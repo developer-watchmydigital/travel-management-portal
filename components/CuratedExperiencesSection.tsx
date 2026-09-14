@@ -320,13 +320,13 @@ export const CuratedExperiencesSection: React.FC = () => {
                         <a
                           href="tel:+919427286755"
                           className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 hover:border-[#FF5A3C] text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] transition-colors"
-                          title="Call Small Daddy Plus"
+                          title="Call Watch My Trip Package Goa"
                         >
                           <Phone className="w-4 h-4" />
                         </a>
 
                         <a
-                          href={`https://wa.me/919427286755?text=Hello%20Small%20Daddy%20Plus!%20I%20am%20interested%20in%20booking%20the%20${encodeURIComponent(
+                          href={`https://wa.me/919427286755?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20am%20interested%20in%20booking%20the%20${encodeURIComponent(
                             pkg.title
                           )}.`}
                           target="_blank"
@@ -463,7 +463,7 @@ export const CuratedExperiencesSection: React.FC = () => {
               </button>
 
               <a
-                href={`https://wa.me/919427286755?text=Hello%20Small%20Daddy%20Plus!%20I%20want%20to%20inquire%20about%20a%20custom%20trip%20for%20${encodeURIComponent(
+                href={`https://wa.me/919427286755?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20want%20to%20inquire%20about%20a%20custom%20trip%20for%20${encodeURIComponent(
                   selectedRegion
                 )}.`}
                 target="_blank"
@@ -632,7 +632,7 @@ export const CuratedExperiencesSection: React.FC = () => {
                   </button>
 
                   <a
-                    href={`https://wa.me/919427286755?text=Hello%20Small%20Daddy%20Plus!%20I%20want%20to%20book%20the%20${encodeURIComponent(
+                    href={`https://wa.me/919427286755?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20want%20to%20book%20the%20${encodeURIComponent(
                       selectedPackage.title
                     )}.`}
                     target="_blank"

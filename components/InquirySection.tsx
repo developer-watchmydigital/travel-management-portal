@@ -110,7 +110,7 @@ export const InquirySection: React.FC = () => {
   };
 
   const getWhatsAppRedirectUrl = () => {
-    const message = `*New Travel Inquiry - Small Daddy Plus*%0A%0A*Name:* ${encodeURIComponent(
+    const message = `*New Travel Inquiry - Watch My Trip Package Goa*%0A%0A*Name:* ${encodeURIComponent(
       fullName || "Customer"
     )}%0A*Phone:* ${encodeURIComponent(phone)}%0A*Type:* ${encodeURIComponent(
       activeTab.toUpperCase()
@@ -157,9 +157,9 @@ export const InquirySection: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-[11px] font-bold text-[#FF5A3C] uppercase tracking-wider">
-                    Founder & Owner
+                    Leadership
                   </span>
-                  <p className="text-base font-bold text-slate-900 dark:text-white">Priykant Gupta</p>
+                  <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Masrur Ahmed & Masum Ahmed</p>
                 </div>
               </div>
 
@@ -302,7 +302,7 @@ export const InquirySection: React.FC = () => {
                     Thank You, {fullName || "Traveller"}!
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto mt-2 leading-relaxed">
-                    Your inquiry has been successfully recorded in our system. Priykant Gupta and our travel desk will contact you shortly with the best options and fares.
+                    Your inquiry has been successfully recorded in our system. Our travel desk and leadership team will contact you shortly with the best options and fares.
                   </p>
 
                   <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -313,7 +313,7 @@ export const InquirySection: React.FC = () => {
                       className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs tracking-wide shadow-lg shadow-[#25D366]/30 hover:scale-105 transition-all"
                     >
                       <MessageCircle className="w-4 h-4 fill-current" />
-                      <span>Send Details Directly on WhatsApp</span>
+                      <span>Continue on WhatsApp</span>
                     </a>
                     <button
                       onClick={() => setIsSubmitted(false)}
@@ -341,7 +341,7 @@ export const InquirySection: React.FC = () => {
                           required
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
-                          placeholder="e.g. Priykant Gupta"
+                          placeholder="e.g. Rahul Sharma"
                           className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:border-[#FF5A3C] focus:bg-white dark:focus:bg-white/10 transition-colors"
                         />
                       </div>

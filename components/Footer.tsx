@@ -18,16 +18,19 @@ export const Footer: React.FC = () => {
           
           {/* Col 1 & 2: Brand & Story */}
           <div className="lg:col-span-2 text-left">
-            <Link href="#home" className="flex items-center gap-3 mb-4 group">
-              <div className="relative h-12 w-auto flex items-center">
+            <Link href="/#home" className="flex items-center gap-2.5 mb-4 group">
+              <div className="relative w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
                 <Image
-                  src="/logo.png"
-                  alt="Small Daddy Plus Logo"
-                  width={200}
-                  height={70}
-                  className="h-11 w-auto object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-300"
+                  src="/favicon.png"
+                  alt="Watch My Trip Package Goa"
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-contain drop-shadow-sm"
                 />
               </div>
+              <span className="text-base font-extrabold text-slate-900 dark:text-white font-['Outfit'] tracking-tight group-hover:text-[#FF5A3C] transition-colors">
+                Watch My Trip Package <span className="text-[#FF5A3C]">Goa</span>
+              </span>
             </Link>
 
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4 max-w-sm">
@@ -35,8 +38,10 @@ export const Footer: React.FC = () => {
             </p>
 
             <div className="flex items-center gap-3">
-              <div className="px-3 py-1 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
-                Founded by <strong className="text-slate-900 dark:text-white">Priykant Gupta</strong>
+              <div className="px-3.5 py-1.5 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm flex items-center gap-1.5 flex-wrap">
+                <span>Founder: <strong className="text-slate-900 dark:text-white">Masrur Ahmed</strong></span>
+                <span>•</span>
+                <span>Director: <strong className="text-slate-900 dark:text-white">Masum Ahmed</strong></span>
               </div>
               <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 15+ Yrs Trust
@@ -149,7 +154,7 @@ export const Footer: React.FC = () => {
         {/* Bottom copyright & Back to top */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <p className="text-slate-500">
-            © {new Date().getFullYear()} SMALL DADDY PLUS. All rights reserved. Registered in Mehsana, Gujarat.
+            © {new Date().getFullYear()} WATCH MY TRIP PACKAGE GOA. All rights reserved. Registered in Mehsana, Gujarat.
           </p>
 
           <div className="flex items-center gap-4">

@@ -394,7 +394,7 @@ export default function AdminPage() {
             Owner Access Only
           </h2>
           <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-            This private administration area is strictly for <strong>Priykant Gupta</strong> and authorized staff.
+            This private administration area is strictly for <strong>Masrur Ahmed, Masum Ahmed</strong> and authorized staff.
           </p>
 
           <form onSubmit={handleLogin} className="mt-6 space-y-4">
@@ -449,15 +449,18 @@ export default function AdminPage() {
             </Link>
             <div>
               <div className="flex items-center gap-2">
-                <div className="relative h-7 w-auto flex items-center">
+                <div className="relative w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center shrink-0">
                   <Image
-                    src="/logo.png"
-                    alt="Small Daddy Plus"
-                    width={110}
+                    src="/favicon.png"
+                    alt="Watch My Trip Package Goa"
+                    width={28}
                     height={28}
-                    className="h-6 w-auto object-contain"
+                    className="w-full h-full object-contain"
                   />
                 </div>
+                <span className="text-sm font-bold text-white font-['Outfit']">
+                  Watch My Trip Package Goa
+                </span>
                 <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] font-bold text-amber-400 uppercase tracking-wide">
                   Owner Portal
                 </span>
@@ -658,7 +661,7 @@ export default function AdminPage() {
                 {filteredLeads.map((lead) => {
                   const whatsappUrl = `https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
                     lead.fullName
-                  )}!%20This%20is%20Priykant%20Gupta%20from%20R%20Travel%20World.%20Thank%20you%20for%20your%20inquiry%20for%20${encodeURIComponent(
+                  )}!%20This%20is%20Watch%20My%20Trip%20Package%20Goa.%20Thank%20you%20for%20your%20inquiry%20for%20${encodeURIComponent(
                     lead.destination || "travel package"
                   )}.`;
 

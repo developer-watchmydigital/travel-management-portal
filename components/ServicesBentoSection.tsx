@@ -179,7 +179,7 @@ export const ServicesBentoSection: React.FC = () => {
           <div>
             <h4 className="text-lg font-bold text-slate-900 dark:text-white">Need a specialized or customized itinerary?</h4>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
-              Speak directly with Priykant Gupta for honest guidance, tailored domestic or international departures, and group bookings.
+              Speak directly with Masrur Ahmed & Masum Ahmed for honest guidance, tailored domestic or international departures, and group bookings.
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">

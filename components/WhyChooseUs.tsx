@@ -26,7 +26,7 @@ export const WhyChooseUs: React.FC = () => {
     {
       name: "Pooja & Hardik Shah",
       location: "Ahmedabad",
-      comment: "Small Daddy Plus planned our Kashmir honeymoon package. The houseboat experience in Dal Lake and Gondola ride in Gulmarg were magical. Very honest pricing and 24/7 personal care.",
+      comment: "Watch My Trip Package Goa planned our Kashmir honeymoon package. The houseboat experience in Dal Lake and Gondola ride in Gulmarg were magical. Very honest pricing and 24/7 personal care.",
       rating: 5,
       trip: "Kashmir Romantic Special",
     },
@@ -47,8 +47,8 @@ export const WhyChooseUs: React.FC = () => {
     },
     {
       icon: <HeartHandshake className="w-6 h-6 text-amber-400" />,
-      title: "Founder-Led Assurance",
-      desc: "Personalized attention and direct honest consultation with founder Priykant Gupta for every major booking.",
+      title: "Leadership Assurance",
+      desc: "Personalized attention and direct honest consultation with founder Masrur Ahmed & director Masum Ahmed for every major booking.",
     },
     {
       icon: <Headphones className="w-6 h-6 text-emerald-400" />,

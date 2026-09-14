@@ -45,6 +45,7 @@ export interface CompanyInfo {
   name: string;
   tagline: string;
   founder: string;
+  director?: string;
   experienceYears: string;
   satisfiedCustomers: string;
   formerName: string;

@@ -107,7 +107,7 @@ export const HeroGoaCarousel: React.FC = () => {
               {/* Main Catchy Heading - Guaranteed 100% visible immediately */}
               <h1 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold tracking-tight text-slate-900 dark:text-white font-['Outfit'] leading-[1.16]">
                 Discover Goa & Beyond with <br />
-                <span className="text-gradient-coral">Small Daddy Plus</span>
+                <span className="text-gradient-coral">Watch My Trip Package Goa</span>
               </h1>
 
               {/* Dynamic Goa Slide Subtitle & Details */}

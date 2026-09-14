@@ -1,9 +1,10 @@
 import { CompanyInfo, Destination, TravelService, CuratedPackage } from "./types";
 
 export const companyData: CompanyInfo = {
-  name: "SMALL DADDY PLUS",
+  name: "WATCH MY TRIP PACKAGE GOA",
   tagline: "Your Journey, Our Responsibility",
-  founder: "Priykant Gupta",
+  founder: "Masrur Ahmed",
+  director: "Masum Ahmed",
   experienceYears: "15+",
   satisfiedCustomers: "25,000+",
   formerName: "Ranjan Services",

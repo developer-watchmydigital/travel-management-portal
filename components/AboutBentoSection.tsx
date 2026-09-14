@@ -45,7 +45,7 @@ export const AboutBentoSection: React.FC = () => {
             className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FF5A3C]/10 border border-[#FF5A3C]/30 text-xs font-bold text-[#FF5A3C] uppercase tracking-wider mb-3"
           >
             <Compass className="w-3.5 h-3.5" />
-            <span>About Small Daddy Plus</span>
+            <span>About Watch My Trip Package Goa</span>
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -63,7 +63,7 @@ export const AboutBentoSection: React.FC = () => {
             transition={{ delay: 0.2 }}
             className="mt-4 text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed"
           >
-            Founded by <strong className="text-slate-900 dark:text-white font-semibold">Priykant Gupta</strong>, with nearly{" "}
+            Founded by <strong className="text-slate-900 dark:text-white font-semibold">Masrur Ahmed</strong> and led by Director <strong className="text-slate-900 dark:text-white font-semibold">Masum Ahmed</strong>, with nearly{" "}
             <strong className="text-[#FF5A3C] font-semibold">15+ years of trusted experience</strong> (formerly{" "}
             <strong className="text-slate-900 dark:text-white font-semibold">Ranjan Services</strong>), we craft journeys built on honesty, flawless execution, and unforgettable memories.
           </motion.p>
@@ -75,25 +75,36 @@ export const AboutBentoSection: React.FC = () => {
           {/* Tile 1: Founder's Story & Trust Legacy (Large Bento Tile - 7 Cols) */}
           <MagicBentoCard className="lg:col-span-7 p-8 flex flex-col justify-between" glowColor="rgba(255, 90, 60, 0.2)">
             <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 rounded-xl bg-[#FF5A3C]/15 border border-[#FF5A3C]/30 text-[#FF5A3C]">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-3 rounded-xl bg-[#FF5A3C]/15 border border-[#FF5A3C]/30 text-[#FF5A3C] shrink-0">
                   <Award className="w-6 h-6" />
                 </div>
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#FF5A3C]">
-                    Founder & Managing Director
-                  </span>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-['Outfit']">
-                    Priykant Gupta
-                  </h3>
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#FF5A3C] block">
+                      Founder
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-['Outfit']">
+                      Masrur Ahmed
+                    </h3>
+                  </div>
+                  <div className="hidden sm:block w-px h-8 bg-slate-200 dark:bg-white/10" />
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-amber-500 block">
+                      Director
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-['Outfit']">
+                      Masum Ahmed
+                    </h3>
+                  </div>
                 </div>
               </div>
 
               <p className="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed mb-4">
-                <strong className="text-slate-900 dark:text-white font-semibold">SMALL DADDY PLUS</strong> is a trusted and customer-focused travel enterprise dedicated to making every journey smooth, comfortable, affordable, and memorable.
+                <strong className="text-slate-900 dark:text-white font-semibold">WATCH MY TRIP PACKAGE GOA</strong> is a trusted and customer-focused travel enterprise dedicated to making every journey smooth, comfortable, affordable, and memorable.
               </p>
               <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6">
-                Before establishing SMALL DADDY PLUS, we successfully operated under the name{" "}
+                Before establishing WATCH MY TRIP PACKAGE GOA, we successfully operated under the name{" "}
                 <span className="text-slate-900 dark:text-white font-semibold">Ranjan Services</span> in Mehsana, gaining valuable experience and deep-rooted relationships across Gujarat and India.
               </p>
 
@@ -223,7 +234,7 @@ export const AboutBentoSection: React.FC = () => {
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white font-['Outfit']">Our Vision</h3>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-                To establish Small Daddy Plus as a revered name in tourism, known for transparent guidance, competitive pricing, and cherished memories.
+                To establish Watch My Trip Package Goa as a revered name in tourism, known for transparent guidance, competitive pricing, and cherished memories.
               </p>
 
               {/* Commitment Box */}

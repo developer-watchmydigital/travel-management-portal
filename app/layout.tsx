@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Small Daddy Plus | Your Journey, Our Responsibility | Mehsana, Gujarat",
+  title: "Watch My Trip Package Goa | Your Journey, Our Responsibility | Goa Tour Packages",
   description:
-    "Trusted travel agency Small Daddy Plus founded by Priykant Gupta (formerly Ranjan Services) with 15+ years experience and 25,000+ happy travelers. Domestic & International flights, Goa packages, Kashmir, Himachal, train bookings & customized holidays.",
+    "Trusted travel agency Watch My Trip Package Goa founded by Masrur Ahmed and led by Director Masum Ahmed (formerly Ranjan Services) with 15+ years experience and 25,000+ happy travelers. Domestic & International flights, Goa packages, Kashmir, Himachal, train bookings & customized holidays.",
   keywords: [
+    "Watch My Trip Package Goa",
+    "WATCH MY TRIP PACKAGE GOA",
+    "Watch My Trip",
+    "Masrur Ahmed",
+    "Masum Ahmed",
     "Small Daddy Plus",
-    "SMALL DADDY PLUS",
-    "Priykant Gupta",
     "Ranjan Services Mehsana",
     "Travel Agency Mehsana",
     "Goa Tour Packages",
@@ -17,7 +20,7 @@ export const metadata: Metadata = {
     "Domestic Tour Packages Gujarat",
     "International Holidays",
   ],
-  authors: [{ name: "Priykant Gupta" }],
+  authors: [{ name: "Masrur Ahmed" }, { name: "Masum Ahmed" }],
   icons: {
     icon: [
       { url: "/favicon.png", type: "image/png" },

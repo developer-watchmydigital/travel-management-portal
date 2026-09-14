@@ -116,7 +116,7 @@ export default function PackageDetailPage() {
     ? "917058323165"
     : companyInfo?.whatsapp || "917058323165";
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    `Hello Small Daddy Plus! I am interested in booking "${pkg?.title}" (${pkg?.duration}) priced at ₹${pkg?.discountedPrice}. Please share itinerary details and customization options.`
+    `Hello Watch My Trip Package Goa! I am interested in booking "${pkg?.title}" (${pkg?.duration}) priced at ₹${pkg?.discountedPrice}. Please share itinerary details and customization options.`
   )}`;
 
   if (loading) {
@@ -813,7 +813,7 @@ export default function PackageDetailPage() {
               <div className="mt-5 p-3 rounded-xl bg-slate-50 dark:bg-[#080D21] border border-slate-100 dark:border-white/5 flex items-center gap-3">
                 <ShieldCheck className="w-8 h-8 text-emerald-500 shrink-0" />
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  <span className="font-bold text-slate-700 dark:text-slate-300">Small Daddy Plus Guarantee</span>: 15+ years experience, verified hotels & 24/7 dedicated support.
+                  <span className="font-bold text-slate-700 dark:text-slate-300">Watch My Trip Package Goa Guarantee</span>: 15+ years experience, verified hotels & 24/7 dedicated support.
                 </div>
               </div>
             </div>

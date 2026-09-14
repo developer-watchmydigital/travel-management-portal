@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Phone, Compass, ShieldCheck, Menu, X, ArrowRight, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -20,6 +21,7 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: "Home", href: "#home" },
+    { name: "Curated Tours", href: "#curated" },
     { name: "About Us", href: "#about" },
     { name: "Services", href: "#services" },
     { name: "Top Destinations", href: "#destinations" },
@@ -31,27 +33,22 @@ export const Navbar: React.FC = () => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/85 dark:bg-[#070B18]/90 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 shadow-lg shadow-black/5 dark:shadow-2xl py-3"
-          : "bg-transparent py-5"
+          ? "bg-white/90 dark:bg-[#070B18]/90 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 shadow-lg shadow-black/5 dark:shadow-2xl py-2 sm:py-2.5"
+          : "bg-transparent py-3 sm:py-4"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="#home" className="flex items-center gap-3 group">
-          <div className="relative w-11 h-11 rounded-xl bg-gradient-to-tr from-[#FF5A3C] via-[#FF7844] to-[#F59E0B] p-0.5 shadow-lg shadow-[#FF5A3C]/30 group-hover:scale-105 transition-transform duration-300">
-            <div className="w-full h-full bg-white dark:bg-[#090E20] rounded-[10px] flex items-center justify-center">
-              <Compass className="w-6 h-6 text-[#FF5A3C] group-hover:rotate-45 transition-transform duration-500" />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white font-['Outfit']">
-                R TRAVEL <span className="text-[#FF5A3C]">WORLD</span>
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium tracking-wide flex items-center gap-1">
-              <span>Your Journey, Our Responsibility</span>
-            </p>
+          <div className="relative h-12 sm:h-14 md:h-16 w-auto flex items-center">
+            <Image
+              src="/logo.png"
+              alt="Small Daddy Plus Logo"
+              width={240}
+              height={85}
+              className="h-11 sm:h-13 md:h-15 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-300"
+              priority
+            />
           </div>
         </Link>
 

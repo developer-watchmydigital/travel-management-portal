@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,6 +15,7 @@ import {
   X,
   Phone,
   MessageCircle,
+  Send,
 } from "lucide-react";
 import { Destination } from "@/lib/types";
 import { destinationsData } from "@/lib/initialData";
@@ -23,6 +25,38 @@ export const DestinationsSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"india" | "international">("india");
   const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (selectedDestination) {
+      document.body.style.overflow = "hidden";
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setSelectedDestination(null);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = "unset";
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [selectedDestination]);
+
+  const handleEnquiryClick = (destName: string) => {
+    setSelectedDestination(null);
+    window.dispatchEvent(
+      new CustomEvent("select-destination", { detail: { destination: destName } })
+    );
+    const contactEl = document.getElementById("contact");
+    if (contactEl) {
+      contactEl.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   const fallbackImage = "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?q=80&w=800&auto=format&fit=crop";
 
@@ -163,107 +197,126 @@ export const DestinationsSection: React.FC = () => {
           </AnimatePresence>
         </motion.div>
 
-        {/* Selected Destination Quick Detail Modal */}
-        {selectedDestination && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        {/* Selected Destination Quick Detail Modal via Portal to avoid stacking context overrides */}
+        {mounted && selectedDestination && createPortal(
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto"
+            onClick={() => setSelectedDestination(null)}
+          >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-xl rounded-3xl bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-white/20 shadow-2xl overflow-hidden p-6 text-left"
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-xl max-h-[90vh] flex flex-col rounded-3xl bg-white dark:bg-[#0F172A] border border-slate-200 dark:border-white/20 shadow-2xl overflow-hidden text-left my-auto"
             >
-              {/* Close Button */}
+              {/* Close Button - Guaranteed 100% visible in both Light and Dark themes over any background */}
               <button
+                type="button"
                 onClick={() => setSelectedDestination(null)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-white z-20 transition-colors"
+                className="absolute top-4 right-4 p-2.5 rounded-full bg-white/95 text-slate-900 border border-slate-200/90 shadow-lg shadow-black/25 hover:bg-white hover:scale-110 active:scale-95 dark:bg-slate-900/95 dark:text-white dark:border-white/20 dark:hover:bg-slate-800 z-30 transition-all cursor-pointer"
                 aria-label="Close modal"
+                title="Close"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 stroke-[2.5]" />
               </button>
 
-              {/* Modal Image Header */}
-              <div className="relative h-48 sm:h-56 -mx-6 -mt-6 mb-5 overflow-hidden">
-                <Image
-                  src={imageErrors[selectedDestination.id] ? fallbackImage : selectedDestination.image}
-                  alt={selectedDestination.name}
-                  fill
-                  onError={() => setImageErrors((prev) => ({ ...prev, [selectedDestination.id]: true }))}
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
-                <div className="absolute bottom-3 left-6 right-6">
-                  <span className="px-2.5 py-0.5 rounded bg-[#FF5A3C] text-xs font-bold text-white">
-                    {selectedDestination.tagline}
+              {/* Scrollable Content Container */}
+              <div className="overflow-y-auto flex-1 p-6">
+                {/* Modal Image Header */}
+                <div className="relative h-48 sm:h-56 -mx-6 -mt-6 mb-5 overflow-hidden">
+                  <Image
+                    src={imageErrors[selectedDestination.id] ? fallbackImage : selectedDestination.image}
+                    alt={selectedDestination.name}
+                    fill
+                    onError={() => setImageErrors((prev) => ({ ...prev, [selectedDestination.id]: true }))}
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30" />
+                  <div className="absolute bottom-3 left-6 right-6">
+                    <span className="px-2.5 py-0.5 rounded bg-[#FF5A3C] text-xs font-bold text-white shadow-sm">
+                      {selectedDestination.tagline}
+                    </span>
+                    <h3 className="text-2xl sm:text-3xl font-extrabold text-white mt-1 font-['Outfit'] drop-shadow-md">
+                      {selectedDestination.name}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Quick Info Badges */}
+                <div className="flex flex-wrap items-center gap-2.5 mb-4 text-xs font-medium">
+                  <span className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 font-semibold">
+                    Duration: <strong className="text-slate-900 dark:text-white">{selectedDestination.duration}</strong>
                   </span>
-                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white mt-1 font-['Outfit']">
-                    {selectedDestination.name}
-                  </h3>
+                  <span className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 font-bold">
+                    Service Launching Soon
+                  </span>
+                </div>
+
+                {/* Service Availability / Notice Box with Direct CTA */}
+                <div className="mb-5 p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-amber-900 dark:text-amber-300 flex items-start gap-3">
+                  <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div className="text-xs">
+                    <strong className="block text-amber-800 dark:text-amber-400 font-bold mb-1">
+                      Service Status Notice:
+                    </strong>
+                    <p className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                      We currently do not provide scheduled tour package services for <strong>{selectedDestination.name}</strong>, but will be launching this service soon! In the meantime, you can submit an enquiry for private custom itineraries, flight tickets, and hotel arrangements.
+                    </p>
+                    {/* Direct In-Notice CTA Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleEnquiryClick(selectedDestination.name)}
+                      className="inline-flex items-center gap-1.5 mt-3 px-3.5 py-1.5 rounded-lg bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs shadow-md shadow-[#FF5A3C]/25 transition-all hover:scale-105 active:scale-95"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Enquire for Custom Tour / Tickets</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Key Attractions / Highlights */}
+                <div className="mb-2">
+                  <h4 className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-2.5">
+                    Package Highlights & Sightseeing
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {selectedDestination.highlights.map((h, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                        <span>{h}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Quick Info Badge (without price) */}
-              <div className="flex flex-wrap items-center gap-2.5 mb-4 text-xs font-medium">
-                <span className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200">
-                  Duration: <strong className="text-slate-900 dark:text-white">{selectedDestination.duration}</strong>
-                </span>
-                <span className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-semibold">
-                  Service Launching Soon
-                </span>
-              </div>
-
-              {/* Service Availability / Route Notice as requested */}
-              <div className="mb-4 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-amber-900 dark:text-amber-300 flex items-start gap-2.5">
-                <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                <div className="text-xs">
-                  <strong className="block text-amber-700 dark:text-amber-400 font-bold mb-0.5">
-                    Service Status Notice:
-                  </strong>
-                  <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                    We currently do not provide scheduled tour package services for <strong>{selectedDestination.name}</strong>, but will be launching this service soon! In the meantime, you can submit an enquiry for private custom itineraries, flight tickets, and hotel arrangements.
-                  </p>
-                </div>
-              </div>
-
-              {/* Key Attractions / Highlights */}
-              <div className="mb-6">
-                <h4 className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-2.5">
-                  Package Highlights & Sightseeing
-                </h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {selectedDestination.highlights.map((h, i) => (
-                    <div key={i} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
-                      <span>{h}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Modal Actions */}
-              <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-slate-200 dark:border-white/10">
-                <Link
-                  href="#contact"
-                  onClick={() => setSelectedDestination(null)}
-                  className="w-full sm:flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs tracking-wide shadow-lg shadow-[#FF5A3C]/30 transition-all"
+              {/* Modal Actions Footer - Always visible and sticky */}
+              <div className="p-4 sm:p-5 border-t border-slate-200 dark:border-white/10 bg-slate-50/90 dark:bg-[#0F172A]/90 backdrop-blur-sm flex flex-col sm:flex-row items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => handleEnquiryClick(selectedDestination.name)}
+                  className="w-full sm:flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs tracking-wide shadow-lg shadow-[#FF5A3C]/30 hover:scale-[1.02] active:scale-95 transition-all"
                 >
-                  <span>Book Enquiry For {selectedDestination.name}</span>
+                  <span>Submit Custom Enquiry for {selectedDestination.name}</span>
                   <ArrowRight className="w-4 h-4" />
-                </Link>
+                </button>
 
                 <a
-                  href={`https://wa.me/919427286755?text=Hello%20R%20Travel%20World!%20I%20want%20to%20inquire%20about%20a%20trip%20for%20${encodeURIComponent(
+                  href={`https://wa.me/919427286755?text=Hello%20Small%20Daddy%20Plus!%20I%20want%20to%20inquire%20about%20a%20trip%20for%20${encodeURIComponent(
                     selectedDestination.name
                   )}.`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 border border-[#25D366]/40 text-[#25D366] font-bold text-xs transition-all"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 border border-[#25D366]/40 text-[#25D366] font-bold text-xs transition-all hover:scale-[1.02] active:scale-95"
                 >
                   <MessageCircle className="w-4 h-4" />
                   <span>WhatsApp</span>
                 </a>
               </div>
             </motion.div>
-          </div>
+          </div>,
+          document.body
         )}
 
       </div>

@@ -53,3 +53,29 @@ export interface CompanyInfo {
   whatsapp: string;
   emails: string[];
 }
+
+export interface ItineraryDay {
+  day: number;
+  title: string;
+  description: string;
+}
+
+export interface CuratedPackage {
+  id: string;
+  state: string; // e.g. "Goa", "Gujarat", "Himachal"
+  title: string;
+  subtitle: string;
+  route: string; // e.g. "2N Calangute • 1N Baga Beach"
+  duration: string; // e.g. "4 Days & 3 Nights"
+  categoryBadge: string; // e.g. "Beach & Watersports", "Spiritual Coast"
+  badgeGradient?: string;
+  image: string;
+  originalPrice: string; // e.g. "16,000"
+  discountedPrice: string; // e.g. "11,999"
+  savings: string; // e.g. "4,501"
+  highlights: string[];
+  itinerary: ItineraryDay[];
+  inclusions: string[];
+  exclusions: string[];
+  featured?: boolean;
+}

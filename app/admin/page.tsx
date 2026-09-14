@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -24,6 +25,10 @@ import {
   Save,
   Search,
   Lock,
+  X,
+  Sparkles,
+  MapPin,
+  Check,
 } from "lucide-react";
 import {
   getStoredLeads,
@@ -34,17 +39,49 @@ import {
   deleteDestination,
   getStoredCompanyInfo,
   saveCompanyInfo,
+  getStoredPackages,
+  savePackage,
+  deletePackage,
 } from "@/lib/storage";
-import { InquiryLead, Destination, CompanyInfo } from "@/lib/types";
+import { InquiryLead, Destination, CompanyInfo, CuratedPackage, ItineraryDay } from "@/lib/types";
+import { curatedRegionsList } from "@/lib/initialData";
 
 export default function AdminPage() {
+  const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState("");
   const [pinError, setPinError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"leads" | "destinations" | "settings">("leads");
+  const [activeTab, setActiveTab] = useState<"leads" | "packages" | "destinations" | "settings">("leads");
   const [leads, setLeads] = useState<InquiryLead[]>([]);
   const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [packages, setPackages] = useState<CuratedPackage[]>([]);
+  const [packageFilterState, setPackageFilterState] = useState<string>("all");
+  const [packageSearchQuery, setPackageSearchQuery] = useState("");
+  const [isPackageModalOpen, setIsPackageModalOpen] = useState(false);
+  const [editingPackage, setEditingPackage] = useState<CuratedPackage | null>(null);
+  const [pkgFormData, setPkgFormData] = useState<Partial<CuratedPackage>>({
+    state: "Goa",
+    title: "",
+    subtitle: "",
+    route: "",
+    duration: "4 Days & 3 Nights",
+    categoryBadge: "Beach & Watersports",
+    badgeGradient: "from-pink-500 to-rose-500",
+    image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop",
+    originalPrice: "16,000",
+    discountedPrice: "11,999",
+    savings: "4,001",
+    highlights: ["Grand Island Scuba", "North Goa Forts", "Sunset Cruise"],
+    itinerary: [
+      { day: 1, title: "Arrival & Hotel Check-in", description: "Arrival, private cab transfer to resort, and leisure beach evening." },
+      { day: 2, title: "Local Sightseeing & Tour", description: "Full-day sightseeing of popular points with private vehicle." },
+      { day: 3, title: "Scenic Exploration & Sunset", description: "Experience scenic sights and local sunset views." },
+      { day: 4, title: "Shopping & Departure Drop", description: "Free time for local markets and drop to airport/railway station." },
+    ],
+    inclusions: ["Deluxe Hotel Stay", "Daily Breakfast", "Private AC Cab Transfers", "All Driver Allowances & Tolls"],
+    exclusions: ["Airfare / Train tickets", "Personal expenses", "Optional watersports"],
+  });
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(getStoredCompanyInfo());
   const [searchQuery, setSearchQuery] = useState("");
   const [leadFilter, setLeadFilter] = useState<"all" | "package" | "flight" | "train">("all");
@@ -59,6 +96,7 @@ export default function AdminPage() {
 
   // Load from localStorage on mount & check session auth
   useEffect(() => {
+    setMounted(true);
     if (typeof window !== "undefined") {
       const auth = sessionStorage.getItem("r_travel_owner_auth");
       if (auth === "true") {
@@ -67,6 +105,7 @@ export default function AdminPage() {
     }
     setLeads(getStoredLeads());
     setDestinations(getStoredDestinations());
+    setPackages(getStoredPackages());
     setCompanyInfo(getStoredCompanyInfo());
   }, []);
 
@@ -138,6 +177,139 @@ export default function AdminPage() {
     saveCompanyInfo(companyInfo);
     alert("Company settings updated successfully!");
   };
+
+  // Package Handlers
+  const handleOpenAddPackage = () => {
+    setEditingPackage(null);
+    setPkgFormData({
+      state: packageFilterState !== "all" ? packageFilterState : "Goa",
+      title: "",
+      subtitle: "",
+      route: "",
+      duration: "4 Days & 3 Nights",
+      categoryBadge: "Beach & Watersports",
+      badgeGradient: "from-pink-500 to-rose-500",
+      image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop",
+      originalPrice: "16,000",
+      discountedPrice: "11,999",
+      savings: "4,001",
+      highlights: ["Grand Island Scuba & Snorkeling", "North Goa Forts & Sunset Cruise", "Private Cab & Resort Transfers"],
+      itinerary: [
+        { day: 1, title: "Arrival & Check-in", description: "Airport/Station pickup, check-in to resort and leisure beach evening." },
+        { day: 2, title: "Grand Island Boat Tour & Watersports", description: "Dolphin spotting, scuba diving, island lunch and watersports." },
+        { day: 3, title: "North Goa Sightseeing & Mandovi Cruise", description: "Aguada Fort, Chapora Fort, Anjuna Beach and luxury evening river cruise." },
+        { day: 4, title: "Local Markets & Departure", description: "Morning shopping and timely drop to airport or railway station." },
+      ],
+      inclusions: [
+        "3 Nights Deluxe AC Hotel Stay",
+        "Daily Buffet Breakfast",
+        "Private AC Cab for Sightseeing & Transfers",
+        "All Tolls, Parking & Driver Allowances",
+      ],
+      exclusions: [
+        "Airfare or Train tickets (Bookings available on request)",
+        "Personal expenses and meals not mentioned",
+        "Optional adventure rides",
+      ],
+    });
+    setIsPackageModalOpen(true);
+  };
+
+  const handleOpenEditPackage = (pkg: CuratedPackage) => {
+    setEditingPackage(pkg);
+    setPkgFormData({
+      ...pkg,
+      highlights: [...(pkg.highlights || [])],
+      itinerary: pkg.itinerary ? pkg.itinerary.map((d) => ({ ...d })) : [],
+      inclusions: [...(pkg.inclusions || [])],
+      exclusions: [...(pkg.exclusions || [])],
+    });
+    setIsPackageModalOpen(true);
+  };
+
+  const handleDeletePackage = (id: string) => {
+    if (confirm("Are you sure you want to delete this curated package?")) {
+      deletePackage(id);
+      setPackages(getStoredPackages());
+    }
+  };
+
+  const handleSavePackage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pkgFormData.title || !pkgFormData.discountedPrice || !pkgFormData.state) {
+      alert("Please enter package title, state, and discounted price.");
+      return;
+    }
+
+    const origNum = parseInt(pkgFormData.originalPrice?.replace(/[^0-9]/g, "") || "0");
+    const discNum = parseInt(pkgFormData.discountedPrice?.replace(/[^0-9]/g, "") || "0");
+    const calculatedSavings = origNum > discNum ? (origNum - discNum).toLocaleString("en-IN") : (pkgFormData.savings || "0");
+
+    const packageToSave: CuratedPackage = {
+      id: editingPackage ? editingPackage.id : "pkg-" + Date.now(),
+      state: pkgFormData.state || "Goa",
+      title: pkgFormData.title || "",
+      subtitle: pkgFormData.subtitle || "",
+      route: pkgFormData.route || "",
+      duration: pkgFormData.duration || "4 Days & 3 Nights",
+      categoryBadge: pkgFormData.categoryBadge || "Holiday Tour",
+      badgeGradient: pkgFormData.badgeGradient || "from-pink-500 to-rose-500",
+      image: pkgFormData.image || "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop",
+      originalPrice: pkgFormData.originalPrice || "0",
+      discountedPrice: pkgFormData.discountedPrice || "0",
+      savings: calculatedSavings,
+      highlights: (pkgFormData.highlights && pkgFormData.highlights.length > 0) ? pkgFormData.highlights : ["Sightseeing", "Hotel Stay", "Transfers"],
+      itinerary: (pkgFormData.itinerary && pkgFormData.itinerary.length > 0) ? pkgFormData.itinerary : [
+        { day: 1, title: "Day 1: Arrival & Transfer", description: "Arrival, hotel check-in and evening at leisure." },
+        { day: 2, title: "Day 2: Sightseeing", description: "Full day sightseeing tour." }
+      ],
+      inclusions: (pkgFormData.inclusions && pkgFormData.inclusions.length > 0) ? pkgFormData.inclusions : ["Hotel Stay", "Breakfast", "Cab Transfers"],
+      exclusions: (pkgFormData.exclusions && pkgFormData.exclusions.length > 0) ? pkgFormData.exclusions : ["Flight/Train", "Personal Expenses"],
+    };
+
+    savePackage(packageToSave);
+    setPackages(getStoredPackages());
+    setIsPackageModalOpen(false);
+  };
+
+  const handleAddItineraryDay = () => {
+    const currentItinerary = pkgFormData.itinerary || [];
+    const nextDayNum = currentItinerary.length + 1;
+    setPkgFormData({
+      ...pkgFormData,
+      itinerary: [
+        ...currentItinerary,
+        { day: nextDayNum, title: `Day ${nextDayNum}: Sightseeing & Exploration`, description: "Full day private sightseeing of key attractions." },
+      ],
+    });
+  };
+
+  const handleUpdateItineraryDay = (index: number, field: "title" | "description", value: string) => {
+    const updated = [...(pkgFormData.itinerary || [])];
+    if (updated[index]) {
+      updated[index] = { ...updated[index], [field]: value };
+      setPkgFormData({ ...pkgFormData, itinerary: updated });
+    }
+  };
+
+  const handleRemoveItineraryDay = (index: number) => {
+    const updated = (pkgFormData.itinerary || [])
+      .filter((_, i) => i !== index)
+      .map((day, idx) => ({ ...day, day: idx + 1 }));
+    setPkgFormData({ ...pkgFormData, itinerary: updated });
+  };
+
+  // Filtered Curated Packages
+  const filteredPackages = packages.filter((pkg) => {
+    const matchesState = packageFilterState === "all" || pkg.state === packageFilterState;
+    const matchesSearch =
+      !packageSearchQuery ||
+      pkg.title.toLowerCase().includes(packageSearchQuery.toLowerCase()) ||
+      pkg.state.toLowerCase().includes(packageSearchQuery.toLowerCase()) ||
+      (pkg.subtitle && pkg.subtitle.toLowerCase().includes(packageSearchQuery.toLowerCase())) ||
+      (pkg.route && pkg.route.toLowerCase().includes(packageSearchQuery.toLowerCase()));
+    return matchesState && matchesSearch;
+  });
 
   // Filtered Leads
   const filteredLeads = leads.filter((lead) => {
@@ -219,9 +391,15 @@ export default function AdminPage() {
             </Link>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg text-white font-['Outfit']">
-                  R TRAVEL <span className="text-[#FF5A3C]">WORLD</span>
-                </span>
+                <div className="relative h-7 w-auto flex items-center">
+                  <Image
+                    src="/logo.png"
+                    alt="Small Daddy Plus"
+                    width={110}
+                    height={28}
+                    className="h-6 w-auto object-contain"
+                  />
+                </div>
                 <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] font-bold text-amber-400 uppercase tracking-wide">
                   Owner Portal
                 </span>
@@ -256,7 +434,7 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* KPI Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Leads</span>
@@ -296,7 +474,18 @@ export default function AdminPage() {
 
           <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Destinations</span>
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Curated Packages</span>
+              <div className="p-2 rounded-lg bg-pink-500/20 text-pink-400">
+                <Package className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-3xl font-extrabold text-white font-['Outfit']">{packages.length}</div>
+            <p className="text-[11px] text-pink-400 mt-1">State-wise tours & plans</p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Destinations</span>
               <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400">
                 <Compass className="w-4 h-4" />
               </div>
@@ -307,7 +496,7 @@ export default function AdminPage() {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-8">
+        <div className="flex flex-wrap items-center gap-3 border-b border-white/10 pb-4 mb-8">
           <button
             onClick={() => setActiveTab("leads")}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
@@ -318,6 +507,18 @@ export default function AdminPage() {
           >
             <Users className="w-4 h-4" />
             <span>Customer Enquiries & Leads ({leads.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("packages")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+              activeTab === "packages"
+                ? "bg-[#FF5A3C] text-white shadow-lg shadow-[#FF5A3C]/30"
+                : "bg-white/5 text-slate-300 hover:bg-white/10"
+            }`}
+          >
+            <Package className="w-4 h-4" />
+            <span>Curated Packages ({packages.length})</span>
           </button>
 
           <button
@@ -556,6 +757,585 @@ export default function AdminPage() {
             )}
           </div>
         )}
+
+        {/* TAB: CURATED EXPERIENCES & PACKAGES MANAGEMENT */}
+        {activeTab === "packages" && (
+          <div>
+            {/* Top Bar with Info, Search, State Filter & Add Button */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div>
+                <h3 className="text-lg font-bold text-white font-['Outfit']">
+                  Curated Tour Packages
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Manage state-wise packages, day-by-day itineraries, pricing, and highlights.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Search */}
+                <div className="relative w-full sm:w-64">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={packageSearchQuery}
+                    onChange={(e) => setPackageSearchQuery(e.target.value)}
+                    placeholder="Search packages..."
+                    className="w-full pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#FF5A3C]"
+                  />
+                </div>
+
+                {/* State Filter Dropdown */}
+                <select
+                  value={packageFilterState}
+                  onChange={(e) => setPackageFilterState(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-[#0F172A] border border-white/10 text-xs text-white focus:outline-none focus:border-[#FF5A3C]"
+                >
+                  <option value="all">All States ({packages.length})</option>
+                  {curatedRegionsList.map((state) => {
+                    const count = packages.filter((p) => p.state === state).length;
+                    return (
+                      <option key={state} value={state}>
+                        {state} ({count})
+                      </option>
+                    );
+                  })}
+                </select>
+
+                {/* Add New Package Button */}
+                <button
+                  onClick={handleOpenAddPackage}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs shadow-lg shadow-[#FF5A3C]/30 transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add New Package</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick State Pills Bar */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-thin">
+              <button
+                onClick={() => setPackageFilterState("all")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                  packageFilterState === "all"
+                    ? "bg-[#FF5A3C] text-white shadow-md shadow-[#FF5A3C]/20"
+                    : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                All States ({packages.length})
+              </button>
+              {curatedRegionsList.map((st) => {
+                const count = packages.filter((p) => p.state === st).length;
+                return (
+                  <button
+                    key={st}
+                    onClick={() => setPackageFilterState(st)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                      packageFilterState === st
+                        ? "bg-[#FF5A3C] text-white shadow-md shadow-[#FF5A3C]/20"
+                        : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <span>{st}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                        count > 0 ? "bg-white/20 text-white font-bold" : "bg-white/5 text-slate-500"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Packages Grid / Empty State */}
+            {filteredPackages.length === 0 ? (
+              <div className="py-16 text-center rounded-2xl bg-white/5 border border-white/10 p-6">
+                <Package className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                <h4 className="text-base font-bold text-white">
+                  No curated packages found {packageFilterState !== "all" ? `for ${packageFilterState}` : ""}
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+                  {packageFilterState !== "all"
+                    ? `Visitors selecting '${packageFilterState}' currently see the 'Service Launching Soon' notice. Click below to add a package and launch this state!`
+                    : "Create your first package to display it on the website."}
+                </p>
+                <button
+                  onClick={handleOpenAddPackage}
+                  className="inline-flex items-center gap-2 mt-4 px-4 py-2.5 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs shadow-lg shadow-[#FF5A3C]/30 transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Create Package for {packageFilterState !== "all" ? packageFilterState : "Goa"}</span>
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredPackages.map((pkg) => (
+                  <div
+                    key={pkg.id}
+                    className="p-5 rounded-2xl bg-[#0F172A] border border-white/10 backdrop-blur-md flex flex-col justify-between hover:border-white/20 transition-all"
+                  >
+                    <div>
+                      {/* Image with badges */}
+                      <div className="relative h-44 w-full rounded-xl overflow-hidden mb-4 bg-slate-800">
+                        <Image
+                          src={pkg.image}
+                          alt={pkg.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-black/40" />
+
+                        {/* State badge */}
+                        <div className="absolute top-3 left-3 bg-[#FF5A3C] text-white text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md shadow-md">
+                          {pkg.state}
+                        </div>
+
+                        {/* Duration badge */}
+                        <div className="absolute top-3 right-3 bg-black/75 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/15 flex items-center gap-1.5 shadow-md">
+                          <Clock className="w-3 h-3 text-amber-400" />
+                          <span>{pkg.duration}</span>
+                        </div>
+
+                        {/* Category badge */}
+                        <div className="absolute bottom-3 left-3">
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-md bg-gradient-to-r ${
+                              pkg.badgeGradient || "from-pink-500 to-rose-500"
+                            }`}
+                          >
+                            {pkg.categoryBadge}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Route & Title */}
+                      <div className="text-[11px] text-amber-400 font-semibold flex items-center gap-1 mb-1">
+                        <MapPin className="w-3 h-3" />
+                        <span>{pkg.route}</span>
+                      </div>
+
+                      <h4 className="text-base font-bold text-white font-['Outfit'] line-clamp-2 mb-1">
+                        {pkg.title}
+                      </h4>
+                      {pkg.subtitle && (
+                        <p className="text-xs text-slate-400 line-clamp-1 mb-3">{pkg.subtitle}</p>
+                      )}
+
+                      {/* Highlights */}
+                      <div className="space-y-1 mb-4">
+                        {(pkg.highlights || []).slice(0, 3).map((hl, i) => (
+                          <div key={i} className="flex items-center gap-1.5 text-xs text-slate-300">
+                            <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                            <span className="truncate">{hl}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Itinerary stats */}
+                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-[11px] text-slate-300 flex items-center justify-between mb-4">
+                        <span className="text-slate-400">Day-wise Itinerary</span>
+                        <span className="font-bold text-white">
+                          {(pkg.itinerary || []).length} Days Configured
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      {/* Price row */}
+                      <div className="flex items-baseline justify-between border-t border-white/10 pt-3 mb-4">
+                        <div>
+                          <div className="text-[11px] text-slate-400">
+                            Starting from{" "}
+                            <span className="line-through text-slate-500">₹{pkg.originalPrice}</span>
+                          </div>
+                          <div className="text-xl font-extrabold text-white font-['Outfit']">
+                            ₹{pkg.discountedPrice}
+                            <span className="text-[10px] font-normal text-slate-400 ml-1">/ person</span>
+                          </div>
+                        </div>
+
+                        {pkg.savings && (
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                            Save ₹{pkg.savings}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleOpenEditPackage(pkg)}
+                          className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                        >
+                          <Edit className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Edit Package</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDeletePackage(pkg.id)}
+                          className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors"
+                          title="Delete Package"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Add / Edit Package Modal using createPortal */}
+        {mounted && isPackageModalOpen && typeof document !== "undefined" &&
+          createPortal(
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md overflow-y-auto">
+              <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-3xl bg-[#0C1226] border border-white/20 shadow-2xl text-left overflow-hidden">
+                {/* Modal Header */}
+                <div className="px-6 py-4 bg-[#090E20] border-b border-white/10 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-[#FF5A3C]/20 text-[#FF5A3C]">
+                      <Package className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white font-['Outfit']">
+                        {editingPackage ? "Edit Curated Package" : "Create New Curated Package"}
+                      </h3>
+                      <p className="text-[11px] text-slate-400">
+                        Configure package details, day-by-day plan, pricing, and inclusions.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsPackageModalOpen(false)}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Modal Form Body */}
+                <form onSubmit={handleSavePackage} className="flex-1 overflow-y-auto p-6 space-y-6 text-xs text-slate-300">
+                  {/* 1. Destination & Identity */}
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5" />
+                      <span>1. State & Identity</span>
+                    </h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">State / Region *</label>
+                        <select
+                          value={pkgFormData.state}
+                          onChange={(e) => setPkgFormData({ ...pkgFormData, state: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-xl bg-[#090E20] border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                          required
+                        >
+                          {curatedRegionsList.map((st) => (
+                            <option key={st} value={st}>
+                              {st}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Duration (e.g. 4 Days & 3 Nights) *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. 4 Days & 3 Nights"
+                          value={pkgFormData.duration || ""}
+                          onChange={(e) => setPkgFormData({ ...pkgFormData, duration: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-300 mb-1 font-medium">Package Title *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Goa Coastal Paradise & Watersports Package"
+                        value={pkgFormData.title || ""}
+                        onChange={(e) => setPkgFormData({ ...pkgFormData, title: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Subtitle / Tagline</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Scuba, Dolphin Safari & Island Cruise Special"
+                          value={pkgFormData.subtitle || ""}
+                          onChange={(e) => setPkgFormData({ ...pkgFormData, subtitle: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Route / Night Breakup</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 2N Calangute • 1N Baga Beach"
+                          value={pkgFormData.route || ""}
+                          onChange={(e) => setPkgFormData({ ...pkgFormData, route: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Category Badge Text</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Beach & Watersports, Heritage & Forts"
+                          value={pkgFormData.categoryBadge || ""}
+                          onChange={(e) => setPkgFormData({ ...pkgFormData, categoryBadge: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Badge Gradient Theme</label>
+                        <select
+                          value={pkgFormData.badgeGradient || "from-pink-500 to-rose-500"}
+                          onChange={(e) => setPkgFormData({ ...pkgFormData, badgeGradient: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-xl bg-[#090E20] border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                        >
+                          <option value="from-pink-500 to-rose-500">Pink / Rose (Coastal / Honeymoon)</option>
+                          <option value="from-amber-500 to-orange-500">Amber / Orange (Sunset / Adventure)</option>
+                          <option value="from-cyan-500 to-blue-600">Cyan / Blue (Island / Water)</option>
+                          <option value="from-emerald-500 to-teal-600">Emerald / Teal (Nature / Hillstation)</option>
+                          <option value="from-purple-500 to-indigo-600">Purple / Indigo (Heritage / Royal)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-300 mb-1 font-medium">Cover Image URL</label>
+                      <input
+                        type="url"
+                        placeholder="https://images.unsplash.com/photo-..."
+                        value={pkgFormData.image || ""}
+                        onChange={(e) => setPkgFormData({ ...pkgFormData, image: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 2. Pricing & Savings */}
+                  <div className="space-y-4 pt-4 border-t border-white/10">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      <span>2. Pricing & Deals</span>
+                    </h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Original Price (₹)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 16,500"
+                          value={pkgFormData.originalPrice || ""}
+                          onChange={(e) => {
+                            const orig = e.target.value;
+                            const disc = pkgFormData.discountedPrice || "";
+                            const o = parseInt(orig.replace(/[^0-9]/g, "") || "0");
+                            const d = parseInt(disc.replace(/[^0-9]/g, "") || "0");
+                            const autoSav = o > d ? (o - d).toLocaleString("en-IN") : (pkgFormData.savings || "0");
+                            setPkgFormData({ ...pkgFormData, originalPrice: orig, savings: autoSav });
+                          }}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Discounted Offer Price (₹) *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. 11,999"
+                          value={pkgFormData.discountedPrice || ""}
+                          onChange={(e) => {
+                            const disc = e.target.value;
+                            const orig = pkgFormData.originalPrice || "";
+                            const o = parseInt(orig.replace(/[^0-9]/g, "") || "0");
+                            const d = parseInt(disc.replace(/[^0-9]/g, "") || "0");
+                            const autoSav = o > d ? (o - d).toLocaleString("en-IN") : (pkgFormData.savings || "0");
+                            setPkgFormData({ ...pkgFormData, discountedPrice: disc, savings: autoSav });
+                          }}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Customer Savings (₹)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 4,501"
+                          value={pkgFormData.savings || ""}
+                          onChange={(e) => setPkgFormData({ ...pkgFormData, savings: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. Key Highlights */}
+                  <div className="space-y-4 pt-4 border-t border-white/10">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-slate-300 font-medium">Key Highlights (1 point per line)</label>
+                        <span className="text-[10px] text-slate-500">Separated by Enter</span>
+                      </div>
+                      <textarea
+                        rows={3}
+                        placeholder="Grand Island Scuba & Snorkeling&#10;North Goa Forts (Aguada & Chapora)&#10;Sunset Cruise on Mandovi River"
+                        value={(pkgFormData.highlights || []).join("\n")}
+                        onChange={(e) => setPkgFormData({ ...pkgFormData, highlights: e.target.value.split("\n") })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C] font-mono text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 4. Day-by-Day Itinerary */}
+                  <div className="space-y-4 pt-4 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>4. Day-Wise Detailed Itinerary</span>
+                        </h4>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Appears inside the &apos;View Itinerary&apos; modal on the website.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleAddItineraryDay}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-[11px] font-semibold transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Day</span>
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {(pkgFormData.itinerary || []).map((day, idx) => (
+                        <div
+                          key={idx}
+                          className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="px-2.5 py-0.5 rounded-md bg-[#FF5A3C]/20 text-[#FF5A3C] font-extrabold text-[11px]">
+                              Day {day.day}
+                            </span>
+                            {(pkgFormData.itinerary || []).length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveItineraryDay(idx)}
+                                className="text-rose-400 hover:text-rose-300 text-[11px] font-medium flex items-center gap-1"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Remove Day</span>
+                              </button>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] text-slate-400 mb-1">Day Title</label>
+                            <input
+                              type="text"
+                              placeholder={`e.g. Day ${day.day}: Arrival & Resort Check-in`}
+                              value={day.title}
+                              onChange={(e) => handleUpdateItineraryDay(idx, "title", e.target.value)}
+                              className="w-full px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] text-slate-400 mb-1">Day Description</label>
+                            <textarea
+                              rows={2}
+                              placeholder="Detail out activities, places visited, and transfers..."
+                              value={day.description}
+                              onChange={(e) => handleUpdateItineraryDay(idx, "description", e.target.value)}
+                              className="w-full px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 5. Inclusions & Exclusions */}
+                  <div className="space-y-4 pt-4 border-t border-white/10">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      <span>5. Inclusions & Exclusions (1 per line)</span>
+                    </h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Inclusions</label>
+                        <textarea
+                          rows={4}
+                          placeholder="3 Nights AC Deluxe Stay&#10;Daily Buffet Breakfast&#10;Private Cab for Sightseeing"
+                          value={(pkgFormData.inclusions || []).join("\n")}
+                          onChange={(e) => setPkgFormData({ ...pkgFormData, inclusions: e.target.value.split("\n") })}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C] font-mono text-xs"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Exclusions</label>
+                        <textarea
+                          rows={4}
+                          placeholder="Airfare / Train tickets&#10;Personal expenses & laundry&#10;Optional watersports"
+                          value={(pkgFormData.exclusions || []).join("\n")}
+                          onChange={(e) => setPkgFormData({ ...pkgFormData, exclusions: e.target.value.split("\n") })}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C] font-mono text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Modal Actions */}
+                  <div className="sticky bottom-0 -mx-6 -mb-6 px-6 py-4 bg-[#090E20] border-t border-white/10 flex items-center justify-end gap-3 shrink-0 z-20">
+                    <button
+                      type="button"
+                      onClick={() => setIsPackageModalOpen(false)}
+                      className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-bold shadow-lg shadow-[#FF5A3C]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>{editingPackage ? "Save Changes" : "Create Package"}</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>,
+            document.body
+          )}
 
         {/* TAB 2: DESTINATIONS MANAGEMENT */}
         {activeTab === "destinations" && (

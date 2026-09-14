@@ -1,10 +1,11 @@
-import { companyData, destinationsData, servicesData } from "./initialData";
-import { CompanyInfo, Destination, InquiryLead, TravelService } from "./types";
+import { companyData, destinationsData, servicesData, initialCuratedPackages } from "./initialData";
+import { CompanyInfo, Destination, InquiryLead, TravelService, CuratedPackage } from "./types";
 
 const LEADS_KEY = "r_travel_leads_v1";
 const DESTINATIONS_KEY = "r_travel_destinations_v2";
 const SERVICES_KEY = "r_travel_services_v1";
 const COMPANY_KEY = "r_travel_company_v1";
+const PACKAGES_KEY = "r_travel_curated_packages_v1";
 
 export const initialLeads: InquiryLead[] = [
   {
@@ -158,3 +159,45 @@ export function saveCompanyInfo(info: CompanyInfo) {
   if (typeof window === "undefined") return;
   localStorage.setItem(COMPANY_KEY, JSON.stringify(info));
 }
+
+export function getStoredPackages(): CuratedPackage[] {
+  if (typeof window === "undefined") return initialCuratedPackages;
+  try {
+    const data = localStorage.getItem(PACKAGES_KEY);
+    if (!data) {
+      localStorage.setItem(PACKAGES_KEY, JSON.stringify(initialCuratedPackages));
+      return initialCuratedPackages;
+    }
+    const parsed = JSON.parse(data);
+    // If empty or older version, fallback to initialCuratedPackages
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      localStorage.setItem(PACKAGES_KEY, JSON.stringify(initialCuratedPackages));
+      return initialCuratedPackages;
+    }
+    return parsed;
+  } catch {
+    return initialCuratedPackages;
+  }
+}
+
+export function savePackage(pkg: CuratedPackage) {
+  if (typeof window === "undefined") return;
+  const current = getStoredPackages();
+  const index = current.findIndex((p) => p.id === pkg.id);
+  let updated: CuratedPackage[];
+  if (index >= 0) {
+    updated = [...current];
+    updated[index] = pkg;
+  } else {
+    updated = [pkg, ...current];
+  }
+  localStorage.setItem(PACKAGES_KEY, JSON.stringify(updated));
+}
+
+export function deletePackage(id: string) {
+  if (typeof window === "undefined") return;
+  const current = getStoredPackages();
+  const updated = current.filter((p) => p.id !== id);
+  localStorage.setItem(PACKAGES_KEY, JSON.stringify(updated));
+}
+

@@ -1,7 +1,7 @@
-import { CompanyInfo, Destination, TravelService } from "./types";
+import { CompanyInfo, Destination, TravelService, CuratedPackage } from "./types";
 
 export const companyData: CompanyInfo = {
-  name: "R TRAVEL WORLD",
+  name: "SMALL DADDY PLUS",
   tagline: "Your Journey, Our Responsibility",
   founder: "Priykant Gupta",
   experienceYears: "15+",
@@ -377,3 +377,258 @@ export const servicesData: TravelService[] = [
     image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=800&auto=format&fit=crop",
   },
 ];
+
+export const curatedRegionsList = [
+  "Gujarat",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "Himachal",
+  "Jammu Kashmir",
+  "North East",
+  "Bengal & Odisha",
+  "Kerala",
+  "Tamil Nadu",
+  "Goa",
+  "Maharashtra",
+  "Karnataka",
+];
+
+export const initialCuratedPackages: CuratedPackage[] = [
+  {
+    id: "pkg-goa-1",
+    state: "Goa",
+    title: "Goa Coastal Paradise & Watersports Package",
+    subtitle: "Scuba, Dolphin Safari & Island Cruise Special",
+    route: "2N Calangute • 1N Baga Beach",
+    duration: "4 Days & 3 Nights",
+    categoryBadge: "Beach & Watersports",
+    badgeGradient: "from-pink-500 to-rose-500",
+    image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop",
+    originalPrice: "16,500",
+    discountedPrice: "11,999",
+    savings: "4,501",
+    highlights: [
+      "Grand Island Scuba & Snorkeling",
+      "Dudhsagar Waterfall Jeep Safari",
+      "North Goa Forts (Aguada & Chapora)",
+      "Sunset Cruise on Mandovi River",
+    ],
+    itinerary: [
+      {
+        day: 1,
+        title: "Arrival in Goa & North Beach Stroll",
+        description: "Private cab pickup from Mopa / Dabolim Airport or Thivim Railway Station. Check-in to your Calangute beachfront resort. Evening stroll along Calangute and Baga beaches with lively beach shacks and sunset views.",
+      },
+      {
+        day: 2,
+        title: "Grand Island Boat Cruise, Dolphin Safari & Scuba",
+        description: "Early morning boat transfer to Grand Island. Enjoy dolphin spotting in Arabian waters, guided scuba diving with professional equipment & underwater photos, followed by swimming and a delicious Goan buffet lunch on the island.",
+      },
+      {
+        day: 3,
+        title: "North Goa Sightseeing & Sunset River Cruise",
+        description: "Explore Aguada Fort and lighthouse, Chapora Fort (Dil Chahta Hai point), Anjuna & Vagator beaches. In the evening, enjoy a 1-hour luxury catamaran cruise on the Mandovi River with live DJ and folk dance performances.",
+      },
+      {
+        day: 4,
+        title: "Local Shopping & Departure Transfer",
+        description: "Breakfast at the resort. Free time for souvenir shopping at Panaji Market or Calangute Mall. Timely private transfer to the airport or railway station for your onward journey.",
+      },
+    ],
+    inclusions: [
+      "3 Nights AC Deluxe Stay in Calangute / Baga",
+      "Daily Buffet Breakfast",
+      "Grand Island Boat Cruise with Scuba Diving Gear",
+      "Mandovi River Sunset Cruise Tickets",
+      "Private AC Cab for all Sightseeing & Transfers",
+      "24/7 Dedicated Trip Manager Support",
+    ],
+    exclusions: [
+      "Airfare / Train tickets (Available on request at special discounted fares)",
+      "Lunch and Dinners not specified in inclusions",
+      "Personal watersport rides like parasailing & jet ski (available at discounted partner rates)",
+    ],
+    featured: true,
+  },
+  {
+    id: "pkg-goa-2",
+    state: "Goa",
+    title: "South Goa Heritage & Luxury Retreat",
+    subtitle: "Portuguese Latin Quarters & Luxury Backwaters",
+    route: "2N Palolem • 2N Colva / Cavelossim",
+    duration: "5 Days & 4 Nights",
+    categoryBadge: "Heritage & Romance",
+    badgeGradient: "from-indigo-500 to-purple-500",
+    image: "https://images.unsplash.com/photo-1587922546307-776227941871?q=80&w=800&auto=format&fit=crop",
+    originalPrice: "19,000",
+    discountedPrice: "14,499",
+    savings: "4,501",
+    highlights: [
+      "Fontainhas Latin Quarter Heritage Walk",
+      "Private Mandovi River Sunset Catamaran",
+      "Basilica of Bom Jesus & Se Cathedral",
+      "Pristine Palolem & Agonda Beach Stays",
+    ],
+    itinerary: [
+      {
+        day: 1,
+        title: "Arrival & Transfer to South Goa Serenity",
+        description: "Warm welcome at Goa airport/station and scenic transfer to South Goa resort in Colva. Spend the evening soaking in the calm sunset, coconut groves, and tranquil shoreline.",
+      },
+      {
+        day: 2,
+        title: "Old Goa Heritage Churches & Fontainhas",
+        description: "Visit UNESCO World Heritage Sites: Basilica of Bom Jesus, Se Cathedral, and Church of St. Francis of Assisi. Guided walking tour through colorful Portuguese quarters of Fontainhas in Panaji.",
+      },
+      {
+        day: 3,
+        title: "Spice Plantation Tour & Mandovi Cruise",
+        description: "Guided tour through an authentic organic Goan spice plantation with traditional lunch on banana leaves. Sunset river cruise with Goan cultural troupe performance.",
+      },
+      {
+        day: 4,
+        title: "Palolem Beach, Butterfly Island & Sunset Point",
+        description: "Drive south to Palolem Beach. Experience a private boat ride to Butterfly Beach, honeymoners cave, and dolphin watching. Evening beachside seafood candle dinner.",
+      },
+      {
+        day: 5,
+        title: "Cabo de Rama Fort & Departure",
+        description: "Visit the historic clifftop Cabo de Rama Fort overlooking turquoise seas. Enjoy breakfast and proceed for private transfer to airport/station.",
+      },
+    ],
+    inclusions: [
+      "4 Nights Premium Resort Stay in South Goa",
+      "Daily Breakfast & Authentic Spice Plantation Lunch",
+      "Old Goa & Fontainhas Heritage Entry Tickets",
+      "Private AC Sedan for Full Duration",
+      "All Tolls, Parking & Driver Allowances",
+    ],
+    exclusions: [
+      "Flight/Train tickets",
+      "Personal expenses & tipping",
+      "Alcoholic beverages",
+    ],
+    featured: true,
+  },
+  {
+    id: "pkg-goa-3",
+    state: "Goa",
+    title: "Complete Goa Explorer (North & South Combined)",
+    subtitle: "Beaches, Nightlife, Heritage & Water Cruise",
+    route: "3N North Goa • 2N South Goa",
+    duration: "6 Days & 5 Nights",
+    categoryBadge: "All-Inclusive Family Special",
+    badgeGradient: "from-emerald-500 to-teal-500",
+    image: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=800&auto=format&fit=crop",
+    originalPrice: "24,000",
+    discountedPrice: "17,999",
+    savings: "6,001",
+    highlights: [
+      "Calangute, Baga & Anjuna Flea Market",
+      "Casino Cruise Experience in Panaji",
+      "Palolem & Butterfly Beach Boat Tour",
+      "Dudhsagar Fall Safari & Elephant Wash",
+    ],
+    itinerary: [
+      {
+        day: 1,
+        title: "North Goa Arrival & Calangute Check-in",
+        description: "Arrival at Goa airport. Private pickup and check-in to North Goa hotel. Evening free to explore the iconic Calangute nightlife and beach street food.",
+      },
+      {
+        day: 2,
+        title: "North Goa Forts & Watersport Hub",
+        description: "Visit Fort Aguada, Chapora Fort, Vagator & Morjim beaches. Optional parasailing, banana ride, and jet ski at Baga beach.",
+      },
+      {
+        day: 3,
+        title: "Dudhsagar Waterfall Jeep Safari",
+        description: "Full-day jungle expedition in Bhagwan Mahavir Wildlife Sanctuary with 4x4 open jeep safari to the base of Dudhsagar Waterfall. Enjoy freshwater swimming.",
+      },
+      {
+        day: 4,
+        title: "Old Goa Heritage & South Goa Hotel Switch",
+        description: "Check out from North Goa. Visit Bom Jesus church and Mangueshi temple. Check in to South Goa resort. Evening Panaji floating casino experience.",
+      },
+      {
+        day: 5,
+        title: "South Goa Beaches & Coastal Leisure",
+        description: "Relax at Colva and Benaulim beaches. Visit Big Foot Goan village museum and local fishing harbor.",
+      },
+      {
+        day: 6,
+        title: "Departure Transfer",
+        description: "Breakfast at resort. Free morning for shopping in Margao. Private transfer to airport / railway station.",
+      },
+    ],
+    inclusions: [
+      "5 Nights Split Stay (3N North + 2N South)",
+      "Daily Breakfast at both properties",
+      "Dudhsagar Jeep Safari & Forest Permits",
+      "All Sightseeing & Inter-Hotel Transfers by AC Cab",
+      "24/7 Dedicated WhatsApp Support from Priykant Gupta",
+    ],
+    exclusions: [
+      "Casino entry chips",
+      "Flight / train fares",
+      "Watersports fee",
+    ],
+    featured: true,
+  },
+  {
+    id: "pkg-goa-4",
+    state: "Goa",
+    title: "Goa Romantic Special (Honeymoon & Couples)",
+    subtitle: "Candlelight Dinner & Private Yacht Cruise",
+    route: "3N Private Beachfront Resort",
+    duration: "4 Days & 3 Nights",
+    categoryBadge: "Couple & Honeymoon",
+    badgeGradient: "from-amber-500 to-rose-500",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop",
+    originalPrice: "22,000",
+    discountedPrice: "16,499",
+    savings: "5,501",
+    highlights: [
+      "Decorated Sunset Candlelight Beach Dinner",
+      "Private Yacht Cruise with Non-Alcoholic Wine",
+      "Flower Bed Decoration & Couple Spa",
+      "Candlelit Cabana Experience",
+    ],
+    itinerary: [
+      {
+        day: 1,
+        title: "Romantic Welcome & Candlelight Dinner",
+        description: "VIP airport pickup with flower bouquet. Check-in to decorated honeymoon suite with welcome cake. Evening private candlelight dinner setup on the beach with complimentary bottle of wine/mocktails.",
+      },
+      {
+        day: 2,
+        title: "Private Luxury Yacht Sailing & Sunset Point",
+        description: "Private 2-hour luxury yacht charter sailing along Mandovi river into the Arabian Sea. Enjoy music, fruits, and sunset photography. Visit Sinquerim sunset viewpoint.",
+      },
+      {
+        day: 3,
+        title: "South Goa Scenic Drive & Rejuvenating Spa",
+        description: "Leisure morning followed by a rejuvenating 60-minute couple Ayurvedic spa therapy at the resort. Evening leisurely drive to Dona Paula viewpoint and Miramar beach.",
+      },
+      {
+        day: 4,
+        title: "Sweet Goodbyes & Airport Drop",
+        description: "Breakfast in bed. Check out and private cab transfer to airport with sweet memories of Goa.",
+      },
+    ],
+    inclusions: [
+      "3 Nights Luxury Beachfront Honeymoon Suite",
+      "Daily Buffet Breakfast",
+      "1 Candlelight Beach Dinner with Special Table Decor",
+      "Special Honeymoon Cake & Bed Floral Arrangement",
+      "Private 2-Hour Yacht / Luxury Boat Charter",
+      "Exclusive AC Cab for Airport & Sightseeing Transfers",
+    ],
+    exclusions: [
+      "Airfare (can be booked via R Travel at partner discounts)",
+      "Any extra activities outside itinerary",
+    ],
+    featured: true,
+  },
+];
+

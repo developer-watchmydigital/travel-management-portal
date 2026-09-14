@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Compass, Phone, Mail, MapPin, ShieldCheck, Heart, LayoutDashboard, ArrowUp } from "lucide-react";
 import { companyData } from "@/lib/initialData";
 
@@ -18,14 +19,15 @@ export const Footer: React.FC = () => {
           {/* Col 1 & 2: Brand & Story */}
           <div className="lg:col-span-2 text-left">
             <Link href="#home" className="flex items-center gap-3 mb-4 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#FF5A3C] to-[#F59E0B] p-0.5 shadow-md">
-                <div className="w-full h-full bg-white dark:bg-[#090E20] rounded-[10px] flex items-center justify-center">
-                  <Compass className="w-5 h-5 text-[#FF5A3C]" />
-                </div>
+              <div className="relative h-12 w-auto flex items-center">
+                <Image
+                  src="/logo.png"
+                  alt="Small Daddy Plus Logo"
+                  width={200}
+                  height={70}
+                  className="h-11 w-auto object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-300"
+                />
               </div>
-              <span className="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white font-['Outfit']">
-                R TRAVEL <span className="text-[#FF5A3C]">WORLD</span>
-              </span>
             </Link>
 
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4 max-w-sm">
@@ -129,7 +131,7 @@ export const Footer: React.FC = () => {
         {/* Bottom copyright & Back to top */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <p className="text-slate-500">
-            © {new Date().getFullYear()} R TRAVEL WORLD. All rights reserved. Registered in Mehsana, Gujarat.
+            © {new Date().getFullYear()} SMALL DADDY PLUS. All rights reserved. Registered in Mehsana, Gujarat.
           </p>
 
           <div className="flex items-center gap-4">

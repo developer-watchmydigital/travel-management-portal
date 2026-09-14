@@ -72,22 +72,20 @@ export const HeroGoaCarousel: React.FC = () => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Background Carousel Visuals with Smooth Motion */}
-      <div className="absolute inset-0 z-0">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeSlide.id}
-            initial={{ opacity: 0, scale: 1.08 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute inset-0"
+      {/* Background Carousel Visuals with Smooth Crossfade */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        {goaCarouselSlides.map((slide, idx) => (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+            }`}
           >
             <Image
-              src={activeSlide.image}
-              alt={activeSlide.title}
+              src={slide.image}
+              alt={slide.title}
               fill
-              priority
+              priority={idx === 0}
               className="object-cover object-center brightness-90 dark:brightness-60 filter"
               sizes="100vw"
             />
@@ -95,8 +93,8 @@ export const HeroGoaCarousel: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-slate-50/95 via-slate-50/70 to-slate-50/90 dark:from-[#070B18] dark:via-[#070B18]/60 dark:to-[#070B18]/80 transition-colors duration-300" />
             <div className="absolute inset-0 bg-gradient-to-r from-slate-50/95 via-slate-50/60 to-transparent dark:from-[#070B18]/90 dark:via-[#070B18]/50 dark:to-transparent transition-colors duration-300" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#FF5A3C]/15 via-transparent to-transparent opacity-70" />
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        ))}
       </div>
 
       {/* Hero Content Container with 7XL width */}
@@ -106,24 +104,16 @@ export const HeroGoaCarousel: React.FC = () => {
           {/* Left Column: Headlines, Details, Actions & Metrics aligned with Card Height */}
           <div className="lg:col-span-7 flex flex-col justify-between h-full text-left py-1 lg:py-2">
             <div>
-              {/* Main Catchy Heading */}
-              <motion.h1
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[45px] font-extrabold tracking-tight text-slate-900 dark:text-white font-['Outfit'] leading-[1.16]"
-              >
+              {/* Main Catchy Heading - Guaranteed 100% visible immediately */}
+              <h1 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold tracking-tight text-slate-900 dark:text-white font-['Outfit'] leading-[1.16]">
                 Discover Goa & Beyond with <br />
-                <span className="text-gradient-coral">R Travel World</span>
-              </motion.h1>
+                <span className="text-gradient-coral">Small Daddy Plus</span>
+              </h1>
 
               {/* Dynamic Goa Slide Subtitle & Details */}
-              <motion.div
+              <div
                 key={`desc-${currentIndex}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="mt-4 max-w-xl"
+                className="mt-4 max-w-xl transition-all duration-300"
               >
                 <div className="flex items-center gap-2 mb-2.5">
                   <span className="px-2.5 py-0.5 rounded-md bg-[#FF5A3C]/15 border border-[#FF5A3C]/30 text-[11px] font-bold text-[#FF5A3C]">
@@ -140,15 +130,10 @@ export const HeroGoaCarousel: React.FC = () => {
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                   {activeSlide.subtitle} We arrange complete domestic & international airfares, luxury stays, railway tickets, and personalized itineraries from Mehsana, Gujarat to worldwide destinations.
                 </p>
-              </motion.div>
+              </div>
 
               {/* High-Impact CTA Buttons */}
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="mt-7 flex flex-wrap items-center gap-3.5"
-              >
+              <div className="mt-7 flex flex-wrap items-center gap-3.5">
                 {/* Main "Plan Your Journey With Us" CTA */}
                 <Link
                   href="#contact"
@@ -160,7 +145,7 @@ export const HeroGoaCarousel: React.FC = () => {
 
                 {/* WhatsApp Quick Chat CTA */}
                 <a
-                  href="https://wa.me/919427286755?text=Hello%20R%20Travel%20World!%20I%20want%20to%20plan%20my%20trip%20to%20Goa%20/%20holiday%20package."
+                  href="https://wa.me/919427286755?text=Hello%20Small%20Daddy%20Plus!%20I%20want%20to%20plan%20my%20trip%20to%20Goa%20/%20holiday%20package."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 border border-[#25D366]/40 text-[#25D366] dark:text-[#25D366] font-semibold text-sm backdrop-blur-md transition-all hover:scale-[1.02]"
@@ -176,7 +161,7 @@ export const HeroGoaCarousel: React.FC = () => {
                 >
                   <span>Top Destinations</span>
                 </Link>
-              </motion.div>
+              </div>
             </div>
 
             {/* Quick Metrics Bar aligned at the bottom of the card */}
@@ -200,44 +185,43 @@ export const HeroGoaCarousel: React.FC = () => {
           <div className="lg:col-span-5 flex flex-col items-center lg:items-end w-full">
             <div className="relative w-full max-w-md">
               {/* Ambient Glow behind card */}
-              <div className="absolute -inset-1.5 bg-gradient-to-r from-[#FF5A3C] to-[#F59E0B] rounded-3xl blur-xl opacity-30 dark:opacity-40 group-hover:opacity-60 transition duration-500" />
+              <div className="absolute -inset-1.5 bg-gradient-to-r from-[#FF5A3C] to-[#F59E0B] rounded-3xl blur-xl opacity-30 dark:opacity-40 transition duration-500" />
 
               {/* 3D Glass Container */}
               <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-white/20 bg-white/95 dark:bg-[#0C142E]/80 backdrop-blur-2xl shadow-xl dark:shadow-2xl p-4">
-                {/* Active Image Container */}
-                <div className="relative h-64 sm:h-72 w-full rounded-xl overflow-hidden">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeSlide.id}
-                      initial={{ opacity: 0, scale: 1.05 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.6 }}
-                      className="relative w-full h-full"
+                {/* Active Image Container with Robust Crossfade */}
+                <div className="relative h-64 sm:h-72 w-full rounded-xl overflow-hidden bg-slate-900">
+                  {goaCarouselSlides.map((slide, idx) => (
+                    <div
+                      key={slide.id}
+                      className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                        idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                      }`}
                     >
                       <Image
-                        src={activeSlide.image}
-                        alt={activeSlide.title}
+                        src={slide.image}
+                        alt={slide.title}
                         fill
+                        priority={idx === 0}
                         className="object-cover object-center"
                         sizes="(max-width: 768px) 100vw, 500px"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/20" />
 
                       {/* Tag pill without price */}
                       <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#FF5A3C] text-white text-xs font-bold shadow">
-                        {activeSlide.tag}
+                        {slide.tag}
                       </div>
 
                       {/* Title on image */}
                       <div className="absolute bottom-3 left-3 right-3 text-left">
                         <p className="text-xs font-medium text-slate-300">Spotlight Tour</p>
                         <h3 className="text-base font-bold text-white drop-shadow">
-                          {activeSlide.title}
+                          {slide.title}
                         </h3>
                       </div>
-                    </motion.div>
-                  </AnimatePresence>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Carousel Navigation Controls & Thumbnails */}

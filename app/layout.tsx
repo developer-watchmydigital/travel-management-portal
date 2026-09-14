@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "R Travel World | Your Journey, Our Responsibility | Mehsana, Gujarat",
+  title: "Small Daddy Plus | Your Journey, Our Responsibility | Mehsana, Gujarat",
   description:
-    "Trusted travel agency founded by Priykant Gupta (formerly Ranjan Services) with 15+ years experience and 25,000+ happy travelers. Domestic & International flights, Goa packages, Kashmir, Himachal, train bookings & customized holidays.",
+    "Trusted travel agency Small Daddy Plus founded by Priykant Gupta (formerly Ranjan Services) with 15+ years experience and 25,000+ happy travelers. Domestic & International flights, Goa packages, Kashmir, Himachal, train bookings & customized holidays.",
   keywords: [
-    "R Travel World",
+    "Small Daddy Plus",
+    "SMALL DADDY PLUS",
     "Priykant Gupta",
     "Ranjan Services Mehsana",
     "Travel Agency Mehsana",

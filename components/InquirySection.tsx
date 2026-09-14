@@ -42,6 +42,18 @@ export const InquirySection: React.FC = () => {
     { name: "", age: "", gender: "Male" },
   ]);
 
+  React.useEffect(() => {
+    const handleSelectDest = (e: Event) => {
+      const customEvent = e as CustomEvent<{ destination: string }>;
+      if (customEvent.detail?.destination) {
+        setActiveTab("package");
+        setDestination(customEvent.detail.destination);
+      }
+    };
+    window.addEventListener("select-destination", handleSelectDest);
+    return () => window.removeEventListener("select-destination", handleSelectDest);
+  }, []);
+
   const handleAddTraveller = () => {
     if (travellers.length < 9) {
       setTravellers([...travellers, { name: "", age: "", gender: "Male" }]);
@@ -98,7 +110,7 @@ export const InquirySection: React.FC = () => {
   };
 
   const getWhatsAppRedirectUrl = () => {
-    const message = `*New Travel Inquiry - R Travel World*%0A%0A*Name:* ${encodeURIComponent(
+    const message = `*New Travel Inquiry - Small Daddy Plus*%0A%0A*Name:* ${encodeURIComponent(
       fullName || "Customer"
     )}%0A*Phone:* ${encodeURIComponent(phone)}%0A*Type:* ${encodeURIComponent(
       activeTab.toUpperCase()

@@ -174,17 +174,33 @@ export function getStoredPackages(): CuratedPackage[] {
       localStorage.setItem(PACKAGES_KEY, JSON.stringify(initialCuratedPackages));
       return initialCuratedPackages;
     }
-    // Auto-merge detailedInclusions from initialCuratedPackages if not present
+    // Auto-merge detailedInclusions & flyerImage from initialCuratedPackages if not present
+    let updatedNeeded = false;
     const merged: CuratedPackage[] = parsed.map((pkg) => {
-      if (!pkg.detailedInclusions || pkg.detailedInclusions.length === 0) {
-        const initial = initialCuratedPackages.find((init) => init.id === pkg.id);
-        if (initial && initial.detailedInclusions) {
-          return { ...pkg, detailedInclusions: initial.detailedInclusions };
+      const updatedPkg = { ...pkg };
+      const initial = initialCuratedPackages.find((init) => init.id === pkg.id);
+      if (initial) {
+        if ((!pkg.detailedInclusions || pkg.detailedInclusions.length === 0) && initial.detailedInclusions) {
+          updatedPkg.detailedInclusions = initial.detailedInclusions;
+          updatedNeeded = true;
+        }
+        if (!pkg.flyerImage && initial.flyerImage) {
+          updatedPkg.flyerImage = initial.flyerImage;
+          updatedNeeded = true;
         }
       }
-      return pkg;
+      return updatedPkg;
     });
-    return merged;
+
+    // Prepend any new initial packages that do not exist in localStorage yet
+    const existingIds = new Set(merged.map((p) => p.id));
+    const missingInitials = initialCuratedPackages.filter((init) => !existingIds.has(init.id));
+    const finalPackages = missingInitials.length > 0 ? [...missingInitials, ...merged] : merged;
+
+    if (missingInitials.length > 0 || updatedNeeded) {
+      localStorage.setItem(PACKAGES_KEY, JSON.stringify(finalPackages));
+    }
+    return finalPackages;
   } catch {
     return initialCuratedPackages;
   }

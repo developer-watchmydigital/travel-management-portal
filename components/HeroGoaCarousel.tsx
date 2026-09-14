@@ -136,7 +136,7 @@ export const HeroGoaCarousel: React.FC = () => {
               <div className="mt-7 flex flex-wrap items-center gap-3.5">
                 {/* Main "Plan Your Journey With Us" CTA */}
                 <Link
-                  href="#contact"
+                  href="/#contact"
                   className="group relative inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#FF5A3C] via-[#FF6C4B] to-[#E04629] text-white font-bold text-sm shadow-lg shadow-[#FF5A3C]/30 hover:scale-[1.02] active:scale-[0.98] transition-all overflow-hidden"
                 >
                   <span className="relative z-10">Plan Your Journey With Us</span>
@@ -145,7 +145,7 @@ export const HeroGoaCarousel: React.FC = () => {
 
                 {/* WhatsApp Quick Chat CTA */}
                 <a
-                  href="https://wa.me/919427286755?text=Hello%20Small%20Daddy%20Plus!%20I%20want%20to%20plan%20my%20trip%20to%20Goa%20/%20holiday%20package."
+                  href="https://wa.me/917058323165?text=Hello%20Small%20Daddy%20Plus!%20I%20want%20to%20plan%20my%20trip%20to%20Goa%20/%20holiday%20package."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 border border-[#25D366]/40 text-[#25D366] dark:text-[#25D366] font-semibold text-sm backdrop-blur-md transition-all hover:scale-[1.02]"
@@ -156,7 +156,7 @@ export const HeroGoaCarousel: React.FC = () => {
 
                 {/* Explore Destinations Secondary Button */}
                 <Link
-                  href="#destinations"
+                  href="/#destinations"
                   className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-slate-900/5 hover:bg-slate-900/10 dark:bg-white/10 dark:hover:bg-white/15 border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white font-semibold text-sm backdrop-blur-md transition-all hover:scale-[1.02]"
                 >
                   <span>Top Destinations</span>
@@ -269,10 +269,10 @@ export const HeroGoaCarousel: React.FC = () => {
                     <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Available 24x7</span>
                   </div>
                   <Link
-                    href="#contact"
+                    href="/packages/pkg-goa-small-daddy-special"
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-semibold text-xs tracking-wide shadow hover:brightness-110 transition-all"
                   >
-                    <span>Instant Inquiry For This Package</span>
+                    <span>View 4N/5D Summer Offer (₹2,499/Day)</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>

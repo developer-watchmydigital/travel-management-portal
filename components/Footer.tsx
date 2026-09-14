@@ -51,32 +51,32 @@ export const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link href="#home" className="hover:text-[#FF5A3C] transition-colors">
+                <Link href="/#home" className="hover:text-[#FF5A3C] transition-colors">
                   Home & Goa Spotlight
                 </Link>
               </li>
               <li>
-                <Link href="#about" className="hover:text-[#FF5A3C] transition-colors">
+                <Link href="/#about" className="hover:text-[#FF5A3C] transition-colors">
                   About Us & Story
                 </Link>
               </li>
               <li>
-                <Link href="#services" className="hover:text-[#FF5A3C] transition-colors">
+                <Link href="/#services" className="hover:text-[#FF5A3C] transition-colors">
                   Our Services
                 </Link>
               </li>
               <li>
-                <Link href="#destinations" className="hover:text-[#FF5A3C] transition-colors">
+                <Link href="/#destinations" className="hover:text-[#FF5A3C] transition-colors">
                   Top Destinations
                 </Link>
               </li>
               <li>
-                <Link href="#why-us" className="hover:text-[#FF5A3C] transition-colors">
+                <Link href="/#why-us" className="hover:text-[#FF5A3C] transition-colors">
                   Why Choose Us
                 </Link>
               </li>
               <li>
-                <Link href="#contact" className="hover:text-[#FF5A3C] transition-colors">
+                <Link href="/#contact" className="hover:text-[#FF5A3C] transition-colors">
                   Book & Inquire
                 </Link>
               </li>
@@ -99,10 +99,10 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Col 5: Contact Mehsana */}
+          {/* Col 5: Contact Mehsana & Goa */}
           <div className="text-left">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
-              Mehsana Office
+              Contact & Bookings
             </h4>
             <div className="space-y-3 text-xs">
               <div className="flex items-start gap-2">
@@ -113,14 +113,32 @@ export const Footer: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#FF5A3C] shrink-0" />
-                <a href="tel:+919427286755" className="text-slate-800 dark:text-slate-200 hover:text-[#FF5A3C] font-semibold">
-                  +91 94272 86755
-                </a>
+                <div className="flex flex-col">
+                  <a href="tel:+917058323165" className="text-slate-800 dark:text-slate-200 hover:text-[#FF5A3C] font-semibold">
+                    +91 70583 23165 <span className="text-[10px] text-amber-500 font-bold">(Goa Hotline)</span>
+                  </a>
+                  <a href="tel:+919427286755" className="text-slate-600 dark:text-slate-400 hover:text-[#FF5A3C]">
+                    +91 94272 86755
+                  </a>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
                 <a href="mailto:info@rtravelworld.com" className="text-slate-600 dark:text-slate-300 hover:text-[#FF5A3C]">
                   info@rtravelworld.com
+                </a>
+              </div>
+              <div className="flex items-center gap-2 pt-1 border-t border-slate-200 dark:border-white/5">
+                <span className="px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-600 dark:text-pink-400 text-[10px] font-bold">
+                  Instagram
+                </span>
+                <a
+                  href="https://instagram.com/watchmytrip"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-800 dark:text-slate-200 hover:text-[#FF5A3C] font-semibold text-xs"
+                >
+                  @watchmytrip
                 </a>
               </div>
             </div>

@@ -8,20 +8,21 @@ export const companyData: CompanyInfo = {
   satisfiedCustomers: "25,000+",
   formerName: "Ranjan Services",
   address: "6/B, Jagdish Chamber, Opp. Rajkamal Petrol pump, Highway, Mehsana 384002 - Gujarat",
-  phones: ["+91 94272 86755", "+91 91731 36111"],
-  whatsapp: "919427286755",
+  phones: ["+91 70583 23165", "+91 94272 86755", "+91 91731 36111"],
+  whatsapp: "917058323165",
   emails: ["info@rtravelworld.com", "rtravelworldmehsana@gmail.com"],
+  instagram: "@watchmytrip",
 };
 
 export const goaCarouselSlides = [
   {
-    id: "goa-1",
-    title: "Golden Beaches & Sunset Waves",
-    subtitle: "Experience the sun-kissed shores of Palolem, Baga & Calangute with private beachfront stays.",
+    id: "goa-summer-offer",
+    title: "Hotel Small Daddy Plus Signature Package",
+    subtitle: "4N/5D Summer Best Offer: Dinner Cruise, Adventure Boat Party, North/South Tour & Full Body Spa.",
     image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1600&auto=format&fit=crop",
-    badge: "Exclusive 4N/5D Goa Coastal Bliss",
-    tag: "Trending Destination",
-    price: "From ₹12,999 / person",
+    badge: "Summer Best Offer: ₹2,499 / Day",
+    tag: "Summer Best Offer",
+    price: "From ₹9,996 / person",
   },
   {
     id: "goa-2",
@@ -394,6 +395,112 @@ export const curatedRegionsList = [
 ];
 
 export const initialCuratedPackages: CuratedPackage[] = [
+  {
+    id: "pkg-goa-small-daddy-special",
+    state: "Goa",
+    title: "Hotel Small Daddy Plus Signature Goa Package",
+    subtitle: "Explore The Goa With Us • Dinner Cruise, Adventure Boat Party & Full Body Spa",
+    route: "4 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute / North Goa",
+    duration: "5 Days & 4 Nights",
+    categoryBadge: "Summer Best Offer",
+    badgeGradient: "from-amber-500 via-orange-500 to-rose-500",
+    image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop",
+    flyerImage: "/small-daddy-plus-flyer.jpeg",
+    originalPrice: "14,999",
+    discountedPrice: "9,996",
+    savings: "5,003",
+    highlights: [
+      "AC Deluxe Room at Hotel Small Daddy Plus",
+      "Complimentary Daily Buffet Breakfast",
+      "Free Pickup from Airport / Railway Station / Bus Stand",
+      "Day 1: Romantic Mandovi River Dinner Cruise",
+      "Day 2: High-Energy Adventure Boat Party with DJ",
+      "Day 3: South Goa / North Goa Guided Tour",
+      "Day 4: Ayurvedic Full Body Spa & Massage",
+    ],
+    itinerary: [
+      {
+        day: 1,
+        title: "Arrival, Free Station/Airport Pickup & Evening Dinner Cruise",
+        description: "Warm welcome upon arrival in Goa! Enjoy hassle-free complimentary pickup directly from Airport / Railway Station / Bus stand. Check in to your AC Deluxe Room at Hotel Small Daddy Plus. In the evening, head out for a magical Mandovi River Dinner Cruise featuring live DJ music, folk dance performances, open deck sea breeze, and a lavish buffet dinner.",
+      },
+      {
+        day: 2,
+        title: "Thrilling Adventure Boat Party with DJ, Drinks & Water Activities",
+        description: "Get ready for an adrenaline-pumping ocean party aboard our multi-deck catamaran boat in the Arabian Sea. Enjoy high-energy DJ music, dance floor, dolphin watching, water slides, swimming, and chilled refreshments onboard.",
+      },
+      {
+        day: 3,
+        title: "Full Day North Goa or South Goa Guided Tour",
+        description: "Explore the best of Goa in a dedicated private sanitized AC cab. Choose between North Goa (Fort Aguada, Chapora Fort, Vagator, Anjuna and Calangute beaches) or South Goa (Old Goa UNESCO Cathedrals, Mangueshi Temple, Miramar beach, and Fontainhas Latin Quarter). Dedicated AC vehicle provided.",
+      },
+      {
+        day: 4,
+        title: "Rejuvenating Full Body Massage & Ayurvedic Spa Therapy",
+        description: "Treat yourself to sheer pampering and wellness. Experience a 60-minute relaxing professional full-body oil massage and herbal spa session to relieve travel fatigue. Spend the afternoon and evening exploring beach shacks, flea markets, or sunset cafes at your leisure.",
+      },
+      {
+        day: 5,
+        title: "Complimentary Breakfast, Check-Out & Farewell Transfer",
+        description: "Start the day with a healthy and tasty morning breakfast spread. Check out from Hotel Small Daddy Plus with wonderful memories. Enjoy a punctual complimentary transfer back to Airport, Railway Station, or Bus stand for your journey home.",
+      },
+    ],
+    inclusions: [
+      "4 Nights AC Deluxe Room Accommodation at Hotel Small Daddy Plus",
+      "Daily Morning Complimentary Breakfast Spread",
+      "Free Pickup from Airport / Railway Station / Bus Stand",
+      "Day 1: Mandovi River Dinner Cruise with Buffet & Live DJ",
+      "Day 2: Adventure Boat Party with DJ & Water Fun",
+      "Day 3: Full-Day Guided North Goa or South Goa Sightseeing Tour",
+      "Day 4: Rejuvenating Full Body Massage & Spa Session",
+      "24/7 Dedicated Trip Concierge Support from Priykant Gupta & Team",
+    ],
+    detailedInclusions: [
+      {
+        id: "inc-sdp-1",
+        title: "AC Deluxe Room at Hotel Small Daddy Plus",
+        description: "Unwind in clean, spacious, air-conditioned deluxe rooms with modern amenities, premium linen, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
+        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-sdp-2",
+        title: "Mandovi River Evening Dinner Cruise",
+        description: "Sail under starlit Goan skies on an expansive 2-hour river dinner cruise. Features live DJ beats, traditional Goan Portuguese folk dances, scenic illuminated coastline, and unlimited buffet dinner.",
+        image: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-sdp-3",
+        title: "Exclusive Adventure Boat Party with Live DJ",
+        description: "Goa's favorite sea party! Cruise across the Arabian waters with live DJ, dance floor, dolphin sightings, fun water activities, safety jackets, and chilled beverages served on board.",
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-sdp-4",
+        title: "Rejuvenating Ayurvedic Full Body Massage & Spa",
+        description: "Experience total physical and mental relaxation with a 60-minute therapeutic full-body massage administered by trained wellness therapists to melt away all stress and fatigue.",
+        image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-sdp-5",
+        title: "Complimentary Daily Breakfast & Free Station/Airport Pickup",
+        description: "Enjoy fresh, wholesome morning breakfast everyday during your stay. Hassle-free arrival pickup from Airport (Mopa / Dabolim), Railway Station (Thivim / Karmali / Madgaon), or Bus stand is 100% complimentary.",
+        image: "",
+      },
+      {
+        id: "inc-sdp-6",
+        title: "24/7 Dedicated Concierge & On-Ground Team Support",
+        description: "No stress, no middleman commissions. Direct personalized coordination by Priykant Gupta and our Goa operations team. Instant help via WhatsApp and phone throughout your holiday.",
+        image: "",
+      },
+    ],
+    exclusions: [
+      "Airfare / Train tickets (Special discounted flight/train booking assistance available)",
+      "Lunch and meals not explicitly mentioned in inclusions",
+      "Personal watersport rides like parasailing & jet ski (available at discounted partner rates)",
+      "Entry tickets for monuments, clubs or casinos",
+    ],
+    featured: true,
+  },
   {
     id: "pkg-goa-1",
     state: "Goa",

@@ -52,6 +52,7 @@ export interface CompanyInfo {
   phones: string[];
   whatsapp: string;
   emails: string[];
+  instagram?: string;
 }
 
 export interface ItineraryDay {
@@ -77,6 +78,7 @@ export interface CuratedPackage {
   categoryBadge: string; // e.g. "Beach & Watersports", "Spiritual Coast"
   badgeGradient?: string;
   image: string;
+  flyerImage?: string; // Optional promotional flyer image URL
   originalPrice: string; // e.g. "16,000"
   discountedPrice: string; // e.g. "11,999"
   savings: string; // e.g. "4,501"

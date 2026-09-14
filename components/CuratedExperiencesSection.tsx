@@ -18,10 +18,16 @@ import {
   Compass,
   Check,
   Minus,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  Layers,
 } from "lucide-react";
 import { CuratedPackage } from "@/lib/types";
 import { curatedRegionsList, initialCuratedPackages } from "@/lib/initialData";
 import { getStoredPackages } from "@/lib/storage";
+
+const ITEMS_PER_PAGE = 4;
 
 export const CuratedExperiencesSection: React.FC = () => {
   const [selectedRegion, setSelectedRegion] = useState<string>("Goa");
@@ -29,6 +35,8 @@ export const CuratedExperiencesSection: React.FC = () => {
   const [selectedPackage, setSelectedPackage] = useState<CuratedPackage | null>(null);
   const [mounted, setMounted] = useState(false);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isViewAll, setIsViewAll] = useState<boolean>(false);
 
   const fallbackImage =
     "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop";
@@ -68,6 +76,50 @@ export const CuratedExperiencesSection: React.FC = () => {
   const filteredPackages = packages.filter(
     (p) => p.state.toLowerCase() === selectedRegion.toLowerCase()
   );
+
+  const totalPackages = filteredPackages.length;
+  const totalPages = Math.max(1, Math.ceil(totalPackages / ITEMS_PER_PAGE));
+
+  // Ensure currentPage is within range
+  const validCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (validCurrentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalPackages);
+
+  const displayedPackages = isViewAll
+    ? filteredPackages
+    : filteredPackages.slice(startIndex, endIndex);
+
+  const scrollToGridTop = () => {
+    const element = document.getElementById("curated-packages-grid");
+    if (element) {
+      const yOffset = -100;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  };
+
+  const handleRegionSelect = (region: string) => {
+    setSelectedRegion(region);
+    setCurrentPage(1);
+    setIsViewAll(false);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      setIsViewAll(false);
+      scrollToGridTop();
+    }
+  };
+
+  const handleToggleViewAll = () => {
+    const nextState = !isViewAll;
+    setIsViewAll(nextState);
+    if (!nextState) {
+      setCurrentPage(1);
+    }
+    scrollToGridTop();
+  };
 
   const handleEnquiry = (packageName?: string, destinationName?: string) => {
     setSelectedPackage(null);
@@ -113,7 +165,7 @@ export const CuratedExperiencesSection: React.FC = () => {
               <button
                 key={region}
                 type="button"
-                onClick={() => setSelectedRegion(region)}
+                onClick={() => handleRegionSelect(region)}
                 className={`relative px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 cursor-pointer ${
                   isActive
                     ? "bg-[#FF5A3C] text-white shadow-lg shadow-[#FF5A3C]/40 scale-105"
@@ -131,136 +183,255 @@ export const CuratedExperiencesSection: React.FC = () => {
 
         {/* Packages Grid or Coming Soon View */}
         {filteredPackages.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredPackages.map((pkg) => (
-              <div
-                key={pkg.id}
-                className="bg-white dark:bg-[#0C142E] rounded-3xl border border-slate-200 dark:border-white/10 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between group text-left"
-              >
-                {/* Package Image & Top Badges */}
-                <div className="relative h-56 w-full overflow-hidden bg-slate-900 shrink-0">
-                  <Image
-                    src={imageErrors[pkg.id] ? fallbackImage : pkg.image}
-                    alt={pkg.title}
-                    fill
-                    onError={() =>
-                      setImageErrors((prev) => ({ ...prev, [pkg.id]: true }))
-                    }
-                    className="object-cover object-center group-hover:scale-110 transition-transform duration-700"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 350px"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30" />
+          <div>
+            {/* Header info & View All quick toggle */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6 px-1">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium text-center sm:text-left">
+                Showing{" "}
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {isViewAll ? `all ${totalPackages}` : `${startIndex + 1}–${endIndex}`}
+                </span>{" "}
+                of{" "}
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {totalPackages}
+                </span>{" "}
+                curated experiences in {selectedRegion}
+              </p>
 
-                  {/* Top-Right Duration Badge */}
-                  <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-white text-[11px] font-bold flex items-center gap-1 shadow">
-                    <Calendar className="w-3 h-3 text-amber-400" />
-                    <span>{pkg.duration}</span>
-                  </div>
+              {totalPackages > ITEMS_PER_PAGE && (
+                <button
+                  type="button"
+                  onClick={handleToggleViewAll}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-[#FF5A3C] hover:text-[#FF5A3C]"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span>{isViewAll ? "Show 4 per page" : `View All (${totalPackages})`}</span>
+                </button>
+              )}
+            </div>
 
-                  {/* Bottom-Left Category Badge */}
-                  <div className="absolute bottom-3 left-3">
-                    <span
-                      className={`px-3 py-1 rounded-full bg-gradient-to-r ${
-                        pkg.badgeGradient || "from-pink-500 to-rose-500"
-                      } text-white text-[11px] font-extrabold shadow`}
-                    >
-                      {pkg.categoryBadge}
-                    </span>
-                  </div>
-                </div>
+            {/* Packages Grid */}
+            <div
+              id="curated-packages-grid"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 scroll-mt-24"
+            >
+              {displayedPackages.map((pkg) => (
+                <div
+                  key={pkg.id}
+                  className="bg-white dark:bg-[#0C142E] rounded-3xl border border-slate-200 dark:border-white/10 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between group text-left"
+                >
+                  {/* Package Image & Top Badges */}
+                  <Link
+                    href={`/packages/${pkg.id}`}
+                    className="block relative h-56 w-full overflow-hidden bg-slate-900 shrink-0 cursor-pointer"
+                  >
+                    <Image
+                      src={imageErrors[pkg.id] ? fallbackImage : pkg.image}
+                      alt={pkg.title}
+                      fill
+                      onError={() =>
+                        setImageErrors((prev) => ({ ...prev, [pkg.id]: true }))
+                      }
+                      className="object-cover object-center group-hover:scale-110 transition-transform duration-700"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 350px"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/30" />
 
-                {/* Card Content Details */}
-                <div className="p-5 flex-1 flex flex-col justify-between">
-                  <div>
-                    {/* Route Line */}
-                    <p className="flex items-center gap-1 text-xs text-[#FF5A3C] font-bold mb-1.5">
-                      <MapPin className="w-3.5 h-3.5 shrink-0" />
-                      <span className="line-clamp-1">{pkg.route}</span>
-                    </p>
-
-                    {/* Title */}
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white font-['Outfit'] group-hover:text-[#FF5A3C] transition-colors leading-snug">
-                      {pkg.title}
-                    </h3>
-
-                    {/* Subtitle */}
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4 line-clamp-2 leading-relaxed">
-                      {pkg.subtitle}
-                    </p>
-
-                    {/* Highlights Bulleted List */}
-                    <div className="space-y-1.5 mb-5">
-                      {pkg.highlights.slice(0, 3).map((h, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                          <span className="line-clamp-1">{h}</span>
-                        </div>
-                      ))}
+                    {/* Top-Right Duration Badge */}
+                    <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-white text-[11px] font-bold flex items-center gap-1 shadow">
+                      <Calendar className="w-3 h-3 text-amber-400" />
+                      <span>{pkg.duration}</span>
                     </div>
-                  </div>
 
-                  {/* Price & Actions Row */}
-                  <div className="pt-4 border-t border-slate-200 dark:border-white/10">
-                    {/* Pricing */}
-                    <div className="flex items-baseline justify-between mb-3.5">
-                      <div className="flex items-center gap-2">
-                        {pkg.originalPrice && (
-                          <span className="line-through text-xs text-slate-400 font-semibold">
-                            ₹{pkg.originalPrice}
-                          </span>
-                        )}
-                        {pkg.savings && (
-                          <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase">
-                            SAVE ₹{pkg.savings}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Starting from{" "}
-                        <strong className="text-base font-extrabold text-slate-900 dark:text-white">
-                          ₹{pkg.discountedPrice}
-                        </strong>{" "}
-                        <span className="text-[10px]">/Person</span>
+                    {/* Bottom-Left Category Badge */}
+                    <div className="absolute bottom-3 left-3">
+                      <span
+                        className={`px-3 py-1 rounded-full bg-gradient-to-r ${
+                          pkg.badgeGradient || "from-pink-500 to-rose-500"
+                        } text-white text-[11px] font-extrabold shadow`}
+                      >
+                        {pkg.categoryBadge}
+                      </span>
+                    </div>
+                  </Link>
+
+                  {/* Card Content Details */}
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      {/* Route Line */}
+                      <p className="flex items-center gap-1 text-xs text-[#FF5A3C] font-bold mb-1.5">
+                        <MapPin className="w-3.5 h-3.5 shrink-0" />
+                        <span className="line-clamp-1">{pkg.route}</span>
                       </p>
+
+                      {/* Title */}
+                      <Link href={`/packages/${pkg.id}`} className="block">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white font-['Outfit'] group-hover:text-[#FF5A3C] transition-colors leading-snug">
+                          {pkg.title}
+                        </h3>
+                      </Link>
+
+                      {/* Subtitle */}
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4 line-clamp-2 leading-relaxed">
+                        {pkg.subtitle}
+                      </p>
+
+                      {/* Highlights Bulleted List */}
+                      <div className="space-y-1.5 mb-5">
+                        {pkg.highlights.slice(0, 3).map((h, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                            <span className="line-clamp-1">{h}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
-                    {/* Action Buttons: Phone, WhatsApp, View Itinerary */}
-                    <div className="flex items-center gap-2">
-                      <a
-                        href="tel:+919427286755"
-                        className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 hover:border-[#FF5A3C] text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] transition-colors"
-                        title="Call Small Daddy Plus"
-                      >
-                        <Phone className="w-4 h-4" />
-                      </a>
+                    {/* Price & Actions Row */}
+                    <div className="pt-4 border-t border-slate-200 dark:border-white/10">
+                      {/* Pricing */}
+                      <div className="flex items-baseline justify-between mb-3.5">
+                        <div className="flex items-center gap-2">
+                          {pkg.originalPrice && (
+                            <span className="line-through text-xs text-slate-400 font-semibold">
+                              ₹{pkg.originalPrice}
+                            </span>
+                          )}
+                          {pkg.savings && (
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase">
+                              SAVE ₹{pkg.savings}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          Starting from{" "}
+                          <strong className="text-base font-extrabold text-slate-900 dark:text-white">
+                            ₹{pkg.discountedPrice}
+                          </strong>{" "}
+                          <span className="text-[10px]">/Person</span>
+                        </p>
+                      </div>
 
-                      <a
-                        href={`https://wa.me/919427286755?text=Hello%20Small%20Daddy%20Plus!%20I%20am%20interested%20in%20booking%20the%20${encodeURIComponent(
-                          pkg.title
-                        )}.`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors"
-                        title="WhatsApp Enquiry"
-                      >
-                        <MessageCircle className="w-4 h-4 fill-current" />
-                      </a>
+                      {/* Action Buttons: Phone, WhatsApp, View Itinerary */}
+                      <div className="flex items-center gap-2">
+                        <a
+                          href="tel:+919427286755"
+                          className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 hover:border-[#FF5A3C] text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] transition-colors"
+                          title="Call Small Daddy Plus"
+                        >
+                          <Phone className="w-4 h-4" />
+                        </a>
 
-                      <Link
-                        href={`/packages/${pkg.id}`}
-                        className="flex-1 py-2.5 px-3 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs shadow-md shadow-[#FF5A3C]/30 flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
-                      >
-                        <span>View Itinerary</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
+                        <a
+                          href={`https://wa.me/919427286755?text=Hello%20Small%20Daddy%20Plus!%20I%20am%20interested%20in%20booking%20the%20${encodeURIComponent(
+                            pkg.title
+                          )}.`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                          title="WhatsApp Enquiry"
+                        >
+                          <MessageCircle className="w-4 h-4 fill-current" />
+                        </a>
+
+                        <Link
+                          href={`/packages/${pkg.id}`}
+                          className="flex-1 py-2.5 px-3 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs shadow-md shadow-[#FF5A3C]/30 flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
+                        >
+                          <span>View Itinerary</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Pagination and View All Controls (when more than 4 packages exist) */}
+            {totalPackages > ITEMS_PER_PAGE && (
+              <div className="mt-12 pt-8 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                {!isViewAll ? (
+                  <>
+                    {/* Pagination Navigation (Previous, Page Numbers, Next) */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={validCurrentPage === 1}
+                        onClick={() => handlePageChange(validCurrentPage - 1)}
+                        className={`flex items-center gap-1 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all ${
+                          validCurrentPage === 1
+                            ? "opacity-40 cursor-not-allowed border-slate-200 dark:border-white/5 text-slate-400"
+                            : "cursor-pointer border-slate-200 dark:border-white/10 hover:border-[#FF5A3C] text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] bg-white dark:bg-[#0C142E] shadow-sm"
+                        }`}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>Prev</span>
+                      </button>
+
+                      <div className="flex items-center gap-1.5">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                          <button
+                            key={page}
+                            type="button"
+                            onClick={() => handlePageChange(page)}
+                            className={`w-9 h-9 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center ${
+                              page === validCurrentPage
+                                ? "bg-[#FF5A3C] text-white shadow-md shadow-[#FF5A3C]/30 scale-105"
+                                : "bg-white dark:bg-[#0C142E] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-[#FF5A3C] hover:text-[#FF5A3C]"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={validCurrentPage === totalPages}
+                        onClick={() => handlePageChange(validCurrentPage + 1)}
+                        className={`flex items-center gap-1 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all ${
+                          validCurrentPage === totalPages
+                            ? "opacity-40 cursor-not-allowed border-slate-200 dark:border-white/5 text-slate-400"
+                            : "cursor-pointer border-slate-200 dark:border-white/10 hover:border-[#FF5A3C] text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] bg-white dark:bg-[#0C142E] shadow-sm"
+                        }`}
+                      >
+                        <span>Next</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Mobile & Desktop Expand / View All Button */}
+                    <button
+                      type="button"
+                      onClick={handleToggleViewAll}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-[#FF5A3C] hover:text-white dark:bg-white/5 dark:hover:bg-[#FF5A3C] text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10 hover:border-[#FF5A3C] text-xs font-bold transition-all shadow-sm cursor-pointer active:scale-95"
+                    >
+                      <LayoutGrid className="w-4 h-4" />
+                      <span>View All ({totalPackages} Packages)</span>
+                    </button>
+                  </>
+                ) : (
+                  /* If View All is active, collapse button */
+                  <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Showing all {totalPackages} packages in {selectedRegion}.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleToggleViewAll}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white border border-slate-300 dark:border-white/20 text-xs font-bold transition-all cursor-pointer active:scale-95"
+                    >
+                      <Layers className="w-4 h-4 text-[#FF5A3C]" />
+                      <span>Collapse to 4 Per Page</span>
+                    </button>
+                  </div>
+                )}
               </div>
-            ))}
+            )}
           </div>
         ) : (
           /* Branded Coming Soon Notice when no packages exist for this region */

@@ -93,7 +93,7 @@ export const Navbar: React.FC = () => {
 
           {/* Plan Journey Primary CTA */}
           <Link
-            href="#contact"
+            href="/#contact"
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-semibold text-sm shadow-lg shadow-[#FF5A3C]/30 hover:shadow-[#FF5A3C]/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
             <span>Plan Journey</span>
@@ -149,7 +149,7 @@ export const Navbar: React.FC = () => {
                 <span>Call: +91 94272 86755</span>
               </a>
               <Link
-                href="#contact"
+                href="/#contact"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#FF5A3C] text-white text-sm font-semibold shadow-md"
               >

@@ -60,6 +60,13 @@ export interface ItineraryDay {
   description: string;
 }
 
+export interface PackageInclusionItem {
+  id: string;
+  title: string;
+  description: string;
+  image?: string; // Optional picture URL
+}
+
 export interface CuratedPackage {
   id: string;
   state: string; // e.g. "Goa", "Gujarat", "Himachal"
@@ -76,6 +83,7 @@ export interface CuratedPackage {
   highlights: string[];
   itinerary: ItineraryDay[];
   inclusions: string[];
+  detailedInclusions?: PackageInclusionItem[]; // Rich inclusions with description and optional picture for zig-zag/middle layout
   exclusions: string[];
   featured?: boolean;
 }

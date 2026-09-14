@@ -20,13 +20,13 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "#home" },
-    { name: "Curated Tours", href: "#curated" },
-    { name: "About Us", href: "#about" },
-    { name: "Services", href: "#services" },
-    { name: "Top Destinations", href: "#destinations" },
-    { name: "Why Us", href: "#why-us" },
-    { name: "Contact & Book", href: "#contact" },
+    { name: "Home", href: "/#home" },
+    { name: "Curated Tours", href: "/#curated" },
+    { name: "About Us", href: "/#about" },
+    { name: "Services", href: "/#services" },
+    { name: "Top Destinations", href: "/#destinations" },
+    { name: "Why Us", href: "/#why-us" },
+    { name: "Contact & Book", href: "/#contact" },
   ];
 
   return (
@@ -39,7 +39,7 @@ export const Navbar: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo */}
-        <Link href="#home" className="flex items-center gap-3 group">
+        <Link href="/" className="flex items-center gap-3 group">
           <div className="relative h-12 sm:h-14 md:h-16 w-auto flex items-center">
             <Image
               src="/logo.png"

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import Image from "next/image";
 import {
   Calendar,
@@ -248,14 +249,13 @@ export const CuratedExperiencesSection: React.FC = () => {
                         <MessageCircle className="w-4 h-4 fill-current" />
                       </a>
 
-                      <button
-                        type="button"
-                        onClick={() => setSelectedPackage(pkg)}
+                      <Link
+                        href={`/packages/${pkg.id}`}
                         className="flex-1 py-2.5 px-3 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs shadow-md shadow-[#FF5A3C]/30 flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
                       >
                         <span>View Itinerary</span>
                         <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>

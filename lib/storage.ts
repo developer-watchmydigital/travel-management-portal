@@ -174,10 +174,25 @@ export function getStoredPackages(): CuratedPackage[] {
       localStorage.setItem(PACKAGES_KEY, JSON.stringify(initialCuratedPackages));
       return initialCuratedPackages;
     }
-    return parsed;
+    // Auto-merge detailedInclusions from initialCuratedPackages if not present
+    const merged: CuratedPackage[] = parsed.map((pkg) => {
+      if (!pkg.detailedInclusions || pkg.detailedInclusions.length === 0) {
+        const initial = initialCuratedPackages.find((init) => init.id === pkg.id);
+        if (initial && initial.detailedInclusions) {
+          return { ...pkg, detailedInclusions: initial.detailedInclusions };
+        }
+      }
+      return pkg;
+    });
+    return merged;
   } catch {
     return initialCuratedPackages;
   }
+}
+
+export function getStoredPackageById(id: string): CuratedPackage | undefined {
+  const all = getStoredPackages();
+  return all.find((p) => p.id === id);
 }
 
 export function savePackage(pkg: CuratedPackage) {

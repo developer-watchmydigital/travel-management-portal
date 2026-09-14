@@ -43,7 +43,7 @@ import {
   savePackage,
   deletePackage,
 } from "@/lib/storage";
-import { InquiryLead, Destination, CompanyInfo, CuratedPackage, ItineraryDay } from "@/lib/types";
+import { InquiryLead, Destination, CompanyInfo, CuratedPackage, ItineraryDay, PackageInclusionItem } from "@/lib/types";
 import { curatedRegionsList } from "@/lib/initialData";
 
 export default function AdminPage() {
@@ -206,6 +206,26 @@ export default function AdminPage() {
         "Private AC Cab for Sightseeing & Transfers",
         "All Tolls, Parking & Driver Allowances",
       ],
+      detailedInclusions: [
+        {
+          id: "inc-" + Date.now() + "-1",
+          title: "Grand Island Scuba Diving & Dolphin Safari Cruise",
+          description: "Arabian Sea catamaran cruise, dolphin watching, certified scuba diving with underwater photos & buffet lunch.",
+          image: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=800&auto=format&fit=crop",
+        },
+        {
+          id: "inc-" + Date.now() + "-2",
+          title: "4-Star Beachside Resort Stay with Pool & Breakfast",
+          description: "Deluxe air-conditioned rooms, swimming pool, private sun terrace, and daily chef-curated breakfast.",
+          image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop",
+        },
+        {
+          id: "inc-" + Date.now() + "-3",
+          title: "24/7 Dedicated On-Trip Concierge & Trip Manager Support",
+          description: "Our dedicated ground team remains at your service throughout the tour for check-in coordination and guidance.",
+          image: "", // Centered, no photo
+        },
+      ],
       exclusions: [
         "Airfare or Train tickets (Bookings available on request)",
         "Personal expenses and meals not mentioned",
@@ -222,6 +242,14 @@ export default function AdminPage() {
       highlights: [...(pkg.highlights || [])],
       itinerary: pkg.itinerary ? pkg.itinerary.map((d) => ({ ...d })) : [],
       inclusions: [...(pkg.inclusions || [])],
+      detailedInclusions: pkg.detailedInclusions
+        ? pkg.detailedInclusions.map((d) => ({ ...d }))
+        : (pkg.inclusions || []).map((inc, idx) => ({
+            id: `inc-${Date.now()}-${idx}`,
+            title: inc,
+            description: "Service included with package guarantee.",
+            image: "",
+          })),
       exclusions: [...(pkg.exclusions || [])],
     });
     setIsPackageModalOpen(true);
@@ -232,6 +260,35 @@ export default function AdminPage() {
       deletePackage(id);
       setPackages(getStoredPackages());
     }
+  };
+
+  const handleAddDetailedInclusion = () => {
+    const current = pkgFormData.detailedInclusions || [];
+    setPkgFormData({
+      ...pkgFormData,
+      detailedInclusions: [
+        ...current,
+        {
+          id: "inc-" + Date.now(),
+          title: "",
+          description: "",
+          image: "",
+        },
+      ],
+    });
+  };
+
+  const handleUpdateDetailedInclusion = (index: number, field: "title" | "description" | "image", value: string) => {
+    const updated = [...(pkgFormData.detailedInclusions || [])];
+    if (updated[index]) {
+      updated[index] = { ...updated[index], [field]: value };
+      setPkgFormData({ ...pkgFormData, detailedInclusions: updated });
+    }
+  };
+
+  const handleRemoveDetailedInclusion = (index: number) => {
+    const updated = (pkgFormData.detailedInclusions || []).filter((_, i) => i !== index);
+    setPkgFormData({ ...pkgFormData, detailedInclusions: updated });
   };
 
   const handleSavePackage = (e: React.FormEvent) => {
@@ -264,6 +321,7 @@ export default function AdminPage() {
         { day: 2, title: "Day 2: Sightseeing", description: "Full day sightseeing tour." }
       ],
       inclusions: (pkgFormData.inclusions && pkgFormData.inclusions.length > 0) ? pkgFormData.inclusions : ["Hotel Stay", "Breakfast", "Cab Transfers"],
+      detailedInclusions: (pkgFormData.detailedInclusions && pkgFormData.detailedInclusions.length > 0) ? pkgFormData.detailedInclusions : undefined,
       exclusions: (pkgFormData.exclusions && pkgFormData.exclusions.length > 0) ? pkgFormData.exclusions : ["Flight/Train", "Personal Expenses"],
     };
 
@@ -935,11 +993,13 @@ export default function AdminPage() {
                         ))}
                       </div>
 
-                      {/* Itinerary stats */}
+                      {/* Itinerary & Inclusion stats */}
                       <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-[11px] text-slate-300 flex items-center justify-between mb-4">
-                        <span className="text-slate-400">Day-wise Itinerary</span>
-                        <span className="font-bold text-white">
-                          {(pkg.itinerary || []).length} Days Configured
+                        <span className="text-slate-400">Itinerary & Services</span>
+                        <span className="font-bold text-white flex items-center gap-1.5">
+                          <span>{(pkg.itinerary || []).length} Days</span>
+                          <span className="text-slate-500">•</span>
+                          <span className="text-emerald-400">{(pkg.detailedInclusions || []).length} Services</span>
                         </span>
                       </div>
                     </div>
@@ -967,6 +1027,15 @@ export default function AdminPage() {
 
                       {/* Action buttons */}
                       <div className="flex items-center gap-2">
+                        <Link
+                          href={`/packages/${pkg.id}`}
+                          target="_blank"
+                          className="p-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 transition-colors flex items-center justify-center"
+                          title="Open Live Itinerary Page"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Link>
+
                         <button
                           onClick={() => handleOpenEditPackage(pkg)}
                           className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
@@ -1311,6 +1380,132 @@ export default function AdminPage() {
                           className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C] font-mono text-xs"
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  {/* 6. Detailed Included Services (with Optional Picture & Zig-Zag / Center Layout) */}
+                  <div className="space-y-4 pt-4 border-t border-white/10">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>6. Detailed Included Services (Itinerary Page Layout)</span>
+                        </h4>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Configure services for the Itinerary Page. Add a picture URL for alternating left/right zig-zag showcase, or leave picture URL blank to render in the middle with zero empty picture space.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleAddDetailedInclusion}
+                        className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[11px] font-semibold border border-emerald-500/30 transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Service</span>
+                      </button>
+                    </div>
+
+                    {/* Inclusion Items List */}
+                    <div className="space-y-3.5">
+                      {(pkgFormData.detailedInclusions || []).map((item, idx) => {
+                        const hasImg = Boolean(item.image && item.image.trim().length > 0);
+                        return (
+                          <div
+                            key={item.id || idx}
+                            className={`p-4 rounded-xl border transition-all ${
+                              hasImg
+                                ? "bg-white/[0.04] border-cyan-500/30 shadow-sm"
+                                : "bg-white/[0.02] border-amber-500/30"
+                            }`}
+                          >
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-white/10">
+                              <div className="flex items-center gap-2">
+                                <span className="px-2 py-0.5 rounded-md bg-white/10 text-white font-extrabold text-[11px]">
+                                  Service #{idx + 1}
+                                </span>
+                                {hasImg ? (
+                                  <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold flex items-center gap-1">
+                                    <span>📸 Zig-Zag Mode (Alternating Image & Text)</span>
+                                  </span>
+                                ) : (
+                                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1">
+                                    <span>📑 Middle Mode (Centered, No Photo Space)</span>
+                                  </span>
+                                )}
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveDetailedInclusion(idx)}
+                                className="text-rose-400 hover:text-rose-300 text-[11px] font-medium flex items-center gap-1 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Remove</span>
+                              </button>
+                            </div>
+
+                            <div className="space-y-3">
+                              <div>
+                                <label className="block text-[11px] text-slate-400 mb-1">
+                                  Service Title *
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. Grand Island Scuba Diving & Dolphin Safari Cruise"
+                                  value={item.title}
+                                  onChange={(e) => handleUpdateDetailedInclusion(idx, "title", e.target.value)}
+                                  className="w-full px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-[11px] text-slate-400 mb-1">
+                                  Service Description *
+                                </label>
+                                <textarea
+                                  rows={2}
+                                  placeholder="Explain what is included in this service (resort amenities, boat details, transfers, etc.)..."
+                                  value={item.description}
+                                  onChange={(e) => handleUpdateDetailedInclusion(idx, "description", e.target.value)}
+                                  className="w-full px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
+                                />
+                              </div>
+
+                              <div>
+                                <div className="flex items-center justify-between mb-1">
+                                  <label className="block text-[11px] text-slate-400">
+                                    Picture URL (Optional)
+                                  </label>
+                                  <span className="text-[10px] text-slate-500">
+                                    Leave blank for centered middle layout
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <input
+                                    type="url"
+                                    placeholder="https://images.unsplash.com/... (optional)"
+                                    value={item.image || ""}
+                                    onChange={(e) => handleUpdateDetailedInclusion(idx, "image", e.target.value)}
+                                    className="flex-1 px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
+                                  />
+                                  {hasImg && (
+                                    <div className="relative w-12 h-10 rounded-lg overflow-hidden border border-white/20 shrink-0 bg-black">
+                                      <Image
+                                        src={item.image!}
+                                        alt="Preview"
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 

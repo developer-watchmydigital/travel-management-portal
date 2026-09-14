@@ -443,6 +443,38 @@ export const initialCuratedPackages: CuratedPackage[] = [
       "Private AC Cab for all Sightseeing & Transfers",
       "24/7 Dedicated Trip Manager Support",
     ],
+    detailedInclusions: [
+      {
+        id: "inc-1",
+        title: "Grand Island Scuba Diving & Dolphin Safari Cruise",
+        description: "Set sail on a morning catamaran cruise across the Arabian Sea. Watch wild dolphins jumping in their natural habitat, and plunge into vibrant coral reefs with certified PADI dive masters, complete with safety gear and underwater video/photos.",
+        image: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-2",
+        title: "4-Star Beachside Deluxe Resort Stay with Swimming Pool",
+        description: "Enjoy 3 nights of serene coastal living in handpicked 4-star beachside resorts in Calangute and Baga. Features air-conditioned rooms, private sun terrace, lush swimming pool, and lavish daily chef-curated morning buffet breakfast.",
+        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-3",
+        title: "Private Dedicated AC Sedan / SUV for All Sightseeing",
+        description: "Travel with complete peace of mind in an exclusive sanitized air-conditioned vehicle. Covers all airport or railway station pickups, drop-offs, intercity beach transfers, Aguada Fort, Chapora, and local shopping with zero surge pricing.",
+        image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-4",
+        title: "Sunset Catamaran River Cruise on Mandovi River",
+        description: "Experience the magic of twilight from the deck of a luxury riverboat on Mandovi River. Includes live traditional Goan folk dances, DJ music sessions, complimentary beverages, and breathtaking sunset panoramas over the coastline.",
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-5",
+        title: "24/7 Dedicated On-Trip Concierge & Trip Manager Support",
+        description: "Our dedicated Mehsana & Goa ground coordination team remains at your service throughout the tour. Enjoy seamless hotel check-ins, curated shack dining recommendations, watersport discounts, and 24/7 emergency care.",
+        image: "",
+      },
+    ],
     exclusions: [
       "Airfare / Train tickets (Available on request at special discounted fares)",
       "Lunch and Dinners not specified in inclusions",
@@ -502,6 +534,32 @@ export const initialCuratedPackages: CuratedPackage[] = [
       "Old Goa & Fontainhas Heritage Entry Tickets",
       "Private AC Sedan for Full Duration",
       "All Tolls, Parking & Driver Allowances",
+    ],
+    detailedInclusions: [
+      {
+        id: "inc-2-1",
+        title: "4 Nights Boutique Heritage Resort in South Goa",
+        description: "Unwind in pristine South Goa surrounded by coconut groves and quiet beaches. Complete with swimming pool, landscaped gardens, and complimentary morning breakfast spreads.",
+        image: "https://images.unsplash.com/photo-1587922546307-776227941871?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-2-2",
+        title: "Guided Fontainhas Latin Quarter & Church Walk",
+        description: "Explore the picturesque 18th-century Portuguese streets of Fontainhas, historic houses, art galleries, and UNESCO World Heritage churches with an experienced local guide.",
+        image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-2-3",
+        title: "Private Sanitized AC Sedan for the Entire Duration",
+        description: "Clean, comfortable air-conditioned cab dedicated exclusively to your group for all airport transfers, heritage monument visits, and evening excursions.",
+        image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-2-4",
+        title: "Authentic Goan Spice Plantation Tour & Buffet Lunch",
+        description: "Immerse yourself in fragrant vanilla, cardamom, and cinnamon plantations followed by a traditional Saraswat Goan lunch served fresh on banana leaves.",
+        image: "",
+      },
     ],
     exclusions: [
       "Flight/Train tickets",
@@ -568,6 +626,32 @@ export const initialCuratedPackages: CuratedPackage[] = [
       "All Sightseeing & Inter-Hotel Transfers by AC Cab",
       "24/7 Dedicated WhatsApp Support from Priykant Gupta",
     ],
+    detailedInclusions: [
+      {
+        id: "inc-3-1",
+        title: "5 Nights Split Stay (3N North Goa + 2N South Goa)",
+        description: "Experience both worlds of Goa: the vibrant energy of North Goa beaches and the peaceful, pristine luxury of South Goa resorts.",
+        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-3-2",
+        title: "4x4 Open Jeep Jungle Safari to Dudhsagar Waterfalls",
+        description: "Thrilling off-road drive crossing jungle rivers in Bhagwan Mahavir Sanctuary to the foot of India's fifth tallest multi-tiered waterfall.",
+        image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-3-3",
+        title: "Private Dedicated Vehicle for Sightseeing & Hotel Shifting",
+        description: "No hassle of booking multiple cabs. Our private AC vehicle stays with you for all beach visits, transfers, and luggage shifts.",
+        image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-3-4",
+        title: "All Tolls, Parking, Inter-State Permits & Driver Allowances",
+        description: "100% transparent pricing with zero surprise charges. All driver food allowances, night charges, state entry taxes and parking are prepaid.",
+        image: "",
+      },
+    ],
     exclusions: [
       "Casino entry chips",
       "Flight / train fares",
@@ -623,6 +707,32 @@ export const initialCuratedPackages: CuratedPackage[] = [
       "Special Honeymoon Cake & Bed Floral Arrangement",
       "Private 2-Hour Yacht / Luxury Boat Charter",
       "Exclusive AC Cab for Airport & Sightseeing Transfers",
+    ],
+    detailedInclusions: [
+      {
+        id: "inc-4-1",
+        title: "Private Beachside Candlelight Dinner with Table Decor",
+        description: "A private decorated table on the sand overlooking the Arabian waves, decorated with fairy lights, floral centerpieces, gourmet 4-course meal, and welcome drinks.",
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-4-2",
+        title: "2-Hour Private Catamaran Yacht Charter",
+        description: "Sail into the sunset on a private luxury yacht with your own captain and crew. Includes soft beverages, tropical fruit platter, and romantic music on the waters.",
+        image: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-4-3",
+        title: "Luxury Beachfront Honeymoon Suite with Floral Bed Decor",
+        description: "Special honeymoon welcome with exotic flower bed arrangement, artisan chocolate cake, fruit basket, and daily breakfast served in bed.",
+        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop",
+      },
+      {
+        id: "inc-4-4",
+        title: "Exclusive Chauffeur-Driven AC Sedan for All Sightseeing",
+        description: "Dedicated private vehicle with romantic sightseeing route, Dona Paula viewpoint, Chapora sunset cliff, and timely airport pickup and drop.",
+        image: "",
+      },
     ],
     exclusions: [
       "Airfare (can be booked via R Travel at partner discounts)",

@@ -18,6 +18,14 @@ export const metadata: Metadata = {
     "International Holidays",
   ],
   authors: [{ name: "Priykant Gupta" }],
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/ChatGPT_Image_Sep_14__2026__05_29_04_PM-removebg-preview.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.png",
+    apple: "/apple-icon.png",
+  },
 };
 
 export const viewport = {
@@ -35,6 +43,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth dark">
       <head>
+        <link rel="icon" href="/favicon.png" type="image/png" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

@@ -190,11 +190,36 @@ export function getStoredPackages(): CuratedPackage[] {
       const updatedPkg = { ...pkg };
       const initial = initialCuratedPackages.find((init) => init.id === pkg.id);
       if (initial) {
-        if ((!pkg.detailedInclusions || pkg.detailedInclusions.length < 10) && initial.detailedInclusions) {
+        // Clean out filler services (items 9 & 10) from cached data
+        if (updatedPkg.detailedInclusions && Array.isArray(updatedPkg.detailedInclusions)) {
+          const beforeLen = updatedPkg.detailedInclusions.length;
+          updatedPkg.detailedInclusions = updatedPkg.detailedInclusions.filter((item: any) => {
+            const isSunset = item.category === "Sunset Vantage" || item.title?.includes("Panoramic Sunset Viewing");
+            const isConcierge = item.category === "Concierge Support" || item.title?.includes("24/7 Dedicated Trip Manager");
+            return !isSunset && !isConcierge;
+          });
+          if (updatedPkg.detailedInclusions.length !== beforeLen) {
+            updatedNeeded = true;
+          }
+          // Ensure accommodation item has the 3 room images
+          updatedPkg.detailedInclusions.forEach((item: any) => {
+            if (
+              (item.category === "Accommodation" || item.title?.includes("Hotel Small Daddy Plus") || item.title?.includes("Stay")) &&
+              (!item.images || item.images.length < 3)
+            ) {
+              const initAcc = initial.detailedInclusions?.find((i: any) => i.category === "Accommodation" || i.title?.includes("Hotel Small Daddy Plus"));
+              if (initAcc?.images) {
+                item.images = initAcc.images;
+                updatedNeeded = true;
+              }
+            }
+          });
+        } else if (initial.detailedInclusions) {
           updatedPkg.detailedInclusions = initial.detailedInclusions;
           updatedNeeded = true;
         }
-        if ((!pkg.galleryImages || pkg.galleryImages.length < 10) && initial.galleryImages) {
+
+        if ((!pkg.galleryImages || pkg.galleryImages.length < 6) && initial.galleryImages) {
           updatedPkg.galleryImages = initial.galleryImages;
           updatedNeeded = true;
         }

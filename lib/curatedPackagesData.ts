@@ -5,8 +5,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-4n5d-spa",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Signature Spa Package (4N/5D)",
-    "subtitle": "Explore Goa With Us \u2022 Dinner Cruise, Adventure Boat Party & Full Body Spa",
-    "route": "4 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Dinner Cruise, Adventure Boat Party & Full Body Spa",
+    "route": "4 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "5 Days & 4 Nights",
     "categoryBadge": "Summer Best Offer",
     "badgeGradient": "from-amber-500 via-orange-500 to-rose-500",
@@ -28,7 +28,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "9,996",
     "savings": "5,003",
     "highlights": [
-      "Summer Offer: \u20b92,499 / Day per Person",
+      "Summer Offer: ₹2,499 / Day per Person",
       "Mandovi River Romantic Dinner Cruise with DJ",
       "Arabian Sea Adventure Catamaran Boat Party",
       "Full Body Ayurvedic Herbal Massage & Spa",
@@ -77,7 +77,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-4n5d-spa-inc-2",
@@ -127,20 +132,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-4n5d-spa-inc-9",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-4n5d-spa-inc-10",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       }
     ],
     "exclusions": [
@@ -154,8 +145,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-4n5d-club",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Night Club Fiesta Package (4N/5D)",
-    "subtitle": "Explore Goa With Us \u2022 Dinner Cruise, Boat Party & VIP Night Club Access",
-    "route": "4 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Dinner Cruise, Boat Party & VIP Night Club Access",
+    "route": "4 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "5 Days & 4 Nights",
     "categoryBadge": "Nightlife Special",
     "badgeGradient": "from-purple-600 via-pink-600 to-rose-500",
@@ -177,7 +168,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "9,996",
     "savings": "5,003",
     "highlights": [
-      "Summer Offer: \u20b92,499 / Day per Person",
+      "Summer Offer: ₹2,499 / Day per Person",
       "VIP Night Club Access & DJ Party Entry",
       "Mandovi River Evening Dinner Cruise with DJ",
       "Arabian Sea Adventure Catamaran Boat Party",
@@ -226,7 +217,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-4n5d-club-inc-2",
@@ -276,20 +272,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-4n5d-club-inc-9",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-4n5d-club-inc-10",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       }
     ],
     "exclusions": [
@@ -303,8 +285,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-4n5d-spa-club",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Luxury Spa & Club Combo (4N/5D)",
-    "subtitle": "Explore Goa With Us \u2022 Dinner Cruise, Boat Party, Full Body Spa & VIP Club",
-    "route": "4 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Dinner Cruise, Boat Party, Full Body Spa & VIP Club",
+    "route": "4 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "5 Days & 4 Nights",
     "categoryBadge": "Ultimate Combo",
     "badgeGradient": "from-emerald-500 via-teal-500 to-cyan-500",
@@ -326,7 +308,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "11,396",
     "savings": "5,603",
     "highlights": [
-      "Best Offer: \u20b92,849 / Day per Person",
+      "Best Offer: ₹2,849 / Day per Person",
       "Ayurvedic Full Body Herbal Oil Massage & Spa",
       "VIP Night Club Party Entry with Live DJ",
       "Mandovi River Scenic Dinner Cruise with DJ",
@@ -375,7 +357,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-4n5d-spa-club-inc-2",
@@ -425,20 +412,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-4n5d-spa-club-inc-9",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-4n5d-spa-club-inc-10",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       }
     ],
     "exclusions": [
@@ -452,8 +425,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-4n5d-dual-sightseeing",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Dual Sightseeing & Boat Party (4N/5D)",
-    "subtitle": "Explore Goa With Us \u2022 North & South Goa Tours with Adventure Boat Party",
-    "route": "4 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • North & South Goa Tours with Adventure Boat Party",
+    "route": "4 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "5 Days & 4 Nights",
     "categoryBadge": "Explorer Value",
     "badgeGradient": "from-blue-600 via-indigo-500 to-sky-500",
@@ -475,7 +448,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "8,796",
     "savings": "4,203",
     "highlights": [
-      "Super Saver Offer: \u20b92,199 / Day per Person",
+      "Super Saver Offer: ₹2,199 / Day per Person",
       "Arabian Sea Adventure Catamaran Boat Party",
       "Full Day North Goa Guided Beaches & Forts Tour",
       "Full Day South Goa Heritage Churches & Miramar Tour",
@@ -523,7 +496,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-4n5d-dual-sightseeing-inc-2",
@@ -568,20 +546,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-sdp-4n5d-dual-sightseeing-inc-8",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-4n5d-dual-sightseeing-inc-9",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-sdp-4n5d-dual-sightseeing-inc-10",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -600,8 +564,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-3n4d-club-cruise",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Club & Dinner Cruise Package (3N/4D)",
-    "subtitle": "Explore Goa With Us \u2022 Mandovi Dinner Cruise, North Goa Tour & VIP Night Club",
-    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Mandovi Dinner Cruise, North Goa Tour & VIP Night Club",
+    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Club & Cruise",
     "badgeGradient": "from-purple-600 via-violet-600 to-pink-500",
@@ -623,7 +587,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "8,697",
     "savings": "4,302",
     "highlights": [
-      "Summer Offer: \u20b92,899 / Day per Person",
+      "Summer Offer: ₹2,899 / Day per Person",
       "Mandovi River Romantic Evening Dinner Cruise",
       "VIP Night Club Access & DJ Dance Floor Entry",
       "Full Day North Goa Guided Coastal Tour",
@@ -666,7 +630,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-3n4d-club-cruise-inc-2",
@@ -704,20 +673,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-sdp-3n4d-club-cruise-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-3n4d-club-cruise-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-sdp-3n4d-club-cruise-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -743,8 +698,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-3n4d-club-spa",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Club & Wellness Spa Package (3N/4D)",
-    "subtitle": "Explore Goa With Us \u2022 Ayurvedic Full Body Spa, North Goa Tour & VIP Night Club",
-    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Ayurvedic Full Body Spa, North Goa Tour & VIP Night Club",
+    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Party & Wellness",
     "badgeGradient": "from-teal-600 via-emerald-600 to-amber-500",
@@ -766,7 +721,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "9,297",
     "savings": "4,702",
     "highlights": [
-      "Special Offer: \u20b93,099 / Day per Person",
+      "Special Offer: ₹3,099 / Day per Person",
       "60-Min Ayurvedic Full Body Herbal Massage & Spa",
       "VIP Night Club Entry with DJ Dance Floor",
       "Full Day North Goa Coastal Sightseeing Tour",
@@ -809,7 +764,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-3n4d-club-spa-inc-2",
@@ -847,20 +807,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-sdp-3n4d-club-spa-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-3n4d-club-spa-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-sdp-3n4d-club-spa-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -886,8 +832,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-3n4d-cruise-spa",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Dinner Cruise & Spa Retreat (3N/4D)",
-    "subtitle": "Explore Goa With Us \u2022 Mandovi Dinner Cruise, North Goa Tour & Full Body Spa",
-    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Mandovi Dinner Cruise, North Goa Tour & Full Body Spa",
+    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Relaxation Special",
     "badgeGradient": "from-rose-500 via-pink-500 to-amber-500",
@@ -909,7 +855,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "8,397",
     "savings": "4,102",
     "highlights": [
-      "Summer Offer: \u20b92,799 / Day per Person",
+      "Summer Offer: ₹2,799 / Day per Person",
       "Mandovi River Romantic Evening Dinner Cruise",
       "60-Minute Ayurvedic Full Body Herbal Spa",
       "Full Day North Goa Beaches & Fort Aguada Tour",
@@ -952,7 +898,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-3n4d-cruise-spa-inc-2",
@@ -990,20 +941,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-sdp-3n4d-cruise-spa-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-3n4d-cruise-spa-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-sdp-3n4d-cruise-spa-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -1029,8 +966,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-3n4d-cruise-club-spa",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Cruise, Club & Spa Triple Combo (3N/4D)",
-    "subtitle": "Explore Goa With Us \u2022 Dinner Cruise, North Goa Tour, Full Body Spa & VIP Club",
-    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Dinner Cruise, North Goa Tour, Full Body Spa & VIP Club",
+    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Triple Combo",
     "badgeGradient": "from-indigo-600 via-purple-600 to-pink-500",
@@ -1052,7 +989,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "9,297",
     "savings": "4,702",
     "highlights": [
-      "Triple Combo Offer: \u20b93,099 / Day per Person",
+      "Triple Combo Offer: ₹3,099 / Day per Person",
       "Mandovi River Romantic Evening Dinner Cruise",
       "VIP Night Club Access & DJ Party Entry",
       "60-Minute Ayurvedic Full Body Herbal Spa",
@@ -1096,7 +1033,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-3n4d-cruise-club-spa-inc-2",
@@ -1141,20 +1083,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-sdp-3n4d-cruise-club-spa-inc-8",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-3n4d-cruise-club-spa-inc-9",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-sdp-3n4d-cruise-club-spa-inc-10",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -1173,8 +1101,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-3n4d-sightseeing-boat-cruise",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Boat Party, Cruise & Sightseeing (3N/4D)",
-    "subtitle": "Explore Goa With Us \u2022 Dinner Cruise, Adventure Boat Party & North Goa Tour",
-    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Dinner Cruise, Adventure Boat Party & North Goa Tour",
+    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Double Aquatic Thrill",
     "badgeGradient": "from-cyan-600 via-sky-600 to-blue-600",
@@ -1196,7 +1124,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "7,197",
     "savings": "3,802",
     "highlights": [
-      "Water Special Offer: \u20b92,399 / Day per Person",
+      "Water Special Offer: ₹2,399 / Day per Person",
       "Mandovi River Evening Dinner Cruise with DJ",
       "Arabian Sea Adventure Catamaran Boat Party",
       "Full Day North Goa Beaches & Fort Aguada Tour",
@@ -1239,7 +1167,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-3n4d-sightseeing-boat-cruise-inc-2",
@@ -1284,20 +1217,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-sdp-3n4d-sightseeing-boat-cruise-inc-8",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-3n4d-sightseeing-boat-cruise-inc-9",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-sdp-3n4d-sightseeing-boat-cruise-inc-10",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -1316,8 +1235,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-3n4d-dual-sightseeing-cruise",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Dual Sightseeing & Dinner Cruise (3N/4D)",
-    "subtitle": "Explore Goa With Us \u2022 North & South Goa Tours with Mandovi Dinner Cruise",
-    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • North & South Goa Tours with Mandovi Dinner Cruise",
+    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Sightseeing Value",
     "badgeGradient": "from-blue-600 via-indigo-600 to-violet-600",
@@ -1339,7 +1258,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "6,399",
     "savings": "3,600",
     "highlights": [
-      "Best Value Offer: \u20b92,133 / Day per Person",
+      "Best Value Offer: ₹2,133 / Day per Person",
       "Mandovi River Romantic Evening Dinner Cruise",
       "Full Day North Goa Beaches & Fort Aguada Tour",
       "Full Day South Goa Heritage Churches & Miramar Tour",
@@ -1382,7 +1301,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-3n4d-dual-sightseeing-cruise-inc-2",
@@ -1420,20 +1344,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-sdp-3n4d-dual-sightseeing-cruise-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-3n4d-dual-sightseeing-cruise-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-sdp-3n4d-dual-sightseeing-cruise-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -1459,8 +1369,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-3n4d-dual-sightseeing-boat",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Dual Sightseeing & Boat Party (3N/4D)",
-    "subtitle": "Explore Goa With Us \u2022 North & South Goa Tours with Adventure Boat Party",
-    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • North & South Goa Tours with Adventure Boat Party",
+    "route": "3 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Adventure Value",
     "badgeGradient": "from-teal-600 via-sky-600 to-indigo-600",
@@ -1482,7 +1392,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "6,399",
     "savings": "3,600",
     "highlights": [
-      "Adventure Saver Offer: \u20b92,133 / Day per Person",
+      "Adventure Saver Offer: ₹2,133 / Day per Person",
       "Arabian Sea Adventure Catamaran Boat Party",
       "Full Day North Goa Guided Sightseeing Tour",
       "Full Day South Goa Heritage Churches & Miramar Tour",
@@ -1525,7 +1435,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-3n4d-dual-sightseeing-boat-inc-2",
@@ -1570,20 +1485,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-sdp-3n4d-dual-sightseeing-boat-inc-8",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-3n4d-dual-sightseeing-boat-inc-9",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-sdp-3n4d-dual-sightseeing-boat-inc-10",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -1602,8 +1503,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-5n6d-scooty-snowpark",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Scooty & Snow Park Package (5N/6D)",
-    "subtitle": "Explore Goa With Us \u2022 Free Rental Scooty, Snow Park & Dinner Cruise",
-    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Free Rental Scooty, Snow Park & Dinner Cruise",
+    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "6 Days & 5 Nights",
     "categoryBadge": "Self-Drive Special",
     "badgeGradient": "from-cyan-500 via-teal-500 to-blue-600",
@@ -1625,7 +1526,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "9,245",
     "savings": "4,754",
     "highlights": [
-      "Grand 5N/6D Offer: \u20b91,849 / Day per Person",
+      "Grand 5N/6D Offer: ₹1,849 / Day per Person",
       "Complimentary Self-Drive Rental Scooty / Two-Wheeler",
       "Snow Park Goa Indoor Sub-Zero Ice Adventure",
       "Mandovi River Evening Dinner Cruise with DJ",
@@ -1645,7 +1546,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
       {
         "day": 3,
         "title": "Snow Park Goa Sub-Zero Ice Slide & Igloo Experience",
-        "description": "Escape the tropical warmth inside Snow Park Goa with real -5\u00b0C snow, ice sledging slides, snow igloos, and snow dancing (warm jackets and boots provided)."
+        "description": "Escape the tropical warmth inside Snow Park Goa with real -5°C snow, ice sledging slides, snow igloos, and snow dancing (warm jackets and boots provided)."
       },
       {
         "day": 4,
@@ -1679,7 +1580,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-5n6d-scooty-snowpark-inc-2",
@@ -1713,7 +1619,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "id": "pkg-sdp-5n6d-scooty-snowpark-inc-6",
         "category": "Indoor Theme Park",
         "title": "Snow Park Goa Sub-Zero Ice Slide & Igloo Adventure",
-        "description": "Enjoy -5\u00b0C real indoor snow with ice sledging slides, snow igloos, snow dancing, and winter boots/jackets provided for the whole family.",
+        "description": "Enjoy -5°C real indoor snow with ice sledging slides, snow igloos, snow dancing, and winter boots/jackets provided for the whole family.",
         "image": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1000&auto=format&fit=crop"
       },
       {
@@ -1729,20 +1635,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-5n6d-scooty-snowpark-inc-9",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-5n6d-scooty-snowpark-inc-10",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       }
     ],
     "exclusions": [
@@ -1756,8 +1648,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-5n6d-club-spa-cruise-boat",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus All-In-One Mega Combo (5N/6D)",
-    "subtitle": "Explore Goa With Us \u2022 Cruise, Boat Party, Spa, Night Club & North Goa Tour",
-    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Cruise, Boat Party, Spa, Night Club & North Goa Tour",
+    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "6 Days & 5 Nights",
     "categoryBadge": "Mega All-In-One",
     "badgeGradient": "from-purple-600 via-pink-600 to-amber-500",
@@ -1779,7 +1671,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "13,195",
     "savings": "5,804",
     "highlights": [
-      "Mega Combo Offer: \u20b92,639 / Day per Person",
+      "Mega Combo Offer: ₹2,639 / Day per Person",
       "Mandovi River Romantic Evening Dinner Cruise",
       "Arabian Sea Adventure Catamaran Boat Party",
       "60-Minute Ayurvedic Full Body Herbal Spa",
@@ -1833,7 +1725,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-5n6d-club-spa-cruise-boat-inc-2",
@@ -1890,13 +1787,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-5n6d-club-spa-cruise-boat-inc-10",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
       }
     ],
     "exclusions": [
@@ -1910,8 +1800,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-5n6d-boat-snowpark",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Boat Party & Snow Park Package (5N/6D)",
-    "subtitle": "Explore Goa With Us \u2022 Adventure Boat Party, Snow Park & Dual Sightseeing",
-    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Adventure Boat Party, Snow Park & Dual Sightseeing",
+    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "6 Days & 5 Nights",
     "categoryBadge": "Family & Fun",
     "badgeGradient": "from-sky-500 via-indigo-500 to-teal-500",
@@ -1933,7 +1823,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "10,145",
     "savings": "4,854",
     "highlights": [
-      "Holiday Special Offer: \u20b92,029 / Day per Person",
+      "Holiday Special Offer: ₹2,029 / Day per Person",
       "Arabian Sea Adventure Catamaran Boat Party",
       "Snow Park Goa Indoor Sub-Zero Ice Adventure",
       "Full Day North Goa Beaches & Forts Tour",
@@ -1953,7 +1843,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
       {
         "day": 3,
         "title": "Snow Park Goa Sub-Zero Ice Slide & Igloo Experience",
-        "description": "Enjoy real indoor snow at -5\u00b0C with ice slides, snow igloos, snow dancing, and winter boots/jackets provided for everyone."
+        "description": "Enjoy real indoor snow at -5°C with ice slides, snow igloos, snow dancing, and winter boots/jackets provided for everyone."
       },
       {
         "day": 4,
@@ -1987,7 +1877,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-5n6d-boat-snowpark-inc-2",
@@ -2014,7 +1909,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "id": "pkg-sdp-5n6d-boat-snowpark-inc-5",
         "category": "Indoor Theme Park",
         "title": "Snow Park Goa Sub-Zero Ice Slide & Igloo Adventure",
-        "description": "Enjoy -5\u00b0C real indoor snow with ice sledging slides, snow igloos, snow dancing, and winter boots/jackets provided for the whole family.",
+        "description": "Enjoy -5°C real indoor snow with ice sledging slides, snow igloos, snow dancing, and winter boots/jackets provided for the whole family.",
         "image": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1000&auto=format&fit=crop"
       },
       {
@@ -2037,20 +1932,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-5n6d-boat-snowpark-inc-9",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-5n6d-boat-snowpark-inc-10",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       }
     ],
     "exclusions": [
@@ -2064,8 +1945,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-5n6d-boat-scooty",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Boat Party & Free Scooty Package (5N/6D)",
-    "subtitle": "Explore Goa With Us \u2022 Adventure Boat Party, Free Rental Scooty & Dual Tours",
-    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Adventure Boat Party, Free Rental Scooty & Dual Tours",
+    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "6 Days & 5 Nights",
     "categoryBadge": "Youth & Explorer",
     "badgeGradient": "from-teal-500 via-emerald-600 to-sky-600",
@@ -2087,7 +1968,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "10,145",
     "savings": "4,854",
     "highlights": [
-      "Adventure Saver Offer: \u20b92,029 / Day per Person",
+      "Adventure Saver Offer: ₹2,029 / Day per Person",
       "Complimentary Self-Drive Rental Scooty for Whole Stay",
       "Arabian Sea Adventure Catamaran Boat Party",
       "Full Day North Goa Guided Coastal Tour",
@@ -2141,7 +2022,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-5n6d-boat-scooty-inc-2",
@@ -2191,20 +2077,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-5n6d-boat-scooty-inc-9",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-5n6d-boat-scooty-inc-10",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       }
     ],
     "exclusions": [
@@ -2218,8 +2090,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-5n6d-nightclub-spa-cruise",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Night Club, Spa & Cruise Package (5N/6D)",
-    "subtitle": "Explore Goa With Us \u2022 Dinner Cruise, Body Spa, VIP Night Club & Dual Tours",
-    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Dinner Cruise, Body Spa, VIP Night Club & Dual Tours",
+    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "6 Days & 5 Nights",
     "categoryBadge": "Party & Wellness 5N",
     "badgeGradient": "from-purple-600 via-violet-600 to-rose-500",
@@ -2241,7 +2113,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "12,495",
     "savings": "5,504",
     "highlights": [
-      "Summer Offer: \u20b92,499 / Day per Person",
+      "Summer Offer: ₹2,499 / Day per Person",
       "Mandovi River Romantic Evening Dinner Cruise",
       "60-Minute Ayurvedic Full Body Herbal Spa",
       "VIP Night Club Access & DJ Party Entry",
@@ -2295,7 +2167,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-5n6d-nightclub-spa-cruise-inc-2",
@@ -2345,20 +2222,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-5n6d-nightclub-spa-cruise-inc-9",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-5n6d-nightclub-spa-cruise-inc-10",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       }
     ],
     "exclusions": [
@@ -2372,8 +2235,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-5n6d-boat-club-spa",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Boat Party, Club & Spa Package (5N/6D)",
-    "subtitle": "Explore Goa With Us \u2022 Adventure Boat Party, Full Body Spa & VIP Night Club",
-    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Adventure Boat Party, Full Body Spa & VIP Night Club",
+    "route": "5 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "6 Days & 5 Nights",
     "categoryBadge": "Party, Spa & Sea",
     "badgeGradient": "from-teal-600 via-cyan-600 to-indigo-600",
@@ -2395,7 +2258,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "12,495",
     "savings": "5,504",
     "highlights": [
-      "Special Offer: \u20b92,499 / Day per Person",
+      "Special Offer: ₹2,499 / Day per Person",
       "Arabian Sea Adventure Catamaran Boat Party",
       "60-Minute Ayurvedic Full Body Herbal Spa",
       "VIP Night Club Access & DJ Party Entry",
@@ -2449,7 +2312,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-5n6d-boat-club-spa-inc-2",
@@ -2499,20 +2367,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-5n6d-boat-club-spa-inc-9",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-5n6d-boat-club-spa-inc-10",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       }
     ],
     "exclusions": [
@@ -2526,8 +2380,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-2n3d-boat-cruise",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Boat Party & Dinner Cruise (2N/3D)",
-    "subtitle": "Explore Goa With Us \u2022 Mandovi Dinner Cruise & Arabian Adventure Boat Party",
-    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Mandovi Dinner Cruise & Arabian Adventure Boat Party",
+    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "3 Days & 2 Nights",
     "categoryBadge": "Short Weekend Party",
     "badgeGradient": "from-amber-500 via-orange-500 to-rose-500",
@@ -2549,7 +2403,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "5,450",
     "savings": "2,549",
     "highlights": [
-      "Weekend Offer: \u20b92,725 / Day per Person",
+      "Weekend Offer: ₹2,725 / Day per Person",
       "Mandovi River Scenic Dinner Cruise with DJ",
       "Arabian Sea Adventure Catamaran Boat Party",
       "Free Station / Airport Pickup & Drop",
@@ -2586,7 +2440,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-2n3d-boat-cruise-inc-2",
@@ -2624,20 +2483,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-sdp-2n3d-boat-cruise-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-2n3d-boat-cruise-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-sdp-2n3d-boat-cruise-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -2663,8 +2508,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-2n3d-club-cruise",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Club & Dinner Cruise Weekend (2N/3D)",
-    "subtitle": "Explore Goa With Us \u2022 Mandovi Dinner Cruise & VIP Night Club Access",
-    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Mandovi Dinner Cruise & VIP Night Club Access",
+    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "3 Days & 2 Nights",
     "categoryBadge": "Club & Cruise Weekend",
     "badgeGradient": "from-purple-600 via-pink-600 to-rose-500",
@@ -2686,7 +2531,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "6,250",
     "savings": "2,749",
     "highlights": [
-      "Weekend Club Offer: \u20b93,125 / Day per Person",
+      "Weekend Club Offer: ₹3,125 / Day per Person",
       "Mandovi River Romantic Evening Dinner Cruise",
       "VIP Night Club Access & DJ Party Entry",
       "Free Airport / Railway Station Transfers",
@@ -2723,7 +2568,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-2n3d-club-cruise-inc-2",
@@ -2752,20 +2602,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-2n3d-club-cruise-inc-6",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-2n3d-club-cruise-inc-7",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       },
       {
         "id": "pkg-sdp-2n3d-club-cruise-inc-8",
@@ -2800,8 +2636,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-2n3d-sightseeing-cruise",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Sightseeing & Dinner Cruise (2N/3D)",
-    "subtitle": "Explore Goa With Us \u2022 Mandovi Dinner Cruise & North Goa Guided Tour",
-    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Mandovi Dinner Cruise & North Goa Guided Tour",
+    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "3 Days & 2 Nights",
     "categoryBadge": "Quick Escape",
     "badgeGradient": "from-blue-600 via-sky-600 to-indigo-600",
@@ -2823,7 +2659,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "4,750",
     "savings": "2,249",
     "highlights": [
-      "Express Value Offer: \u20b92,375 / Day per Person",
+      "Express Value Offer: ₹2,375 / Day per Person",
       "Mandovi River Romantic Evening Dinner Cruise",
       "Full Day North Goa Guided Sightseeing Tour",
       "Free Airport / Railway Station Transfers",
@@ -2860,7 +2696,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-2n3d-sightseeing-cruise-inc-2",
@@ -2889,20 +2730,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-2n3d-sightseeing-cruise-inc-6",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-2n3d-sightseeing-cruise-inc-7",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       },
       {
         "id": "pkg-sdp-2n3d-sightseeing-cruise-inc-8",
@@ -2937,8 +2764,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-2n3d-club-boat",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Club & Boat Party Weekend (2N/3D)",
-    "subtitle": "Explore Goa With Us \u2022 Adventure Boat Party & VIP Night Club Access",
-    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Adventure Boat Party & VIP Night Club Access",
+    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "3 Days & 2 Nights",
     "categoryBadge": "Party Express",
     "badgeGradient": "from-pink-600 via-rose-600 to-amber-500",
@@ -2960,7 +2787,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "6,250",
     "savings": "2,749",
     "highlights": [
-      "Party Weekend Offer: \u20b93,125 / Day per Person",
+      "Party Weekend Offer: ₹3,125 / Day per Person",
       "Arabian Sea Adventure Catamaran Boat Party",
       "VIP Night Club Access & DJ Party Entry",
       "Free Airport / Railway Station Transfers",
@@ -2997,7 +2824,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-2n3d-club-boat-inc-2",
@@ -3035,20 +2867,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-sdp-2n3d-club-boat-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-2n3d-club-boat-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-sdp-2n3d-club-boat-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -3074,8 +2892,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-2n3d-sightseeing-boat",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Boat Party & Sightseeing Express (2N/3D)",
-    "subtitle": "Explore Goa With Us \u2022 Adventure Boat Party & North Goa Guided Tour",
-    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • Adventure Boat Party & North Goa Guided Tour",
+    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "3 Days & 2 Nights",
     "categoryBadge": "Weekend Explorer",
     "badgeGradient": "from-teal-500 via-cyan-600 to-blue-600",
@@ -3097,7 +2915,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "4,750",
     "savings": "2,249",
     "highlights": [
-      "Express Value Offer: \u20b92,375 / Day per Person",
+      "Express Value Offer: ₹2,375 / Day per Person",
       "Arabian Sea Adventure Catamaran Boat Party",
       "Full Day North Goa Guided Sightseeing Tour",
       "Free Airport / Railway Station Transfers",
@@ -3134,7 +2952,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-2n3d-sightseeing-boat-inc-2",
@@ -3172,20 +2995,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-sdp-2n3d-sightseeing-boat-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-2n3d-sightseeing-boat-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-sdp-2n3d-sightseeing-boat-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -3211,8 +3020,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-sdp-2n3d-dual-sightseeing",
     "state": "Goa",
     "title": "Hotel Small Daddy Plus Dual Sightseeing Express (2N/3D)",
-    "subtitle": "Explore Goa With Us \u2022 North & South Goa Tours in 3 Days",
-    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus \u2022 Calangute",
+    "subtitle": "Explore Goa With Us • North & South Goa Tours in 3 Days",
+    "route": "2 Nights AC Deluxe Stay at Hotel Small Daddy Plus • Calangute",
     "duration": "3 Days & 2 Nights",
     "categoryBadge": "Express Sightseeing",
     "badgeGradient": "from-blue-600 via-indigo-600 to-sky-600",
@@ -3234,7 +3043,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "4,050",
     "savings": "1,949",
     "highlights": [
-      "Unbeatable Budget Offer: \u20b92,025 / Day per Person",
+      "Unbeatable Budget Offer: ₹2,025 / Day per Person",
       "Full Day North Goa Guided Sightseeing Tour",
       "Full Day South Goa Heritage Churches Tour",
       "Free Airport / Railway Station Transfers",
@@ -3271,7 +3080,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Hotel Small Daddy Plus AC Deluxe Stay",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-sdp-2n3d-dual-sightseeing-inc-2",
@@ -3300,20 +3114,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-2n3d-dual-sightseeing-inc-6",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-sdp-2n3d-dual-sightseeing-inc-7",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       },
       {
         "id": "pkg-sdp-2n3d-dual-sightseeing-inc-8",
@@ -3348,8 +3148,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-safar-4n5d-all-inclusive",
     "state": "Goa",
     "title": "Safar Express All-Inclusive Dudhsagar & Scuba Mega Tour (4N/5D)",
-    "subtitle": "4N/5D All-Inclusive \u2022 4 Days Breakfast, 4 Days Dinner & 3 Days Lunch Included",
-    "route": "4 Nights 3-Star Pool Resort \u2022 North Goa",
+    "subtitle": "4N/5D All-Inclusive • 4 Days Breakfast, 4 Days Dinner & 3 Days Lunch Included",
+    "route": "4 Nights 3-Star Pool Resort • North Goa",
     "duration": "5 Days & 4 Nights",
     "categoryBadge": "All-Inclusive Meals",
     "badgeGradient": "from-emerald-600 via-teal-600 to-cyan-600",
@@ -3419,7 +3219,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "3-Star Deluxe Pool Resort Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-safar-4n5d-all-inclusive-inc-2",
@@ -3464,20 +3269,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-safar-4n5d-all-inclusive-inc-8",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-safar-4n5d-all-inclusive-inc-9",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-safar-4n5d-all-inclusive-inc-10",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -3496,8 +3287,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-safar-4n5d-pool-resort-watersports",
     "state": "Goa",
     "title": "Vacation to Goa Pool Resort & 5 Watersports Thrill (4N/5D)",
-    "subtitle": "4N/5D Special \u2022 5 Beach Watersports, Pool Resort Stay & Dual Tours",
-    "route": "4 Nights 3-Star Pool Resort \u2022 North Goa",
+    "subtitle": "4N/5D Special • 5 Beach Watersports, Pool Resort Stay & Dual Tours",
+    "route": "4 Nights 3-Star Pool Resort • North Goa",
     "duration": "5 Days & 4 Nights",
     "categoryBadge": "Watersports Thrill",
     "badgeGradient": "from-cyan-600 via-blue-600 to-indigo-600",
@@ -3567,7 +3358,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "3-Star Deluxe Pool Resort Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-safar-4n5d-pool-resort-watersports-inc-2",
@@ -3612,20 +3408,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-safar-4n5d-pool-resort-watersports-inc-8",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-safar-4n5d-pool-resort-watersports-inc-9",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-safar-4n5d-pool-resort-watersports-inc-10",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -3644,8 +3426,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-safar-4n5d-beach-trip-spice",
     "state": "Goa",
     "title": "Goa Beach Trip Package with Pool & Spice Garden (4N/5D)",
-    "subtitle": "4N/5D Package \u2022 Dudhsagar Jeep Safari, Spice Plantation & Dolphin Safari",
-    "route": "4 Nights 3-Star Pool Resort \u2022 North Goa",
+    "subtitle": "4N/5D Package • Dudhsagar Jeep Safari, Spice Plantation & Dolphin Safari",
+    "route": "4 Nights 3-Star Pool Resort • North Goa",
     "duration": "5 Days & 4 Nights",
     "categoryBadge": "Nature & Beach",
     "badgeGradient": "from-emerald-600 via-green-600 to-teal-500",
@@ -3715,7 +3497,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "3-Star Deluxe Pool Resort Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-safar-4n5d-beach-trip-spice-inc-2",
@@ -3753,20 +3540,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-safar-4n5d-beach-trip-spice-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-safar-4n5d-beach-trip-spice-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-safar-4n5d-beach-trip-spice-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -3792,8 +3565,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-safar-3n4d-premium-shuttle",
     "state": "Goa",
     "title": "Safar Premium Goa Holiday with Dedicated Shuttle & Guide (3N/4D)",
-    "subtitle": "3N/4D Premium Tour \u2022 Dedicated Chauffeur Car, Mandovi Cruise & Dual Tours",
-    "route": "3 Nights 3-Star Deluxe Stay \u2022 North Goa",
+    "subtitle": "3N/4D Premium Tour • Dedicated Chauffeur Car, Mandovi Cruise & Dual Tours",
+    "route": "3 Nights 3-Star Deluxe Stay • North Goa",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Chauffeur Driven",
     "badgeGradient": "from-amber-600 via-orange-600 to-rose-600",
@@ -3858,7 +3631,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "3-Star Deluxe Hotel Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-safar-3n4d-premium-shuttle-inc-2",
@@ -3896,20 +3674,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-safar-3n4d-premium-shuttle-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-safar-3n4d-premium-shuttle-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-safar-3n4d-premium-shuttle-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -3935,8 +3699,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-safar-3n4d-resort-sic",
     "state": "Goa",
     "title": "Goa Tour 3 & 4-Star Resort SIC Package (3N/4D)",
-    "subtitle": "3N/4D Resort Tour \u2022 AC Coach SIC Tours, Pool Resort Stay & Breakfast",
-    "route": "3 Nights 3/4-Star Pool Resort \u2022 North Goa",
+    "subtitle": "3N/4D Resort Tour • AC Coach SIC Tours, Pool Resort Stay & Breakfast",
+    "route": "3 Nights 3/4-Star Pool Resort • North Goa",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Resort Comfort",
     "badgeGradient": "from-indigo-600 via-blue-600 to-teal-500",
@@ -4000,7 +3764,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "3 & 4-Star Premium Resort Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-safar-3n4d-resort-sic-inc-2",
@@ -4029,20 +3798,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-safar-3n4d-resort-sic-inc-6",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-safar-3n4d-resort-sic-inc-7",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
       },
       {
         "id": "pkg-safar-3n4d-resort-sic-inc-8",
@@ -4077,8 +3832,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-goa-scuba-watersports-day",
     "state": "Goa",
     "title": "Grand Island Scuba Diving + 5 Watersports Thrill Package",
-    "subtitle": "Full Day Island Adventure \u2022 Scuba Diving with Photos/Video & 5 Watersports Combo",
-    "route": "Full Day Adventure \u2022 Grand Island & Coastal Waters",
+    "subtitle": "Full Day Island Adventure • Scuba Diving with Photos/Video & 5 Watersports Combo",
+    "route": "Full Day Adventure • Grand Island & Coastal Waters",
     "duration": "1 Full Day Adventure",
     "categoryBadge": "Island Day Tour",
     "badgeGradient": "from-cyan-600 via-sky-600 to-blue-700",
@@ -4129,7 +3884,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Day Tour Adventure Package (No Overnight Stay)",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1682687220063-4742bd7fd538?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1682687220063-4742bd7fd538?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-goa-scuba-watersports-day-inc-2",
@@ -4167,20 +3927,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-goa-scuba-watersports-day-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-goa-scuba-watersports-day-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-goa-scuba-watersports-day-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -4206,8 +3952,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-safar-3n4d-budget-explorer",
     "state": "Goa",
     "title": "Goa Budget Explorer with Dudhsagar & Scuba Diving (3N/4D)",
-    "subtitle": "3N/4D Budget Tour \u2022 Grand Island Scuba, Dudhsagar Jeep Safari & Breakfast",
-    "route": "3 Nights Budget AC Stay \u2022 Calangute / North Goa",
+    "subtitle": "3N/4D Budget Tour • Grand Island Scuba, Dudhsagar Jeep Safari & Breakfast",
+    "route": "3 Nights Budget AC Stay • Calangute / North Goa",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Budget Adventure",
     "badgeGradient": "from-teal-600 via-emerald-600 to-sky-600",
@@ -4272,7 +4018,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Budget Deluxe AC Hotel Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-safar-3n4d-budget-explorer-inc-2",
@@ -4310,20 +4061,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-safar-3n4d-budget-explorer-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-safar-3n4d-budget-explorer-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-safar-3n4d-budget-explorer-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -4349,8 +4086,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-safar-3n4d-classic-heritage",
     "state": "Goa",
     "title": "Goa Classic Heritage & Waterfall Tour (3N/4D)",
-    "subtitle": "3N/4D Heritage Tour \u2022 Dudhsagar Jeep Safari, Mandovi Cruise & North Tour",
-    "route": "3 Nights 3-Star Deluxe Stay \u2022 North Goa",
+    "subtitle": "3N/4D Heritage Tour • Dudhsagar Jeep Safari, Mandovi Cruise & North Tour",
+    "route": "3 Nights 3-Star Deluxe Stay • North Goa",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Heritage & Nature",
     "badgeGradient": "from-amber-600 via-orange-600 to-emerald-600",
@@ -4415,7 +4152,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "3-Star Deluxe Hotel Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-safar-3n4d-classic-heritage-inc-2",
@@ -4453,20 +4195,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-safar-3n4d-classic-heritage-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-safar-3n4d-classic-heritage-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-safar-3n4d-classic-heritage-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -4492,8 +4220,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-safar-3n4d-time-to-travel",
     "state": "Goa",
     "title": "Time To Travel Goa Holiday Special 20% Off (3N/4D)",
-    "subtitle": "3N/4D Holiday Offer \u2022 3-Star Resort, Mandovi Cruise & Dual Tours",
-    "route": "3 Nights 3-Star Resort \u2022 North Goa",
+    "subtitle": "3N/4D Holiday Offer • 3-Star Resort, Mandovi Cruise & Dual Tours",
+    "route": "3 Nights 3-Star Resort • North Goa",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "20% Off Holiday",
     "badgeGradient": "from-rose-500 via-pink-600 to-indigo-600",
@@ -4558,7 +4286,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "3-Star Deluxe Resort Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-safar-3n4d-time-to-travel-inc-2",
@@ -4596,20 +4329,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-safar-3n4d-time-to-travel-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-safar-3n4d-time-to-travel-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-safar-3n4d-time-to-travel-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -4635,8 +4354,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-safar-3n4d-journey-through",
     "state": "Goa",
     "title": "Journey Through Goa Holiday Special 30% Off (3N/4D)",
-    "subtitle": "3N/4D Special Offer \u2022 30% Off \u2022 Resort Stay, Mandovi Cruise & Sightseeing",
-    "route": "3 Nights 3-Star Resort \u2022 North Goa",
+    "subtitle": "3N/4D Special Offer • 30% Off • Resort Stay, Mandovi Cruise & Sightseeing",
+    "route": "3 Nights 3-Star Resort • North Goa",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "30% Off Special",
     "badgeGradient": "from-emerald-600 via-teal-600 to-indigo-600",
@@ -4701,7 +4420,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "3-Star Deluxe Resort Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-safar-3n4d-journey-through-inc-2",
@@ -4739,20 +4463,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-safar-3n4d-journey-through-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-safar-3n4d-journey-through-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-safar-3n4d-journey-through-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -4778,8 +4488,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-romance-3n4d-calangute-couple",
     "state": "Goa",
     "title": "Calangute Beachside 100m Couple Escape with Free Scooty (3N/4D)",
-    "subtitle": "Stay 100m From The Beach \u2022 Free Rental Scooty, Mandovi Cruise & Bed Decor",
-    "route": "3 Nights Beachside Resort Stay \u2022 100m from Calangute Beach",
+    "subtitle": "Stay 100m From The Beach • Free Rental Scooty, Mandovi Cruise & Bed Decor",
+    "route": "3 Nights Beachside Resort Stay • 100m from Calangute Beach",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Couple & Scooty",
     "badgeGradient": "from-rose-500 via-pink-500 to-amber-500",
@@ -4845,7 +4555,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Beachside Couple Resort (100m from Calangute Beach)",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-romance-3n4d-calangute-couple-inc-2",
@@ -4883,20 +4598,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-romance-3n4d-calangute-couple-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-romance-3n4d-calangute-couple-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-romance-3n4d-calangute-couple-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -4922,8 +4623,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-romance-3n4d-girish-hotel",
     "state": "Goa",
     "title": "Girish Goa Hotel Romantic Couple Escape with Flower Decor & Cake (3N/4D)",
-    "subtitle": "Romantic Couple Tour \u2022 Bed Floral Decor, Cake, Parra Road Drive & Cruise",
-    "route": "3 Nights AC Deluxe Stay at Girish Goa Hotel \u2022 North Goa",
+    "subtitle": "Romantic Couple Tour • Bed Floral Decor, Cake, Parra Road Drive & Cruise",
+    "route": "3 Nights AC Deluxe Stay at Girish Goa Hotel • North Goa",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Honeymoon Special",
     "badgeGradient": "from-rose-600 via-pink-600 to-red-500",
@@ -4945,7 +4646,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "18,000",
     "savings": "6,000",
     "highlights": [
-      "Romantic Couple Price: \u20b918,000 Total for Both",
+      "Romantic Couple Price: ₹18,000 Total for Both",
       "Honeymoon Bed Floral Arrangement & Artisan Celebration Cake",
       "Romantic Drive to Parra Road & Chapora Clifftop Sunset",
       "Mandovi River Romantic Evening Cruise with Live DJ",
@@ -4989,7 +4690,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Girish Goa Hotel AC Deluxe Honeymoon Room",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-romance-3n4d-girish-hotel-inc-2",
@@ -5027,20 +4733,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-romance-3n4d-girish-hotel-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-romance-3n4d-girish-hotel-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-romance-3n4d-girish-hotel-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -5066,8 +4758,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-romance-2n3d-newyear-couple",
     "state": "Goa",
     "title": "Goa Tour New Year Special Couple Celebration with Bike (2N/3D)",
-    "subtitle": "New Year Special Couple Package \u2022 Free Rental Bike, Beach Celebration & Cruise",
-    "route": "2 Nights Deluxe AC Stay \u2022 North Goa",
+    "subtitle": "New Year Special Couple Package • Free Rental Bike, Beach Celebration & Cruise",
+    "route": "2 Nights Deluxe AC Stay • North Goa",
     "duration": "3 Days & 2 Nights",
     "categoryBadge": "New Year Couple",
     "badgeGradient": "from-purple-600 via-rose-600 to-amber-500",
@@ -5126,7 +4818,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Deluxe Couple Resort Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-romance-2n3d-newyear-couple-inc-2",
@@ -5164,20 +4861,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-romance-2n3d-newyear-couple-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-romance-2n3d-newyear-couple-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-romance-2n3d-newyear-couple-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -5203,8 +4886,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-romance-4d3n-candlelight-retreat",
     "state": "Goa",
     "title": "Goa Romance & Candlelight Sunset Beach Retreat (4D/3N)",
-    "subtitle": "Honeymoon Luxury \u2022 Candlelight Beach Dinner, Catamaran Yacht & Couple Spa",
-    "route": "3 Nights Luxury Beachfront Honeymoon Suite \u2022 North Goa",
+    "subtitle": "Honeymoon Luxury • Candlelight Beach Dinner, Catamaran Yacht & Couple Spa",
+    "route": "3 Nights Luxury Beachfront Honeymoon Suite • North Goa",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Candlelight Luxury",
     "badgeGradient": "from-amber-500 via-rose-500 to-pink-600",
@@ -5270,7 +4953,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Luxury Beachfront Honeymoon Suite",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-romance-4d3n-candlelight-retreat-inc-2",
@@ -5308,20 +4996,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-romance-4d3n-candlelight-retreat-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-romance-4d3n-candlelight-retreat-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-romance-4d3n-candlelight-retreat-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -5347,8 +5021,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-family-3n4d-pool-resort",
     "state": "Goa",
     "title": "Goa Family Tour Package with Scuba & Pool Hotel (3N/4D)",
-    "subtitle": "Family Special \u2022 Scuba Diving, Dolphin Safari, Snow Park & Pool Resort",
-    "route": "3 Nights Family Pool Resort \u2022 Calangute",
+    "subtitle": "Family Special • Scuba Diving, Dolphin Safari, Snow Park & Pool Resort",
+    "route": "3 Nights Family Pool Resort • Calangute",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Family Special",
     "badgeGradient": "from-sky-500 via-blue-600 to-indigo-600",
@@ -5370,7 +5044,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "5,500",
     "savings": "2,500",
     "highlights": [
-      "Budget Family Rate: \u20b95,500 per Person",
+      "Budget Family Rate: ₹5,500 per Person",
       "Grand Island Guided Scuba Diving & Dolphin Safari",
       "Snow Park Goa Sub-Zero Ice Slide for Kids & Adults",
       "3-Star Deluxe Pool Resort Stay with Swimming Pool",
@@ -5390,7 +5064,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
       {
         "day": 3,
         "title": "North Goa Forts, Beaches & Snow Park Ice Adventure",
-        "description": "Visit historic Fort Aguada, Calangute beach, and enjoy Snow Park Goa with real -5\u00b0C snow, ice slides, and igloos for family fun."
+        "description": "Visit historic Fort Aguada, Calangute beach, and enjoy Snow Park Goa with real -5°C snow, ice slides, and igloos for family fun."
       },
       {
         "day": 4,
@@ -5414,7 +5088,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "3-Star Family Deluxe Pool Resort",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-family-3n4d-pool-resort-inc-2",
@@ -5434,7 +5113,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "id": "pkg-family-3n4d-pool-resort-inc-4",
         "category": "Indoor Theme Park",
         "title": "Snow Park Goa Sub-Zero Ice Slide & Igloo Adventure",
-        "description": "Enjoy -5\u00b0C real indoor snow with ice sledging slides, snow igloos, snow dancing, and winter boots/jackets provided for the whole family.",
+        "description": "Enjoy -5°C real indoor snow with ice sledging slides, snow igloos, snow dancing, and winter boots/jackets provided for the whole family.",
         "image": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1000&auto=format&fit=crop"
       },
       {
@@ -5459,20 +5138,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-family-3n4d-pool-resort-inc-8",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-family-3n4d-pool-resort-inc-9",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-family-3n4d-pool-resort-inc-10",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -5491,8 +5156,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-friends-3n4d-watersports-shacks",
     "state": "Goa",
     "title": "Goa Friends Group Tour Package with Watersports & Shacks (3N/4D)",
-    "subtitle": "Friends Group Special \u2022 5 Watersports, Boat Party, Nightclub & Beach Shacks",
-    "route": "3 Nights Beachside Resort \u2022 Near Baga Beach",
+    "subtitle": "Friends Group Special • 5 Watersports, Boat Party, Nightclub & Beach Shacks",
+    "route": "3 Nights Beachside Resort • Near Baga Beach",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "Friends Group",
     "badgeGradient": "from-teal-500 via-sky-600 to-indigo-600",
@@ -5514,7 +5179,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "5,500",
     "savings": "3,000",
     "highlights": [
-      "Best Group Rate: \u20b95,500 per Person",
+      "Best Group Rate: ₹5,500 per Person",
       "Action-Packed 5 Watersports Combo at Beach",
       "Arabian Sea Catamaran Adventure Boat Party with DJ",
       "VIP Night Club Access with DJ Dance Floor",
@@ -5557,7 +5222,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Baga Beachside Friends Resort",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-friends-3n4d-watersports-shacks-inc-2",
@@ -5602,20 +5272,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-friends-3n4d-watersports-shacks-inc-8",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-friends-3n4d-watersports-shacks-inc-9",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-friends-3n4d-watersports-shacks-inc-10",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -5634,8 +5290,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-group-2n3d-newyear-bike",
     "state": "Goa",
     "title": "Goa Tour New Year Special Group Celebration with Bike (2N/3D)",
-    "subtitle": "New Year Special \u2022 Free Rental Bike, Beach Bash, Cruise & Party",
-    "route": "2 Nights AC Deluxe Stay \u2022 North Goa",
+    "subtitle": "New Year Special • Free Rental Bike, Beach Bash, Cruise & Party",
+    "route": "2 Nights AC Deluxe Stay • North Goa",
     "duration": "3 Days & 2 Nights",
     "categoryBadge": "New Year Party",
     "badgeGradient": "from-purple-600 via-pink-600 to-amber-500",
@@ -5657,7 +5313,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "6,350",
     "savings": "2,650",
     "highlights": [
-      "New Year Festive Offer: \u20b96,350 per Person",
+      "New Year Festive Offer: ₹6,350 per Person",
       "Complimentary Rental Bike / Two-Wheeler for Whole Stay",
       "Mandovi River Romantic Evening Sunset Cruise",
       "North Goa Beach Bash & Tito's Lane Party Atmosphere",
@@ -5694,7 +5350,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Deluxe AC Hotel Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-group-2n3d-newyear-bike-inc-2",
@@ -5732,20 +5393,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-group-2n3d-newyear-bike-inc-7",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-group-2n3d-newyear-bike-inc-8",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-group-2n3d-newyear-bike-inc-9",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -5771,8 +5418,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-group-3n4d-newyear-special",
     "state": "Goa",
     "title": "Goa New Year Celebration Special 25% Off (3N/4D)",
-    "subtitle": "New Year Special Offer \u2022 25% Off \u2022 Resort Stay, Mandovi Cruise & Dual Tours",
-    "route": "3 Nights 3-Star Resort \u2022 North Goa",
+    "subtitle": "New Year Special Offer • 25% Off • Resort Stay, Mandovi Cruise & Dual Tours",
+    "route": "3 Nights 3-Star Resort • North Goa",
     "duration": "4 Days & 3 Nights",
     "categoryBadge": "25% Off New Year",
     "badgeGradient": "from-rose-600 via-purple-600 to-amber-500",
@@ -5794,7 +5441,7 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "discountedPrice": "7,500",
     "savings": "2,500",
     "highlights": [
-      "Special New Year 25% Off Deal: \u20b97,500 per Person",
+      "Special New Year 25% Off Deal: ₹7,500 per Person",
       "Mandovi River Evening Sunset Cruise with Live DJ",
       "Full Day North Goa Guided Sightseeing Tour",
       "Full Day South Goa Heritage Churches Tour",
@@ -5837,7 +5484,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "3-Star Deluxe Resort Accommodation",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-group-3n4d-newyear-special-inc-2",
@@ -5882,20 +5534,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
       },
       {
-        "id": "pkg-group-3n4d-newyear-special-inc-8",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-group-3n4d-newyear-special-inc-9",
-        "category": "Concierge Support",
-        "title": "24/7 Dedicated Trip Manager & Ground Operations Support",
-        "description": "Personalized trip assistance via WhatsApp and call throughout your stay from our local Goa team for any restaurant, beach, or travel needs.",
-        "image": "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
         "id": "pkg-group-3n4d-newyear-special-inc-10",
         "category": "Resort Leisure",
         "title": "Sparkling Swimming Pool Access & Sun-Deck Relaxation",
@@ -5914,8 +5552,8 @@ export const initialCuratedPackages: CuratedPackage[] = [
     "id": "pkg-adventure-6d5n-complete-explorer",
     "state": "Goa",
     "title": "Complete Goa Explorer North & South Split Stay (6D/5N)",
-    "subtitle": "6D/5N Grand Tour \u2022 3N North + 2N South Goa, Scuba, Dudhsagar & Cruise",
-    "route": "3N North Beachfront Resort \u2022 2N South Luxury Resort",
+    "subtitle": "6D/5N Grand Tour • 3N North + 2N South Goa, Scuba, Dudhsagar & Cruise",
+    "route": "3N North Beachfront Resort • 2N South Luxury Resort",
     "duration": "6 Days & 5 Nights",
     "categoryBadge": "Grand Split Stay",
     "badgeGradient": "from-emerald-600 via-teal-600 to-indigo-600",
@@ -5992,7 +5630,12 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "category": "Accommodation",
         "title": "Luxury Split Stay: 3N North Goa + 2N South Goa Resort",
         "description": "Clean, air-conditioned deluxe room with modern amenities, attached sanitized bathroom, LED TV, and courteous round-the-clock room service.",
-        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop"
+        "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+        "images": [
+          "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1000&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1000&auto=format&fit=crop"
+        ]
       },
       {
         "id": "pkg-adventure-6d5n-complete-explorer-inc-2",
@@ -6049,13 +5692,6 @@ export const initialCuratedPackages: CuratedPackage[] = [
         "title": "Hassle-Free Airport / Railway Station / Bus Stand Pickup & Drop",
         "description": "Prompt, comfortable pickup and drop transfers in a clean, air-conditioned vehicle from Mopa/Dabolim Airport, Thivim/Madgaon Railway Station, or Bus stand.",
         "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=1000&auto=format&fit=crop"
-      },
-      {
-        "id": "pkg-adventure-6d5n-complete-explorer-inc-10",
-        "category": "Sunset Vantage",
-        "title": "Panoramic Sunset Viewing at Chapora / Sinquerim Cliff",
-        "description": "Capture unforgettable photos of the golden Goan sunset over the Arabian Sea from picturesque clifftop viewpoints.",
-        "image": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=1000&auto=format&fit=crop"
       }
     ],
     "exclusions": [

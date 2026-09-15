@@ -35,7 +35,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getStoredPackageById, getStoredCompanyInfo, saveLead } from "@/lib/storage";
 import { CuratedPackage, CompanyInfo } from "@/lib/types";
-import { getPerDayPrice, calculateTravelersTotal } from "@/lib/pricing";
+import { getPerDayPrice, getPerDayPriceNumber, calculateTravelersTotal } from "@/lib/pricing";
 
 export default function PackageDetailPage({ params: propParams }: { params?: { id?: string } }) {
   const clientParams = useParams();
@@ -48,6 +48,14 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
   const [copiedShare, setCopiedShare] = useState(false);
   const [isFlyerModalOpen, setIsFlyerModalOpen] = useState(false);
   const [galleryLightboxIndex, setGalleryLightboxIndex] = useState<number | null>(null);
+
+  // 3-Room Photos Lightbox Modal State
+  const [roomLightbox, setRoomLightbox] = useState<{
+    isOpen: boolean;
+    serviceTitle: string;
+    images: string[];
+    activeIndex: number;
+  } | null>(null);
 
   // Booking / Inquiry Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -112,13 +120,31 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
           setGalleryLightboxIndex(null);
         }
       }
+      if (roomLightbox && roomLightbox.isOpen) {
+        if (e.key === "ArrowRight") {
+          setRoomLightbox((prev) =>
+            prev ? { ...prev, activeIndex: (prev.activeIndex + 1) % prev.images.length } : null
+          );
+        } else if (e.key === "ArrowLeft") {
+          setRoomLightbox((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  activeIndex: (prev.activeIndex - 1 + prev.images.length) % prev.images.length,
+                }
+              : null
+          );
+        } else if (e.key === "Escape") {
+          setRoomLightbox(null);
+        }
+      }
       if (isFlyerModalOpen && e.key === "Escape") {
         setIsFlyerModalOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [galleryLightboxIndex, isFlyerModalOpen, pkg]);
+  }, [galleryLightboxIndex, isFlyerModalOpen, roomLightbox, pkg]);
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -137,6 +163,8 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
 
     const calculatedTotal = calculateTravelersTotal(pkg?.discountedPrice || "0", numTravelers);
     const perDay = getPerDayPrice(pkg?.discountedPrice || "0", pkg?.duration || "4 Days");
+    const perDayNum = getPerDayPriceNumber(pkg?.discountedPrice || "0", pkg?.duration || "4 Days");
+    const groupDaily = (perDayNum * numTravelers).toLocaleString("en-IN");
 
     const leadPayload = {
       type: "package" as const,
@@ -153,7 +181,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
           gender: "Not Specified",
         },
       ],
-      specialRequirements: `Travelers: ${numTravelers} ${numTravelers === 1 ? "Person" : "Persons"}. Total Tour Cost: ₹${calculatedTotal} (₹${perDay}/Day). Notes: ${bookingForm.specialRequests || "None"}`,
+      specialRequirements: `Travelers: ${numTravelers} ${numTravelers === 1 ? "Person" : "Persons"}. Daily Rate: ₹${groupDaily}/Day (₹${perDay} per person). Total Tour Cost: ₹${calculatedTotal}. Notes: ${bookingForm.specialRequests || "None"}`,
     };
 
     saveLead(leadPayload);
@@ -173,9 +201,11 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
       calculatedTotal
     )} (${numTravelers} ${numTravelers === 1 ? "Person" : "Persons"} @ ₹${encodeURIComponent(
       pkg?.discountedPrice || ""
-    )}/person)%0A*Per Day Rate:* ₹${encodeURIComponent(
+    )}/person)%0A*Daily Rate:* ₹${encodeURIComponent(
+      groupDaily
+    )}/day (${numTravelers} ${numTravelers === 1 ? "Person" : "Persons"} @ ₹${encodeURIComponent(
       perDay
-    )}/day%0A*Name:* ${encodeURIComponent(bookingForm.fullName)}%0A*Phone:* ${encodeURIComponent(
+    )}/person/day)%0A*Name:* ${encodeURIComponent(bookingForm.fullName)}%0A*Phone:* ${encodeURIComponent(
       bookingForm.phone
     )}%0A*Email:* ${encodeURIComponent(
       bookingForm.email || "N/A"
@@ -552,12 +582,14 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                 </div>
               )}
 
-              {/* DETAILED INCLUSIONS CONTAINER - ALL 10 SERVICES */}
+              {/* DETAILED INCLUSIONS CONTAINER */}
               <div className="space-y-10 sm:space-y-12">
                 {pkg.detailedInclusions && pkg.detailedInclusions.length > 0 ? (
                   pkg.detailedInclusions.map((item, itemIdx) => {
-                    const hasImage = Boolean(item.image && item.image.trim().length > 0);
+                    const hasMultipleImages = Boolean(item.images && item.images.length > 1);
+                    const hasImage = Boolean(hasMultipleImages || (item.image && item.image.trim().length > 0));
                     const isEven = itemIdx % 2 === 0;
+                    const itemImageList = item.images && item.images.length > 0 ? item.images : (item.image ? [item.image] : []);
 
                     return (
                       <div
@@ -581,13 +613,20 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                                   <Award className="w-3.5 h-3.5" />
                                   <span>
                                     Service {String(itemIdx + 1).padStart(2, "0")} of{" "}
-                                    {String(pkg.detailedInclusions?.length || 10).padStart(2, "0")}
+                                    {String(pkg.detailedInclusions?.length || 8).padStart(2, "0")}
                                   </span>
                                 </span>
 
                                 {item.category && (
                                   <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[11px] font-bold">
                                     {item.category}
+                                  </span>
+                                )}
+
+                                {hasMultipleImages && (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[11px] font-extrabold border border-amber-500/30">
+                                    <Camera className="w-3 h-3" />
+                                    <span>3 Room Photos</span>
                                   </span>
                                 )}
                               </div>
@@ -612,10 +651,107 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                             </div>
                           </div>
 
-                          {/* Picture Component with Zoom on Hover */}
-                          {hasImage && (
+                          {/* Picture Component: 3 Room Photos Collage or Single Photo */}
+                          {hasMultipleImages ? (
                             <div
-                              className={`relative h-64 sm:h-72 md:h-auto min-h-[260px] overflow-hidden bg-slate-900 ${
+                              className={`p-3 bg-slate-900 flex flex-col justify-between ${
+                                isEven
+                                  ? "md:col-span-5 order-2"
+                                  : "md:col-span-5 order-2 md:order-1"
+                              }`}
+                            >
+                              {/* Primary Room Photo */}
+                              <div
+                                onClick={() =>
+                                  setRoomLightbox({
+                                    isOpen: true,
+                                    serviceTitle: item.title,
+                                    images: itemImageList,
+                                    activeIndex: 0,
+                                  })
+                                }
+                                className="relative h-44 sm:h-52 rounded-2xl overflow-hidden cursor-pointer group/mainphoto border border-white/10 shadow-md"
+                              >
+                                <Image
+                                  src={itemImageList[0]}
+                                  alt={`${item.title} - Main Room Photo`}
+                                  fill
+                                  sizes="(max-width: 768px) 100vw, 40vw"
+                                  className="object-cover group-hover/mainphoto:scale-105 transition-transform duration-500"
+                                />
+                                <div className="absolute inset-0 bg-black/20 group-hover/mainphoto:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover/mainphoto:opacity-100">
+                                  <div className="px-3 py-1.5 rounded-xl bg-black/75 backdrop-blur-md text-white text-xs font-bold flex items-center gap-1.5 shadow-xl">
+                                    <Maximize2 className="w-3.5 h-3.5 text-[#FF5A3C]" />
+                                    <span>Expand All 3 Room Photos</span>
+                                  </div>
+                                </div>
+                                <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md text-[10px] font-bold text-white flex items-center gap-1">
+                                  <Camera className="w-3 h-3 text-[#FF5A3C]" />
+                                  <span>Room Photo 1</span>
+                                </div>
+                              </div>
+
+                              {/* 2 Supporting Room Photos */}
+                              <div className="grid grid-cols-2 gap-2 mt-2">
+                                {itemImageList.slice(1, 3).map((rImg, rIdx) => (
+                                  <div
+                                    key={rIdx}
+                                    onClick={() =>
+                                      setRoomLightbox({
+                                        isOpen: true,
+                                        serviceTitle: item.title,
+                                        images: itemImageList,
+                                        activeIndex: rIdx + 1,
+                                      })
+                                    }
+                                    className="relative h-20 sm:h-24 rounded-xl overflow-hidden cursor-pointer group/subphoto border border-white/10"
+                                  >
+                                    <Image
+                                      src={rImg}
+                                      alt={`${item.title} - Room Photo ${rIdx + 2}`}
+                                      fill
+                                      sizes="(max-width: 768px) 50vw, 20vw"
+                                      className="object-cover group-hover/subphoto:scale-105 transition-transform duration-500"
+                                    />
+                                    <div className="absolute inset-0 bg-black/20 group-hover/subphoto:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover/subphoto:opacity-100">
+                                      <Maximize2 className="w-3.5 h-3.5 text-white" />
+                                    </div>
+                                    <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-md text-[9px] font-semibold text-white">
+                                      Room Photo {rIdx + 2}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+
+                              <div className="mt-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setRoomLightbox({
+                                      isOpen: true,
+                                      serviceTitle: item.title,
+                                      images: itemImageList,
+                                      activeIndex: 0,
+                                    })
+                                  }
+                                  className="text-[11px] font-bold text-amber-400 hover:text-amber-300 inline-flex items-center gap-1 transition-colors cursor-pointer"
+                                >
+                                  <Maximize2 className="w-3 h-3" />
+                                  <span>Click Photo to Expand (3 Room Photos in Box)</span>
+                                </button>
+                              </div>
+                            </div>
+                          ) : hasImage ? (
+                            <div
+                              onClick={() =>
+                                setRoomLightbox({
+                                  isOpen: true,
+                                  serviceTitle: item.title,
+                                  images: itemImageList,
+                                  activeIndex: 0,
+                                })
+                              }
+                              className={`relative h-64 sm:h-72 md:h-auto min-h-[260px] overflow-hidden bg-slate-900 cursor-pointer group/single ${
                                 isEven
                                   ? "md:col-span-5 order-2"
                                   : "md:col-span-5 order-2 md:order-1"
@@ -626,7 +762,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                                 alt={item.title}
                                 fill
                                 sizes="(max-width: 768px) 100vw, 40vw"
-                                className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                                className="object-cover object-center group-hover/single:scale-105 transition-transform duration-700"
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:hidden" />
                               <div className="absolute bottom-3 right-3 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md text-[10px] font-bold text-white flex items-center gap-1">
@@ -634,7 +770,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                                 <span>Verified Photo</span>
                               </div>
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       </div>
                     );
@@ -931,7 +1067,12 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                   <div className="flex items-center justify-between text-xs mb-1.5">
                     <span className="text-slate-600 dark:text-slate-300 font-medium">Daily Breakdown:</span>
                     <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                      ₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} / Day
+                      ₹{(getPerDayPriceNumber(pkg.discountedPrice, pkg.duration) * numTravelers).toLocaleString("en-IN")} / Day
+                      {numTravelers > 1 && (
+                        <span className="text-[10px] text-slate-400 font-normal ml-1">
+                          (₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} × {numTravelers})
+                        </span>
+                      )}
                     </span>
                   </div>
                   <div className="pt-2 border-t border-orange-500/20 flex items-center justify-between">
@@ -1181,6 +1322,119 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
         </div>
       )}
 
+      {/* POPUP MODAL FOR 3-ROOM PHOTOS LIGHTBOX (ALL THREE IN SAME BOX) */}
+      {roomLightbox && roomLightbox.isOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+          onClick={() => setRoomLightbox(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full bg-[#0C132B] rounded-3xl border border-white/20 shadow-2xl p-4 sm:p-6 flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="w-full flex items-center justify-between pb-3 mb-3 border-b border-white/10 text-white">
+              <div className="flex items-center gap-2">
+                <Hotel className="w-4 h-4 text-[#FF5A3C]" />
+                <span className="text-xs sm:text-sm font-bold">
+                  {roomLightbox.serviceTitle}
+                </span>
+                <span className="text-xs text-amber-400 font-semibold ml-2">
+                  (Photo {roomLightbox.activeIndex + 1} of {roomLightbox.images.length})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRoomLightbox(null)}
+                className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                title="Close"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Main Image Box */}
+            <div className="relative w-full aspect-[16/10] max-h-[65vh] rounded-2xl overflow-hidden bg-black border border-white/15 shadow-inner">
+              <Image
+                src={roomLightbox.images[roomLightbox.activeIndex]}
+                alt={`Room Photo ${roomLightbox.activeIndex + 1}`}
+                fill
+                priority
+                className="object-contain"
+              />
+
+              {/* Prev Button */}
+              <button
+                type="button"
+                onClick={() =>
+                  setRoomLightbox((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          activeIndex:
+                            (prev.activeIndex - 1 + prev.images.length) % prev.images.length,
+                        }
+                      : null
+                  )
+                }
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 flex items-center justify-center transition-all hover:scale-110 shadow-lg cursor-pointer"
+                title="Previous Room Photo"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              {/* Next Button */}
+              <button
+                type="button"
+                onClick={() =>
+                  setRoomLightbox((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          activeIndex: (prev.activeIndex + 1) % prev.images.length,
+                        }
+                      : null
+                  )
+                }
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 flex items-center justify-center transition-all hover:scale-110 shadow-lg cursor-pointer"
+                title="Next Room Photo"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* All 3 Room Photos Thumbnails Inside Same Box */}
+            <div className="mt-4 flex items-center justify-center gap-3 w-full">
+              {roomLightbox.images.map((thumbUrl, tIdx) => (
+                <button
+                  type="button"
+                  key={tIdx}
+                  onClick={() =>
+                    setRoomLightbox((prev) => (prev ? { ...prev, activeIndex: tIdx } : null))
+                  }
+                  className={`relative w-20 sm:w-24 h-14 sm:h-16 rounded-xl overflow-hidden transition-all border-2 cursor-pointer ${
+                    roomLightbox.activeIndex === tIdx
+                      ? "border-[#FF5A3C] scale-105 shadow-lg shadow-[#FF5A3C]/40"
+                      : "border-transparent opacity-50 hover:opacity-100"
+                  }`}
+                  title={`View Room Photo ${tIdx + 1}`}
+                >
+                  <Image
+                    src={thumbUrl}
+                    alt={`Room thumbnail ${tIdx + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute bottom-0 inset-x-0 bg-black/60 text-[9px] text-white text-center py-0.5 font-bold">
+                    Room {tIdx + 1}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* POPUP MODAL FOR MOBILE / QUICK INQUIRY */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
@@ -1297,7 +1551,12 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                 <div className="flex items-center justify-between text-xs mb-1.5">
                   <span className="text-slate-600 dark:text-slate-300 font-medium">Daily Breakdown:</span>
                   <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                    ₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} / Day
+                    ₹{(getPerDayPriceNumber(pkg.discountedPrice, pkg.duration) * numTravelers).toLocaleString("en-IN")} / Day
+                    {numTravelers > 1 && (
+                      <span className="text-[10px] text-slate-400 font-normal ml-1">
+                        (₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} × {numTravelers})
+                      </span>
+                    )}
                   </span>
                 </div>
                 <div className="pt-2 border-t border-orange-500/20 flex items-center justify-between">

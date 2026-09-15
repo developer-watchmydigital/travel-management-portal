@@ -66,7 +66,8 @@ export interface PackageInclusionItem {
   id: string;
   title: string;
   description: string;
-  image?: string; // Optional picture URL
+  image?: string; // Optional primary picture URL
+  images?: string[]; // Up to 3 room/service photos
   category?: string; // e.g. "Accommodation", "Cruise", "Watersports", "Sightseeing", "Wellness", "Nightlife"
 }
 

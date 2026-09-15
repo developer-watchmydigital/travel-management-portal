@@ -329,7 +329,10 @@ export default function AdminPage() {
       itinerary: pkg.itinerary ? pkg.itinerary.map((d) => ({ ...d })) : [],
       inclusions: [...(pkg.inclusions || [])],
       detailedInclusions: pkg.detailedInclusions
-        ? pkg.detailedInclusions.map((d) => ({ ...d }))
+        ? pkg.detailedInclusions.map((d) => ({
+            ...d,
+            images: d.images ? [...d.images] : undefined,
+          }))
         : (pkg.inclusions || []).map((inc, idx) => ({
             id: `inc-${Date.now()}-${idx}`,
             category: "Included Service",
@@ -369,6 +372,57 @@ export default function AdminPage() {
     const updated = [...(pkgFormData.detailedInclusions || [])];
     if (updated[index]) {
       updated[index] = { ...updated[index], [field]: value };
+      setPkgFormData({ ...pkgFormData, detailedInclusions: updated });
+    }
+  };
+
+  const handleUpdateDetailedInclusionRoomPhoto = (
+    itemIndex: number,
+    photoIndex: number,
+    value: string
+  ) => {
+    const updated = [...(pkgFormData.detailedInclusions || [])];
+    if (updated[itemIndex]) {
+      const currentImages = [...(updated[itemIndex].images || ["", "", ""])];
+      while (currentImages.length < 3) currentImages.push("");
+      currentImages[photoIndex] = value;
+      const primaryImg = updated[itemIndex].image || currentImages[0] || "";
+      updated[itemIndex] = {
+        ...updated[itemIndex],
+        image: primaryImg,
+        images: currentImages,
+      };
+      setPkgFormData({ ...pkgFormData, detailedInclusions: updated });
+    }
+  };
+
+  const handleEnableRoomPhotos = (itemIndex: number) => {
+    const updated = [...(pkgFormData.detailedInclusions || [])];
+    if (updated[itemIndex]) {
+      const existing = updated[itemIndex].images || [];
+      const defaultPhotos = [
+        updated[itemIndex].image || "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=800&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1591088398332-8a7791972843?q=80&w=800&auto=format&fit=crop",
+      ];
+      updated[itemIndex] = {
+        ...updated[itemIndex],
+        images: [
+          existing[0] || defaultPhotos[0],
+          existing[1] || defaultPhotos[1],
+          existing[2] || defaultPhotos[2],
+        ],
+      };
+      setPkgFormData({ ...pkgFormData, detailedInclusions: updated });
+    }
+  };
+
+  const handleRemoveRoomPhotos = (itemIndex: number) => {
+    const updated = [...(pkgFormData.detailedInclusions || [])];
+    if (updated[itemIndex]) {
+      const copy = { ...updated[itemIndex] };
+      delete copy.images;
+      updated[itemIndex] = copy;
       setPkgFormData({ ...pkgFormData, detailedInclusions: updated });
     }
   };
@@ -1733,6 +1787,85 @@ export default function AdminPage() {
                                     </div>
                                   )}
                                 </div>
+                              </div>
+
+                              {/* 3 Room Photos Management */}
+                              <div className="pt-2 border-t border-white/10">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[11px] font-semibold text-cyan-300">
+                                      🏨 3 Room Photos (Collage + 3-in-1 Lightbox Modal)
+                                    </span>
+                                    {item.images && item.images.length > 0 && (
+                                      <span className="px-1.5 py-0.5 rounded text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">
+                                        3 Room Photos Enabled
+                                      </span>
+                                    )}
+                                  </div>
+                                  {item.images && item.images.length > 0 ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveRoomPhotos(idx)}
+                                      className="text-[10px] text-rose-400 hover:text-rose-300 font-medium transition-colors"
+                                    >
+                                      Disable 3 Photos
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleEnableRoomPhotos(idx)}
+                                      className="text-[10px] text-cyan-400 hover:text-cyan-300 font-medium underline transition-colors"
+                                    >
+                                      + Add 3 Room Photos
+                                    </button>
+                                  )}
+                                </div>
+
+                                {item.images && item.images.length > 0 && (
+                                  <div className="p-3 rounded-lg bg-black/30 border border-cyan-500/20 space-y-2.5">
+                                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                                      Displays a 3-photo room grid on the package page. When visitors click any room photo, all 3 photos expand inside the same modal box with previous/next controls.
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                      {[0, 1, 2].map((photoIdx) => {
+                                        const photoUrl = item.images?.[photoIdx] || "";
+                                        const labels = ["Room Photo 1 (Main / Bed)", "Room Photo 2 (Interior / Living)", "Room Photo 3 (Balcony / View)"];
+                                        return (
+                                          <div key={photoIdx} className="space-y-1">
+                                            <div className="flex items-center justify-between text-[10px] text-slate-400">
+                                              <span className="font-semibold text-slate-300">#{photoIdx + 1}</span>
+                                              <span className="text-[9px] text-slate-500 truncate max-w-[120px]">{labels[photoIdx]}</span>
+                                            </div>
+                                            <input
+                                              type="url"
+                                              placeholder={`Room photo #${photoIdx + 1} URL`}
+                                              value={photoUrl}
+                                              onChange={(e) =>
+                                                handleUpdateDetailedInclusionRoomPhoto(idx, photoIdx, e.target.value)
+                                              }
+                                              className="w-full px-2.5 py-1.5 rounded-md bg-[#090E20] border border-white/10 text-white text-[11px] focus:outline-none focus:border-cyan-400"
+                                            />
+                                            {photoUrl ? (
+                                              <div className="relative w-full h-16 rounded overflow-hidden border border-white/10 bg-black">
+                                                <Image
+                                                  src={photoUrl}
+                                                  alt={`Room ${photoIdx + 1}`}
+                                                  fill
+                                                  className="object-cover"
+                                                  unoptimized
+                                                />
+                                              </div>
+                                            ) : (
+                                              <div className="w-full h-16 rounded border border-dashed border-white/10 flex items-center justify-center text-[10px] text-slate-600">
+                                                No photo URL
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>

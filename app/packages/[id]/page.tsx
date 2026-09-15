@@ -676,6 +676,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                                   src={itemImageList[0]}
                                   alt={`${item.title} - Main Room Photo`}
                                   fill
+                                  unoptimized
                                   sizes="(max-width: 768px) 100vw, 40vw"
                                   className="object-cover group-hover/mainphoto:scale-105 transition-transform duration-500"
                                 />
@@ -710,6 +711,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                                       src={rImg}
                                       alt={`${item.title} - Room Photo ${rIdx + 2}`}
                                       fill
+                                      unoptimized
                                       sizes="(max-width: 768px) 50vw, 20vw"
                                       className="object-cover group-hover/subphoto:scale-105 transition-transform duration-500"
                                     />
@@ -761,6 +763,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                                 src={item.image!}
                                 alt={item.title}
                                 fill
+                                unoptimized
                                 sizes="(max-width: 768px) 100vw, 40vw"
                                 className="object-cover object-center group-hover/single:scale-105 transition-transform duration-700"
                               />
@@ -1360,6 +1363,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                 alt={`Room Photo ${roomLightbox.activeIndex + 1}`}
                 fill
                 priority
+                unoptimized
                 className="object-contain"
               />
 
@@ -1423,6 +1427,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                     src={thumbUrl}
                     alt={`Room thumbnail ${tIdx + 1}`}
                     fill
+                    unoptimized
                     className="object-cover"
                   />
                   <div className="absolute bottom-0 inset-x-0 bg-black/60 text-[9px] text-white text-center py-0.5 font-bold">

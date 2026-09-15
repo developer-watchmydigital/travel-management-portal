@@ -1,14 +1,28 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Phone, Compass, ShieldCheck, Menu, X, ArrowRight, Sun, Moon } from "lucide-react";
+import {
+  Phone,
+  Package,
+  MapPin,
+  Sparkles,
+  ChevronDown,
+  Menu,
+  X,
+  ArrowRight,
+  Sun,
+  Moon,
+} from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
 export const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(true);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -19,62 +33,184 @@ export const Navbar: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: "Home", href: "/#home" },
-    { name: "Curated Tours", href: "/#curated" },
-    { name: "About Us", href: "/#about" },
-    { name: "Services", href: "/#services" },
-    { name: "Top Destinations", href: "/#destinations" },
-    { name: "Why Us", href: "/#why-us" },
-    { name: "Contact & Book", href: "/#contact" },
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const exploreDropdownItems = [
+    {
+      name: "Curated Tour Packages",
+      description: "42+ Handcrafted Goa Tour Itineraries",
+      href: "/#curated",
+      icon: Package,
+      badge: "42 Tours",
+      badgeColor: "bg-[#FF5A3C]/15 text-[#FF5A3C] border-[#FF5A3C]/30",
+    },
+    {
+      name: "Top Destinations",
+      description: "Beaches, Fortresses & Scenic Islands",
+      href: "/#destinations",
+      icon: MapPin,
+      badge: "Must Visit",
+      badgeColor: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+    },
+    {
+      name: "Guaranteed Services",
+      description: "Deluxe Stays, Cruises, Spa & Watersports",
+      href: "/#services",
+      icon: Sparkles,
+      badge: "Included",
+      badgeColor: "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border-cyan-500/30",
+    },
   ];
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/90 dark:bg-[#070B18]/90 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 shadow-lg shadow-black/5 dark:shadow-2xl py-2 sm:py-2.5"
-          : "bg-transparent py-3 sm:py-4"
+          ? "bg-white/95 dark:bg-[#070B18]/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 shadow-lg shadow-black/5 dark:shadow-2xl py-2 sm:py-2.5"
+          : "bg-gradient-to-b from-black/60 via-black/30 to-transparent py-3 sm:py-4"
       }`}
     >
-      <div className="max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-3 lg:gap-5 xl:gap-8">
+      <div className="max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-3 lg:gap-6 xl:gap-8">
         {/* Brand: Favicon + "Watch my trip package Goa" */}
-        <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0 mr-1 xl:mr-2">
-          <div className="relative w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
+        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+          <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-md">
             <Image
-              src="/favicon.png?v=3"
+              src="/favicon.png?v=4"
               alt="Watch my trip package Goa"
-              width={40}
-              height={40}
+              width={44}
+              height={44}
               className="w-full h-full object-contain drop-shadow-md"
               priority
             />
           </div>
-          <span className="text-xs sm:text-sm lg:text-base font-extrabold text-slate-900 dark:text-white font-['Outfit'] tracking-tight leading-tight group-hover:text-[#FF5A3C] transition-colors whitespace-nowrap">
+          <span className="text-sm sm:text-base lg:text-lg font-extrabold text-slate-900 dark:text-white font-['Outfit'] tracking-tight leading-tight group-hover:text-[#FF5A3C] transition-colors whitespace-nowrap">
             Watch my trip package <span className="text-[#FF5A3C]">Goa</span>
           </span>
         </Link>
 
-        {/* Desktop Nav Links - Single Line Unbreakable */}
-        <nav className="hidden lg:flex items-center gap-2 xl:gap-4 2xl:gap-5 flex-nowrap shrink-0">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className="text-xs xl:text-[13px] 2xl:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-[#FF5A3C] dark:hover:text-[#FF5A3C] transition-colors relative py-1 px-1.5 whitespace-nowrap shrink-0 group"
+        {/* Desktop Nav Links - Prominent Text Size & Single Dropdown */}
+        <nav className="hidden lg:flex items-center gap-5 xl:gap-7 2xl:gap-8 flex-nowrap shrink-0">
+          {/* 1. Home */}
+          <Link
+            href="/#home"
+            className="text-[15px] xl:text-base font-bold text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] dark:hover:text-[#FF5A3C] transition-colors relative py-1 px-1 whitespace-nowrap shrink-0 group"
+          >
+            <span>Home</span>
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FF5A3C] transition-all duration-300 group-hover:w-full" />
+          </Link>
+
+          {/* 2. Explore Dropdown (Packages, Destinations, Services) */}
+          <div
+            ref={dropdownRef}
+            className="relative"
+            onMouseEnter={() => setDropdownOpen(true)}
+            onMouseLeave={() => setDropdownOpen(false)}
+          >
+            <button
+              type="button"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className={`inline-flex items-center gap-1.5 text-[15px] xl:text-base font-bold transition-colors py-1 px-1.5 rounded-lg cursor-pointer ${
+                dropdownOpen
+                  ? "text-[#FF5A3C]"
+                  : "text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] dark:hover:text-[#FF5A3C]"
+              }`}
+              aria-expanded={dropdownOpen}
             >
-              {link.name}
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FF5A3C] transition-all duration-300 group-hover:w-full" />
-            </Link>
-          ))}
+              <span>Explore & Packages</span>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  dropdownOpen ? "rotate-180 text-[#FF5A3C]" : "text-slate-400"
+                }`}
+              />
+            </button>
+
+            {/* Dropdown Menu Box */}
+            {dropdownOpen && (
+              <div className="absolute top-full left-0 mt-2 w-80 rounded-2xl bg-white/98 dark:bg-[#0B1124]/98 backdrop-blur-2xl border border-slate-200 dark:border-white/15 shadow-2xl p-2.5 transition-all z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-3 py-1.5 mb-1 border-b border-slate-100 dark:border-white/5">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#FF5A3C]">
+                    Tour Highlights & Guide
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {exploreDropdownItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all group"
+                      >
+                        <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/5 group-hover:bg-[#FF5A3C]/10 text-slate-700 dark:text-slate-300 group-hover:text-[#FF5A3C] flex items-center justify-center shrink-0 border border-slate-200 dark:border-white/10 transition-colors">
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1.5">
+                            <span className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-[#FF5A3C] transition-colors truncate">
+                              {item.name}
+                            </span>
+                            <span
+                              className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded border shrink-0 ${item.badgeColor}`}
+                            >
+                              {item.badge}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                            {item.description}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 3. About Us */}
+          <Link
+            href="/#about"
+            className="text-[15px] xl:text-base font-bold text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] dark:hover:text-[#FF5A3C] transition-colors relative py-1 px-1 whitespace-nowrap shrink-0 group"
+          >
+            <span>About Us</span>
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FF5A3C] transition-all duration-300 group-hover:w-full" />
+          </Link>
+
+          {/* 4. Why Us */}
+          <Link
+            href="/#why-us"
+            className="text-[15px] xl:text-base font-bold text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] dark:hover:text-[#FF5A3C] transition-colors relative py-1 px-1 whitespace-nowrap shrink-0 group"
+          >
+            <span>Why Us</span>
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FF5A3C] transition-all duration-300 group-hover:w-full" />
+          </Link>
+
+          {/* 5. Contact & Book */}
+          <Link
+            href="/#contact"
+            className="text-[15px] xl:text-base font-bold text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] dark:hover:text-[#FF5A3C] transition-colors relative py-1 px-1 whitespace-nowrap shrink-0 group"
+          >
+            <span>Contact & Book</span>
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FF5A3C] transition-all duration-300 group-hover:w-full" />
+          </Link>
         </nav>
 
-        {/* Right CTA Actions - Single Line Unbreakable */}
-        <div className="hidden lg:flex items-center gap-2 xl:gap-2.5 shrink-0 flex-nowrap">
+        {/* Right CTA Actions - Spacious & Guaranteed Single Line Uncut */}
+        <div className="hidden lg:flex items-center gap-3 xl:gap-4 shrink-0 flex-nowrap">
           {/* Dark / White Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            className="p-1.5 xl:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 transition-all shrink-0 cursor-pointer"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 transition-all shrink-0 cursor-pointer shadow-sm"
             title={`Switch to ${theme === "dark" ? "White" : "Dark"} Theme`}
             aria-label="Toggle Theme"
           >
@@ -88,19 +224,19 @@ export const Navbar: React.FC = () => {
           {/* Quick Call Pill */}
           <a
             href="tel:+919588667027"
-            className="flex items-center gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] transition-all shrink-0 whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-xs xl:text-sm font-bold text-slate-800 dark:text-slate-200 hover:text-[#FF5A3C] transition-all shrink-0 whitespace-nowrap shadow-sm"
           >
             <Phone className="w-3.5 h-3.5 text-[#FF5A3C] shrink-0" />
-            <span className="whitespace-nowrap font-medium">+91 95886 67027</span>
+            <span className="whitespace-nowrap">+91 95886 67027</span>
           </a>
 
           {/* Plan Journey Primary CTA */}
           <Link
             href="/#contact"
-            className="flex items-center gap-1.5 px-3 xl:px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-semibold text-xs xl:text-sm shadow-md shadow-[#FF5A3C]/30 hover:shadow-[#FF5A3C]/50 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 whitespace-nowrap cursor-pointer"
+            className="flex items-center gap-1.5 px-4 xl:px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-extrabold text-xs xl:text-sm shadow-lg shadow-[#FF5A3C]/35 hover:shadow-[#FF5A3C]/55 hover:scale-[1.03] active:scale-[0.97] transition-all shrink-0 whitespace-nowrap cursor-pointer"
           >
             <span className="whitespace-nowrap">Plan Journey</span>
-            <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </Link>
         </div>
 
@@ -129,24 +265,80 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile & Tablet Menu Dropdown */}
+      {/* Mobile & Tablet Menu Dropdown Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden px-4 pt-4 pb-6 bg-white/98 dark:bg-[#090E20]/98 backdrop-blur-2xl border-b border-slate-200 dark:border-white/10 shadow-xl">
-          <div className="flex flex-col gap-3">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2 rounded-lg text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-[#FF5A3C] font-medium transition-colors"
+        <div className="lg:hidden px-4 pt-4 pb-6 bg-white/98 dark:bg-[#090E20]/98 backdrop-blur-2xl border-b border-slate-200 dark:border-white/10 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200 max-h-[85vh] overflow-y-auto">
+          <div className="flex flex-col gap-2">
+            <Link
+              href="/#home"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3.5 py-2.5 rounded-xl text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5 hover:text-[#FF5A3C] font-bold text-base transition-colors"
+            >
+              Home
+            </Link>
+
+            {/* Mobile Dropdown Group */}
+            <div className="p-2 rounded-2xl bg-slate-100/70 dark:bg-white/5 border border-slate-200/60 dark:border-white/10">
+              <button
+                type="button"
+                onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+                className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-extrabold uppercase tracking-wider text-[#FF5A3C]"
               >
-                {link.name}
-              </Link>
-            ))}
-            <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex flex-col gap-2">
+                <span>Explore Tours & Services</span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform ${
+                    mobileDropdownOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              {mobileDropdownOpen && (
+                <div className="mt-1 space-y-1">
+                  {exploreDropdownItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-800 dark:text-slate-200 hover:bg-white dark:hover:bg-white/10 hover:text-[#FF5A3C] font-semibold text-sm transition-colors"
+                      >
+                        <Icon className="w-4 h-4 text-[#FF5A3C]" />
+                        <span>{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/#about"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3.5 py-2.5 rounded-xl text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5 hover:text-[#FF5A3C] font-bold text-base transition-colors"
+            >
+              About Us
+            </Link>
+
+            <Link
+              href="/#why-us"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3.5 py-2.5 rounded-xl text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5 hover:text-[#FF5A3C] font-bold text-base transition-colors"
+            >
+              Why Us
+            </Link>
+
+            <Link
+              href="/#contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3.5 py-2.5 rounded-xl text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5 hover:text-[#FF5A3C] font-bold text-base transition-colors"
+            >
+              Contact & Book
+            </Link>
+
+            <div className="pt-3 mt-1 border-t border-slate-200 dark:border-white/10 flex flex-col gap-2.5">
               <a
                 href="tel:+919588667027"
-                className="flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-100 dark:bg-white/5 text-sm text-slate-800 dark:text-slate-200 font-medium hover:text-[#FF5A3C]"
+                className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 dark:bg-white/5 text-sm text-slate-800 dark:text-slate-200 font-bold hover:text-[#FF5A3C] border border-slate-200 dark:border-white/10 shadow-sm"
               >
                 <Phone className="w-4 h-4 text-[#FF5A3C]" />
                 <span>Call: +91 95886 67027</span>
@@ -154,7 +346,7 @@ export const Navbar: React.FC = () => {
               <Link
                 href="/#contact"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#FF5A3C] text-white text-sm font-semibold shadow-md"
+                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white text-sm font-extrabold shadow-lg shadow-[#FF5A3C]/30"
               >
                 <span>Plan Your Journey With Us</span>
                 <ArrowRight className="w-4 h-4" />

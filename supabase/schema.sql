@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS public.company_info (
     phones JSONB DEFAULT '["+91 95886 67027", "+91 70583 23165"]'::jsonb,
     whatsapp TEXT DEFAULT '919588667027',
     emails JSONB DEFAULT '["info@rtravelworld.com", "rtravelworldmehsana@gmail.com"]'::jsonb,
-    instagram TEXT DEFAULT '@watchmytrip',
+    instagram TEXT DEFAULT 'https://www.instagram.com/watchmytrippackage?stkn=MWxieXNncG5hcDl4OA%3D%3D&utm_source=qr',
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

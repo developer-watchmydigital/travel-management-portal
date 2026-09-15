@@ -21,7 +21,7 @@ export const Footer: React.FC = () => {
             <Link href="/#home" className="flex items-center gap-2.5 mb-4 group">
               <div className="relative w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
                 <Image
-                  src="/favicon.png?v=3"
+                  src="/favicon.png?v=4"
                   alt="Watch My Trip Package Goa"
                   width={32}
                   height={32}
@@ -138,12 +138,12 @@ export const Footer: React.FC = () => {
                   Instagram
                 </span>
                 <a
-                  href="https://instagram.com/watchmytrip"
+                  href="https://www.instagram.com/watchmytrippackage?stkn=MWxieXNncG5hcDl4OA%3D%3D&utm_source=qr"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-slate-800 dark:text-slate-200 hover:text-[#FF5A3C] font-semibold text-xs"
                 >
-                  @watchmytrip
+                  @watchmytrippackage
                 </a>
               </div>
             </div>

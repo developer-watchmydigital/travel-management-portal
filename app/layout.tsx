@@ -23,10 +23,10 @@ export const metadata: Metadata = {
   authors: [{ name: "Masrur Ahmed" }, { name: "Masum Ahmed" }],
   icons: {
     icon: [
-      { url: "/favicon.png?v=3", type: "image/png" },
+      { url: "/favicon.png?v=4", type: "image/png" },
     ],
-    shortcut: "/favicon.png?v=3",
-    apple: "/apple-icon.png?v=3",
+    shortcut: "/favicon.png?v=4",
+    apple: "/apple-icon.png?v=4",
   },
 };
 
@@ -45,8 +45,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth dark">
       <head>
-        <link rel="icon" href="/favicon.png?v=3" type="image/png" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-icon.png?v=3" />
+        <link rel="icon" href="/favicon.png?v=4" type="image/png" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-icon.png?v=4" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

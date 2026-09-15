@@ -303,7 +303,7 @@ export const DestinationsSection: React.FC = () => {
                 </button>
 
                 <a
-                  href={`https://wa.me/919427286755?text=Hello%20Small%20Daddy%20Plus!%20I%20want%20to%20inquire%20about%20a%20trip%20for%20${encodeURIComponent(
+                  href={`https://wa.me/919588667027?text=Hello%20Small%20Daddy%20Plus!%20I%20want%20to%20inquire%20about%20a%20trip%20for%20${encodeURIComponent(
                     selectedDestination.name
                   )}.`}
                   target="_blank"

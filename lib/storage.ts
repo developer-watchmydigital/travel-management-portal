@@ -4,8 +4,8 @@ import { CompanyInfo, Destination, InquiryLead, TravelService, CuratedPackage } 
 const LEADS_KEY = "r_travel_leads_v1";
 const DESTINATIONS_KEY = "r_travel_destinations_v2";
 const SERVICES_KEY = "r_travel_services_v1";
-const COMPANY_KEY = "r_travel_company_v1";
-const PACKAGES_KEY = "r_travel_curated_packages_v1";
+const COMPANY_KEY = "r_travel_company_v2";
+const PACKAGES_KEY = "r_travel_curated_packages_v3";
 
 export const initialLeads: InquiryLead[] = [
   {
@@ -149,7 +149,13 @@ export function getStoredCompanyInfo(): CompanyInfo {
       localStorage.setItem(COMPANY_KEY, JSON.stringify(companyData));
       return companyData;
     }
-    return JSON.parse(data);
+    const parsed: CompanyInfo = JSON.parse(data);
+    if (!parsed.whatsapp || parsed.whatsapp !== "919588667027") {
+      parsed.whatsapp = "919588667027";
+      parsed.phones = ["+91 95886 67027"];
+      localStorage.setItem(COMPANY_KEY, JSON.stringify(parsed));
+    }
+    return parsed;
   } catch {
     return companyData;
   }
@@ -180,8 +186,12 @@ export function getStoredPackages(): CuratedPackage[] {
       const updatedPkg = { ...pkg };
       const initial = initialCuratedPackages.find((init) => init.id === pkg.id);
       if (initial) {
-        if ((!pkg.detailedInclusions || pkg.detailedInclusions.length === 0) && initial.detailedInclusions) {
+        if ((!pkg.detailedInclusions || pkg.detailedInclusions.length < 10) && initial.detailedInclusions) {
           updatedPkg.detailedInclusions = initial.detailedInclusions;
+          updatedNeeded = true;
+        }
+        if ((!pkg.galleryImages || pkg.galleryImages.length < 10) && initial.galleryImages) {
+          updatedPkg.galleryImages = initial.galleryImages;
           updatedNeeded = true;
         }
         if (!pkg.flyerImage && initial.flyerImage) {

@@ -119,11 +119,8 @@ export const Footer: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-[#FF5A3C] shrink-0" />
                 <div className="flex flex-col">
-                  <a href="tel:+917058323165" className="text-slate-800 dark:text-slate-200 hover:text-[#FF5A3C] font-semibold">
-                    +91 70583 23165 <span className="text-[10px] text-amber-500 font-bold">(Goa Hotline)</span>
-                  </a>
-                  <a href="tel:+919427286755" className="text-slate-600 dark:text-slate-400 hover:text-[#FF5A3C]">
-                    +91 94272 86755
+                  <a href="tel:+919588667027" className="text-slate-800 dark:text-slate-200 hover:text-[#FF5A3C] font-semibold">
+                    +91 95886 67027 <span className="text-[10px] text-amber-500 font-bold">(Direct & WhatsApp)</span>
                   </a>
                 </div>
               </div>

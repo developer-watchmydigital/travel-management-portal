@@ -121,7 +121,7 @@ export const InquirySection: React.FC = () => {
     )}%0A*Total Travellers:* ${travellers.length}%0A*Special Notes:* ${encodeURIComponent(
       specialRequirements || "None"
     )}`;
-    return `https://wa.me/919427286755?text=${message}`;
+    return `https://wa.me/919588667027?text=${message}`;
   };
 
   return (
@@ -188,11 +188,8 @@ export const InquirySection: React.FC = () => {
                     Phone Numbers
                   </span>
                   <div className="flex flex-col text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-semibold mt-0.5">
-                    <a href="tel:+919427286755" className="hover:text-[#FF5A3C] transition-colors">
-                      +91 94272 86755
-                    </a>
-                    <a href="tel:+919173136111" className="hover:text-[#FF5A3C] transition-colors">
-                      +91 91731 36111
+                    <a href="tel:+919588667027" className="hover:text-[#FF5A3C] transition-colors">
+                      +91 95886 67027
                     </a>
                   </div>
                 </div>
@@ -222,7 +219,7 @@ export const InquirySection: React.FC = () => {
             {/* Direct WhatsApp Action Button matching screenshot 5 */}
             <div className="mt-6">
               <a
-                href="https://wa.me/919427286755?text=Hello%20R%20Travel%20World!%20I%20want%20to%20inquire%20about%20a%20tour%20package."
+                href="https://wa.me/919588667027?text=Hello%20R%20Travel%20World!%20I%20want%20to%20inquire%20about%20a%20tour%20package."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-sm tracking-wide shadow-lg shadow-[#25D366]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"

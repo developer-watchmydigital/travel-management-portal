@@ -26,6 +26,10 @@ import {
   Car,
   Utensils,
   Award,
+  Camera,
+  ChevronLeft,
+  Download,
+  Maximize2,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -42,6 +46,7 @@ export default function PackageDetailPage() {
   const [loading, setLoading] = useState(true);
   const [copiedShare, setCopiedShare] = useState(false);
   const [isFlyerModalOpen, setIsFlyerModalOpen] = useState(false);
+  const [galleryLightboxIndex, setGalleryLightboxIndex] = useState<number | null>(null);
 
   // Booking / Inquiry Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -67,6 +72,31 @@ export default function PackageDetailPage() {
       setLoading(false);
     }
   }, [packageId]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (galleryLightboxIndex !== null && pkg?.galleryImages) {
+        if (e.key === "ArrowRight") {
+          setGalleryLightboxIndex((prev) =>
+            prev !== null && pkg.galleryImages ? (prev + 1) % pkg.galleryImages.length : null
+          );
+        } else if (e.key === "ArrowLeft") {
+          setGalleryLightboxIndex((prev) =>
+            prev !== null && pkg.galleryImages
+              ? (prev - 1 + pkg.galleryImages.length) % pkg.galleryImages.length
+              : null
+          );
+        } else if (e.key === "Escape") {
+          setGalleryLightboxIndex(null);
+        }
+      }
+      if (isFlyerModalOpen && e.key === "Escape") {
+        setIsFlyerModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [galleryLightboxIndex, isFlyerModalOpen, pkg]);
 
   const handleShare = () => {
     if (typeof window !== "undefined") {
@@ -108,13 +138,8 @@ export default function PackageDetailPage() {
     }, 2800);
   };
 
-  const isSmallDaddyPackage = pkg?.id === "pkg-goa-small-daddy-special";
-  const phoneCall = isSmallDaddyPackage
-    ? "+91 70583 23165"
-    : companyInfo?.phones?.[0] || "+91 70583 23165";
-  const whatsappNumber = isSmallDaddyPackage
-    ? "917058323165"
-    : companyInfo?.whatsapp || "917058323165";
+  const phoneCall = companyInfo?.phones?.[0] || "+91 95886 67027";
+  const whatsappNumber = companyInfo?.whatsapp || "919588667027";
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     `Hello Watch My Trip Package Goa! I am interested in booking "${pkg?.title}" (${pkg?.duration}) priced at ₹${pkg?.discountedPrice}. Please share itinerary details and customization options.`
   )}`;
@@ -158,9 +183,6 @@ export default function PackageDetailPage() {
       </div>
     );
   }
-
-  // Calculate Zig-Zag sequence for detailed inclusions
-  let imageCounter = 0;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#070B18] text-slate-900 dark:text-slate-100 transition-colors duration-200 selection:bg-[#FF5A3C] selection:text-white">
@@ -429,7 +451,7 @@ export default function PackageDetailPage() {
                 </span>
               </div>
 
-              {/* Optional Promotional Flyer Banner Callout */}
+              {/* Dynamic Promotional Flyer Banner Callout */}
               {pkg.flyerImage && (
                 <div className="mb-8 p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-rose-500/15 border border-amber-400/40 dark:border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
                   <div className="flex items-center gap-3.5 text-center sm:text-left">
@@ -438,13 +460,13 @@ export default function PackageDetailPage() {
                     </div>
                     <div>
                       <span className="text-[10px] uppercase tracking-wider font-extrabold text-[#FF5A3C]">
-                        Official Summer Special Offer
+                        Verified Promotional Offer Available
                       </span>
                       <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                        Special Rate: ₹2,499 / day per person
+                        {pkg.title} • ₹{pkg.discountedPrice} {pkg.originalPrice ? `(Save ₹${pkg.savings})` : ""}
                       </h4>
                       <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                        Includes AC Deluxe stay, Dinner Cruise, Adventure Boat Party & Full Body Spa.
+                        {pkg.subtitle}
                       </p>
                     </div>
                   </div>
@@ -458,32 +480,44 @@ export default function PackageDetailPage() {
                 </div>
               )}
 
-              {/* DETAILED INCLUSIONS CONTAINER */}
+              {/* DETAILED INCLUSIONS CONTAINER - ALL 10 SERVICES */}
               <div className="space-y-10 sm:space-y-12">
                 {pkg.detailedInclusions && pkg.detailedInclusions.length > 0 ? (
-                  pkg.detailedInclusions.map((item) => {
+                  pkg.detailedInclusions.map((item, itemIdx) => {
                     const hasImage = Boolean(item.image && item.image.trim().length > 0);
+                    const isEven = itemIdx % 2 === 0;
 
-                    if (hasImage) {
-                      // Alternate left/right zig-zag
-                      const isEven = imageCounter % 2 === 0;
-                      imageCounter++;
+                    return (
+                      <div
+                        key={item.id || itemIdx}
+                        className="group relative rounded-3xl bg-white dark:bg-[#0C132B] border border-slate-200/80 dark:border-white/10 shadow-lg shadow-slate-200/40 dark:shadow-none overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-[#FF5A3C]/40"
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-0 items-stretch">
+                          {/* Text Content */}
+                          <div
+                            className={`p-6 sm:p-8 flex flex-col justify-between ${
+                              hasImage
+                                ? isEven
+                                  ? "md:col-span-7 order-1"
+                                  : "md:col-span-7 order-1 md:order-2"
+                                : "md:col-span-12 order-1"
+                            }`}
+                          >
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2 mb-3">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[#FF5A3C] to-[#FF8C6B] text-white text-[11px] font-black tracking-wider uppercase shadow-sm">
+                                  <Award className="w-3.5 h-3.5" />
+                                  <span>
+                                    Service {String(itemIdx + 1).padStart(2, "0")} of{" "}
+                                    {String(pkg.detailedInclusions?.length || 10).padStart(2, "0")}
+                                  </span>
+                                </span>
 
-                      return (
-                        <div
-                          key={item.id}
-                          className="group relative rounded-3xl bg-white dark:bg-[#0C132B] border border-slate-200/80 dark:border-white/10 shadow-lg shadow-slate-200/40 dark:shadow-none overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-[#FF5A3C]/40"
-                        >
-                          <div className="grid grid-cols-1 md:grid-cols-12 gap-0 items-center">
-                            {/* Text Content */}
-                            <div
-                              className={`p-6 sm:p-8 md:col-span-7 flex flex-col justify-center ${
-                                isEven ? "order-1" : "order-1 md:order-2"
-                              }`}
-                            >
-                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FF5A3C]/10 text-[#FF5A3C] text-xs font-bold w-fit mb-3">
-                                <Award className="w-3.5 h-3.5" />
-                                <span>Included Experience</span>
+                                {item.category && (
+                                  <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-[11px] font-bold">
+                                    {item.category}
+                                  </span>
+                                )}
                               </div>
 
                               <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Outfit'] leading-snug group-hover:text-[#FF5A3C] transition-colors">
@@ -493,17 +527,26 @@ export default function PackageDetailPage() {
                               <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                                 {item.description}
                               </p>
-
-                              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-white/5 flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                                <span>100% Guaranteed & Included with Package</span>
-                              </div>
                             </div>
 
-                            {/* Picture Component */}
+                            <div className="mt-5 pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                              <span className="inline-flex items-center gap-1.5">
+                                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                                <span>100% Guaranteed & Included with Package</span>
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-mono">
+                                #0{itemIdx + 1}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Picture Component with Zoom on Hover */}
+                          {hasImage && (
                             <div
-                              className={`relative h-64 sm:h-72 md:h-full min-h-[260px] md:col-span-5 overflow-hidden ${
-                                isEven ? "order-2" : "order-2 md:order-1"
+                              className={`relative h-64 sm:h-72 md:h-auto min-h-[260px] overflow-hidden bg-slate-900 ${
+                                isEven
+                                  ? "md:col-span-5 order-2"
+                                  : "md:col-span-5 order-2 md:order-1"
                               }`}
                             >
                               <Image
@@ -514,48 +557,17 @@ export default function PackageDetailPage() {
                                 className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:hidden" />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    } else {
-                      // NO PICTURE: RENDER IN THE MIDDLE, NO PICTURE SPACE OR BLANK PLACEHOLDER
-                      return (
-                        <div
-                          key={item.id}
-                          className="max-w-3xl mx-auto rounded-3xl bg-gradient-to-br from-white via-slate-50 to-amber-50/30 dark:from-[#0C132B] dark:via-[#090E20] dark:to-[#131B38] border border-amber-300/40 dark:border-amber-500/20 shadow-lg p-6 sm:p-8 text-center sm:text-left transition-all hover:border-[#FF5A3C]/40"
-                        >
-                          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5">
-                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#FF5A3C] to-amber-400 text-white flex items-center justify-center shrink-0 shadow-md shadow-[#FF5A3C]/30">
-                              <ShieldCheck className="w-6 h-6" />
-                            </div>
-
-                            <div className="flex-1">
-                              <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[11px] font-bold uppercase tracking-wider mb-2">
-                                <Sparkles className="w-3 h-3" />
-                                <span>Complimentary Hospitality Inclusions</span>
-                              </div>
-
-                              <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-['Outfit']">
-                                {item.title}
-                              </h3>
-
-                              <p className="mt-2.5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                                {item.description}
-                              </p>
-
-                              <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                                <Check className="w-4 h-4" />
-                                <span>Included at Zero Extra Surcharge</span>
+                              <div className="absolute bottom-3 right-3 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md text-[10px] font-bold text-white flex items-center gap-1">
+                                <Camera className="w-3 h-3 text-[#FF5A3C]" />
+                                <span>Verified Photo</span>
                               </div>
                             </div>
-                          </div>
+                          )}
                         </div>
-                      );
-                    }
+                      </div>
+                    );
                   })
                 ) : (
-                  // Fallback if detailedInclusions is not set yet
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {(pkg.inclusions || []).map((inc, i) => (
                       <div
@@ -563,13 +575,67 @@ export default function PackageDetailPage() {
                         className="p-4 rounded-2xl bg-white dark:bg-[#0C132B] border border-slate-200 dark:border-white/10 flex items-center gap-3"
                       >
                         <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                        <span className="text-sm font-medium text-slate-800 dark:text-slate-200">{inc}</span>
+                        <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                          {inc}
+                        </span>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
             </section>
+
+            {/* ========================================================================= */}
+            {/* SECTION: 10-PHOTO VISUAL EXPERIENCE GALLERY */}
+            {/* ========================================================================= */}
+            {pkg.galleryImages && pkg.galleryImages.length > 0 && (
+              <section id="gallery" className="scroll-mt-28">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold uppercase tracking-wider">
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>Visual Experience Gallery</span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-['Outfit'] mt-2">
+                      Tour Photos & Moments (10 Verified Visuals)
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+                      High-definition photos capturing your hotels, dinner cruise, party boat, sightseeing spots, and activities. Click any image to view in full-screen gallery.
+                    </p>
+                  </div>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium shrink-0">
+                    10 HD Photos
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
+                  {pkg.galleryImages.slice(0, 10).map((imgUrl, gIdx) => (
+                    <div
+                      key={gIdx}
+                      onClick={() => setGalleryLightboxIndex(gIdx)}
+                      className="group relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer bg-slate-900 border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-xl transition-all duration-300 hover:border-[#FF5A3C]/60"
+                      title="Click to expand photo in full resolution"
+                    >
+                      <Image
+                        src={imgUrl}
+                        alt={`Experience photo ${gIdx + 1}`}
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
+                        className="object-cover object-center group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2.5">
+                        <span className="self-end p-1.5 rounded-lg bg-black/60 text-white backdrop-blur-sm shadow-md">
+                          <Maximize2 className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="text-[10px] font-extrabold text-white tracking-wide">
+                          Photo {String(gIdx + 1).padStart(2, "0")} / 10
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* ========================================================================= */}
             {/* SECTION: DAY-WISE DETAILED ITINERARY TIMELINE */}
@@ -854,7 +920,7 @@ export default function PackageDetailPage() {
             <div className="relative w-full aspect-[3/4] max-h-[65vh] rounded-2xl overflow-hidden bg-slate-950 border border-slate-200 dark:border-white/10 shadow-inner">
               <Image
                 src={pkg.flyerImage}
-                alt="Hotel Small Daddy Plus Official Flyer"
+                alt={`${pkg.title} Official Promotional Flyer`}
                 fill
                 priority
                 className="object-contain"
@@ -865,9 +931,10 @@ export default function PackageDetailPage() {
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-slate-200 dark:border-white/10">
               <a
                 href={pkg.flyerImage}
-                download="Hotel-Small-Daddy-Plus-Goa-Package.jpeg"
+                download={`${pkg.title.replace(/[^a-zA-Z0-9_-]/g, "-")}-Flyer.jpeg`}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white text-xs font-semibold border border-slate-200 dark:border-white/10 transition-all"
               >
+                <Download className="w-3.5 h-3.5" />
                 <span>Save Flyer Image</span>
               </a>
 
@@ -890,6 +957,99 @@ export default function PackageDetailPage() {
                   <span>WhatsApp Inquiry</span>
                 </a>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* POPUP MODAL FOR 10-PHOTO EXPERIENCE GALLERY LIGHTBOX */}
+      {galleryLightboxIndex !== null && pkg.galleryImages && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
+          onClick={() => setGalleryLightboxIndex(null)}
+        >
+          <div
+            className="relative max-w-5xl w-full flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top Bar: Counter & Close */}
+            <div className="w-full flex items-center justify-between text-white pb-3 mb-2 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Camera className="w-4 h-4 text-[#FF5A3C]" />
+                <span className="text-xs sm:text-sm font-bold">
+                  Photo {galleryLightboxIndex + 1} of {pkg.galleryImages.length}
+                </span>
+                <span className="text-xs text-slate-400 hidden sm:inline">• {pkg.title}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGalleryLightboxIndex(null)}
+                className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                title="Close Lightbox (Esc)"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Main Image View */}
+            <div className="relative w-full aspect-[16/10] max-h-[72vh] rounded-2xl overflow-hidden bg-black/60 border border-white/15 shadow-2xl">
+              <Image
+                src={pkg.galleryImages[galleryLightboxIndex]}
+                alt={`Gallery image ${galleryLightboxIndex + 1}`}
+                fill
+                priority
+                className="object-contain"
+              />
+
+              {/* Prev Arrow */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setGalleryLightboxIndex(
+                    (galleryLightboxIndex - 1 + pkg.galleryImages!.length) %
+                      pkg.galleryImages!.length
+                  );
+                }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 flex items-center justify-center transition-all hover:scale-110 cursor-pointer shadow-lg"
+                title="Previous Photo (Left Arrow)"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+
+              {/* Next Arrow */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setGalleryLightboxIndex(
+                    (galleryLightboxIndex + 1) % pkg.galleryImages!.length
+                  );
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 flex items-center justify-center transition-all hover:scale-110 cursor-pointer shadow-lg"
+                title="Next Photo (Right Arrow)"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Thumbnails Strip */}
+            <div className="mt-4 flex items-center justify-center gap-2 overflow-x-auto max-w-full py-1">
+              {pkg.galleryImages.map((tImg, tIdx) => (
+                <button
+                  type="button"
+                  key={tIdx}
+                  onClick={() => setGalleryLightboxIndex(tIdx)}
+                  className={`relative w-12 h-9 sm:w-16 sm:h-12 rounded-lg overflow-hidden shrink-0 transition-all border-2 cursor-pointer ${
+                    galleryLightboxIndex === tIdx
+                      ? "border-[#FF5A3C] scale-105 shadow-md shadow-[#FF5A3C]/40"
+                      : "border-transparent opacity-50 hover:opacity-100"
+                  }`}
+                  title={`Photo ${tIdx + 1}`}
+                >
+                  <Image src={tImg} alt={`thumb ${tIdx + 1}`} fill className="object-cover" />
+                </button>
+              ))}
             </div>
           </div>
         </div>

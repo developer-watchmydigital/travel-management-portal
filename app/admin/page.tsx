@@ -58,6 +58,7 @@ export default function AdminPage() {
   const [packages, setPackages] = useState<CuratedPackage[]>([]);
   const [packageFilterState, setPackageFilterState] = useState<string>("all");
   const [packageSearchQuery, setPackageSearchQuery] = useState("");
+  const [packagePage, setPackagePage] = useState(1);
   const [isPackageModalOpen, setIsPackageModalOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<CuratedPackage | null>(null);
   const [pkgFormData, setPkgFormData] = useState<Partial<CuratedPackage>>({
@@ -246,10 +247,13 @@ export default function AdminPage() {
         ? pkg.detailedInclusions.map((d) => ({ ...d }))
         : (pkg.inclusions || []).map((inc, idx) => ({
             id: `inc-${Date.now()}-${idx}`,
+            category: "Included Service",
             title: inc,
             description: "Service included with package guarantee.",
             image: "",
           })),
+      flyerImage: pkg.flyerImage || "",
+      galleryImages: pkg.galleryImages ? [...pkg.galleryImages] : [],
       exclusions: [...(pkg.exclusions || [])],
     });
     setIsPackageModalOpen(true);
@@ -270,6 +274,7 @@ export default function AdminPage() {
         ...current,
         {
           id: "inc-" + Date.now(),
+          category: "Included Service",
           title: "",
           description: "",
           image: "",
@@ -278,7 +283,11 @@ export default function AdminPage() {
     });
   };
 
-  const handleUpdateDetailedInclusion = (index: number, field: "title" | "description" | "image", value: string) => {
+  const handleUpdateDetailedInclusion = (
+    index: number,
+    field: "title" | "description" | "image" | "category",
+    value: string
+  ) => {
     const updated = [...(pkgFormData.detailedInclusions || [])];
     if (updated[index]) {
       updated[index] = { ...updated[index], [field]: value };
@@ -289,6 +298,23 @@ export default function AdminPage() {
   const handleRemoveDetailedInclusion = (index: number) => {
     const updated = (pkgFormData.detailedInclusions || []).filter((_, i) => i !== index);
     setPkgFormData({ ...pkgFormData, detailedInclusions: updated });
+  };
+
+  const handleUpdateGalleryImage = (index: number, value: string) => {
+    const updated = [...(pkgFormData.galleryImages || [])];
+    updated[index] = value;
+    setPkgFormData({ ...pkgFormData, galleryImages: updated });
+  };
+
+  const handleAddGalleryImage = () => {
+    const updated = [...(pkgFormData.galleryImages || [])];
+    updated.push("https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop");
+    setPkgFormData({ ...pkgFormData, galleryImages: updated });
+  };
+
+  const handleRemoveGalleryImage = (index: number) => {
+    const updated = (pkgFormData.galleryImages || []).filter((_, i) => i !== index);
+    setPkgFormData({ ...pkgFormData, galleryImages: updated });
   };
 
   const handleSavePackage = (e: React.FormEvent) => {
@@ -312,6 +338,8 @@ export default function AdminPage() {
       categoryBadge: pkgFormData.categoryBadge || "Holiday Tour",
       badgeGradient: pkgFormData.badgeGradient || "from-pink-500 to-rose-500",
       image: pkgFormData.image || "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop",
+      flyerImage: pkgFormData.flyerImage ? pkgFormData.flyerImage.trim() : undefined,
+      galleryImages: (pkgFormData.galleryImages && pkgFormData.galleryImages.length > 0) ? pkgFormData.galleryImages : undefined,
       originalPrice: pkgFormData.originalPrice || "0",
       discountedPrice: pkgFormData.discountedPrice || "0",
       savings: calculatedSavings,
@@ -368,6 +396,13 @@ export default function AdminPage() {
       (pkg.route && pkg.route.toLowerCase().includes(packageSearchQuery.toLowerCase()));
     return matchesState && matchesSearch;
   });
+
+  const packagesPerPage = 9;
+  const totalPackagePages = Math.max(1, Math.ceil(filteredPackages.length / packagesPerPage));
+  const paginatedPackages = filteredPackages.slice(
+    (packagePage - 1) * packagesPerPage,
+    packagePage * packagesPerPage
+  );
 
   // Filtered Leads
   const filteredLeads = leads.filter((lead) => {
@@ -840,7 +875,10 @@ export default function AdminPage() {
                   <input
                     type="text"
                     value={packageSearchQuery}
-                    onChange={(e) => setPackageSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setPackageSearchQuery(e.target.value);
+                      setPackagePage(1);
+                    }}
                     placeholder="Search packages..."
                     className="w-full pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#FF5A3C]"
                   />
@@ -849,7 +887,10 @@ export default function AdminPage() {
                 {/* State Filter Dropdown */}
                 <select
                   value={packageFilterState}
-                  onChange={(e) => setPackageFilterState(e.target.value)}
+                  onChange={(e) => {
+                    setPackageFilterState(e.target.value);
+                    setPackagePage(1);
+                  }}
                   className="px-3 py-2 rounded-xl bg-[#0F172A] border border-white/10 text-xs text-white focus:outline-none focus:border-[#FF5A3C]"
                 >
                   <option value="all">All States ({packages.length})</option>
@@ -877,7 +918,10 @@ export default function AdminPage() {
             {/* Quick State Pills Bar */}
             <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-thin">
               <button
-                onClick={() => setPackageFilterState("all")}
+                onClick={() => {
+                  setPackageFilterState("all");
+                  setPackagePage(1);
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   packageFilterState === "all"
                     ? "bg-[#FF5A3C] text-white shadow-md shadow-[#FF5A3C]/20"
@@ -891,7 +935,10 @@ export default function AdminPage() {
                 return (
                   <button
                     key={st}
-                    onClick={() => setPackageFilterState(st)}
+                    onClick={() => {
+                      setPackageFilterState(st);
+                      setPackagePage(1);
+                    }}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                       packageFilterState === st
                         ? "bg-[#FF5A3C] text-white shadow-md shadow-[#FF5A3C]/20"
@@ -932,132 +979,184 @@ export default function AdminPage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredPackages.map((pkg) => (
-                  <div
-                    key={pkg.id}
-                    className="p-5 rounded-2xl bg-[#0F172A] border border-white/10 backdrop-blur-md flex flex-col justify-between hover:border-white/20 transition-all"
-                  >
-                    <div>
-                      {/* Image with badges */}
-                      <div className="relative h-44 w-full rounded-xl overflow-hidden mb-4 bg-slate-800">
-                        <Image
-                          src={pkg.image}
-                          alt={pkg.title}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-black/40" />
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {paginatedPackages.map((pkg) => (
+                    <div
+                      key={pkg.id}
+                      className="p-5 rounded-2xl bg-[#0F172A] border border-white/10 backdrop-blur-md flex flex-col justify-between hover:border-white/20 transition-all"
+                    >
+                      <div>
+                        {/* Image with badges */}
+                        <div className="relative h-44 w-full rounded-xl overflow-hidden mb-4 bg-slate-800">
+                          <Image
+                            src={pkg.image}
+                            alt={pkg.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-black/40" />
 
-                        {/* State badge */}
-                        <div className="absolute top-3 left-3 bg-[#FF5A3C] text-white text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md shadow-md">
-                          {pkg.state}
+                          {/* State badge */}
+                          <div className="absolute top-3 left-3 bg-[#FF5A3C] text-white text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md shadow-md">
+                            {pkg.state}
+                          </div>
+
+                          {/* Duration badge */}
+                          <div className="absolute top-3 right-3 bg-black/75 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/15 flex items-center gap-1.5 shadow-md">
+                            <Clock className="w-3 h-3 text-amber-400" />
+                            <span>{pkg.duration}</span>
+                          </div>
+
+                          {/* Category badge */}
+                          <div className="absolute bottom-3 left-3">
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-md bg-gradient-to-r ${
+                                pkg.badgeGradient || "from-pink-500 to-rose-500"
+                              }`}
+                            >
+                              {pkg.categoryBadge}
+                            </span>
+                          </div>
                         </div>
 
-                        {/* Duration badge */}
-                        <div className="absolute top-3 right-3 bg-black/75 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/15 flex items-center gap-1.5 shadow-md">
-                          <Clock className="w-3 h-3 text-amber-400" />
-                          <span>{pkg.duration}</span>
+                        {/* Route & Title */}
+                        <div className="text-[11px] text-amber-400 font-semibold flex items-center gap-1 mb-1">
+                          <MapPin className="w-3 h-3" />
+                          <span>{pkg.route}</span>
                         </div>
 
-                        {/* Category badge */}
-                        <div className="absolute bottom-3 left-3">
-                          <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-md bg-gradient-to-r ${
-                              pkg.badgeGradient || "from-pink-500 to-rose-500"
-                            }`}
-                          >
-                            {pkg.categoryBadge}
+                        <h4 className="text-base font-bold text-white font-['Outfit'] line-clamp-2 mb-1">
+                          {pkg.title}
+                        </h4>
+                        {pkg.subtitle && (
+                          <p className="text-xs text-slate-400 line-clamp-1 mb-3">{pkg.subtitle}</p>
+                        )}
+
+                        {/* Highlights */}
+                        <div className="space-y-1 mb-4">
+                          {(pkg.highlights || []).slice(0, 3).map((hl, i) => (
+                            <div key={i} className="flex items-center gap-1.5 text-xs text-slate-300">
+                              <Check className="w-3 h-3 text-emerald-400 shrink-0" />
+                              <span className="truncate">{hl}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Itinerary & Inclusion stats */}
+                        <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-[11px] text-slate-300 flex items-center justify-between mb-4">
+                          <span className="text-slate-400">Itinerary & Services</span>
+                          <span className="font-bold text-white flex items-center gap-1.5">
+                            <span>{(pkg.itinerary || []).length} Days</span>
+                            <span className="text-slate-500">•</span>
+                            <span className="text-emerald-400">
+                              {(pkg.detailedInclusions || []).length} Services
+                            </span>
                           </span>
                         </div>
                       </div>
 
-                      {/* Route & Title */}
-                      <div className="text-[11px] text-amber-400 font-semibold flex items-center gap-1 mb-1">
-                        <MapPin className="w-3 h-3" />
-                        <span>{pkg.route}</span>
-                      </div>
-
-                      <h4 className="text-base font-bold text-white font-['Outfit'] line-clamp-2 mb-1">
-                        {pkg.title}
-                      </h4>
-                      {pkg.subtitle && (
-                        <p className="text-xs text-slate-400 line-clamp-1 mb-3">{pkg.subtitle}</p>
-                      )}
-
-                      {/* Highlights */}
-                      <div className="space-y-1 mb-4">
-                        {(pkg.highlights || []).slice(0, 3).map((hl, i) => (
-                          <div key={i} className="flex items-center gap-1.5 text-xs text-slate-300">
-                            <Check className="w-3 h-3 text-emerald-400 shrink-0" />
-                            <span className="truncate">{hl}</span>
+                      <div>
+                        {/* Price row */}
+                        <div className="flex items-baseline justify-between border-t border-white/10 pt-3 mb-4">
+                          <div>
+                            <div className="text-[11px] text-slate-400">
+                              Starting from{" "}
+                              <span className="line-through text-slate-500">₹{pkg.originalPrice}</span>
+                            </div>
+                            <div className="text-xl font-extrabold text-white font-['Outfit']">
+                              ₹{pkg.discountedPrice}
+                              <span className="text-[10px] font-normal text-slate-400 ml-1">/ person</span>
+                            </div>
                           </div>
-                        ))}
-                      </div>
 
-                      {/* Itinerary & Inclusion stats */}
-                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-[11px] text-slate-300 flex items-center justify-between mb-4">
-                        <span className="text-slate-400">Itinerary & Services</span>
-                        <span className="font-bold text-white flex items-center gap-1.5">
-                          <span>{(pkg.itinerary || []).length} Days</span>
-                          <span className="text-slate-500">•</span>
-                          <span className="text-emerald-400">{(pkg.detailedInclusions || []).length} Services</span>
-                        </span>
+                          {pkg.savings && (
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                              Save ₹{pkg.savings}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/packages/${pkg.id}`}
+                            target="_blank"
+                            className="p-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 transition-colors flex items-center justify-center"
+                            title="Open Live Itinerary Page"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Link>
+
+                          <button
+                            onClick={() => handleOpenEditPackage(pkg)}
+                            className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                          >
+                            <Edit className="w-3.5 h-3.5 text-amber-400" />
+                            <span>Edit Package</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleDeletePackage(pkg.id)}
+                            className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors"
+                            title="Delete Package"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
 
-                    <div>
-                      {/* Price row */}
-                      <div className="flex items-baseline justify-between border-t border-white/10 pt-3 mb-4">
-                        <div>
-                          <div className="text-[11px] text-slate-400">
-                            Starting from{" "}
-                            <span className="line-through text-slate-500">₹{pkg.originalPrice}</span>
-                          </div>
-                          <div className="text-xl font-extrabold text-white font-['Outfit']">
-                            ₹{pkg.discountedPrice}
-                            <span className="text-[10px] font-normal text-slate-400 ml-1">/ person</span>
-                          </div>
-                        </div>
+                {/* Pagination Controls */}
+                {totalPackagePages > 1 && (
+                  <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[#0F172A] border border-white/10">
+                    <span className="text-xs text-slate-400">
+                      Showing <strong className="text-white">{(packagePage - 1) * packagesPerPage + 1}</strong> to{" "}
+                      <strong className="text-white">
+                        {Math.min(packagePage * packagesPerPage, filteredPackages.length)}
+                      </strong>{" "}
+                      of <strong className="text-white">{filteredPackages.length}</strong> packages
+                    </span>
 
-                        {pkg.savings && (
-                          <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
-                            Save ₹{pkg.savings}
-                          </span>
-                        )}
-                      </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        disabled={packagePage === 1}
+                        onClick={() => setPackagePage((p) => Math.max(1, p - 1))}
+                        className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold text-white transition-colors"
+                      >
+                        Previous
+                      </button>
 
-                      {/* Action buttons */}
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/packages/${pkg.id}`}
-                          target="_blank"
-                          className="p-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/20 transition-colors flex items-center justify-center"
-                          title="Open Live Itinerary Page"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Link>
-
+                      {Array.from({ length: totalPackagePages }, (_, i) => i + 1).map((num) => (
                         <button
-                          onClick={() => handleOpenEditPackage(pkg)}
-                          className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                          key={num}
+                          type="button"
+                          onClick={() => setPackagePage(num)}
+                          className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
+                            packagePage === num
+                              ? "bg-[#FF5A3C] text-white shadow-md shadow-[#FF5A3C]/30"
+                              : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+                          }`}
                         >
-                          <Edit className="w-3.5 h-3.5 text-amber-400" />
-                          <span>Edit Package</span>
+                          {num}
                         </button>
+                      ))}
 
-                        <button
-                          onClick={() => handleDeletePackage(pkg.id)}
-                          className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors"
-                          title="Delete Package"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        disabled={packagePage === totalPackagePages}
+                        onClick={() => setPackagePage((p) => Math.min(totalPackagePages, p + 1))}
+                        className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold text-white transition-colors"
+                      >
+                        Next
+                      </button>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>
@@ -1196,15 +1295,27 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-slate-300 mb-1 font-medium">Cover Image URL</label>
-                      <input
-                        type="url"
-                        placeholder="https://images.unsplash.com/photo-..."
-                        value={pkgFormData.image || ""}
-                        onChange={(e) => setPkgFormData({ ...pkgFormData, image: e.target.value })}
-                        className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Cover Image URL</label>
+                        <input
+                          type="url"
+                          placeholder="https://images.unsplash.com/photo-..."
+                          value={pkgFormData.image || ""}
+                          onChange={(e) => setPkgFormData({ ...pkgFormData, image: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-slate-300 mb-1 font-medium">Official Flyer Image URL (Optional)</label>
+                        <input
+                          type="text"
+                          placeholder="/goa-packages/package_01_luxury_3n4d.jpg"
+                          value={pkgFormData.flyerImage || ""}
+                          onChange={(e) => setPkgFormData({ ...pkgFormData, flyerImage: e.target.value })}
+                          className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -1449,17 +1560,31 @@ export default function AdminPage() {
                             </div>
 
                             <div className="space-y-3">
-                              <div>
-                                <label className="block text-[11px] text-slate-400 mb-1">
-                                  Service Title *
-                                </label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g. Grand Island Scuba Diving & Dolphin Safari Cruise"
-                                  value={item.title}
-                                  onChange={(e) => handleUpdateDetailedInclusion(idx, "title", e.target.value)}
-                                  className="w-full px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
-                                />
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div className="sm:col-span-2">
+                                  <label className="block text-[11px] text-slate-400 mb-1">
+                                    Service Title *
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. Grand Island Scuba Diving & Dolphin Safari Cruise"
+                                    value={item.title}
+                                    onChange={(e) => handleUpdateDetailedInclusion(idx, "title", e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[11px] text-slate-400 mb-1">
+                                    Category Badge (Optional)
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. Watersports, Cruise, Spa"
+                                    value={item.category || ""}
+                                    onChange={(e) => handleUpdateDetailedInclusion(idx, "category", e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
+                                  />
+                                </div>
                               </div>
 
                               <div>
@@ -1509,6 +1634,69 @@ export default function AdminPage() {
                           </div>
                         );
                       })}
+                    </div>
+                  </div>
+
+                  {/* 7. 10-Photo Visual Experience Gallery */}
+                  <div className="space-y-4 pt-4 border-t border-white/10">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>7. 10-Photo Visual Experience Gallery</span>
+                        </h4>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          HD photo gallery showcase for the Itinerary page. Enter image URLs for high-resolution gallery view & interactive lightbox.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleAddGalleryImage}
+                        className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-[11px] font-semibold border border-cyan-500/30 transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Photo</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {(pkgFormData.galleryImages || []).map((imgUrl, gIdx) => (
+                        <div
+                          key={gIdx}
+                          className="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-3"
+                        >
+                          <div className="relative w-14 h-12 rounded-lg overflow-hidden border border-white/20 shrink-0 bg-black">
+                            <Image
+                              src={imgUrl}
+                              alt={`Gallery ${gIdx + 1}`}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="block text-[10px] text-slate-400 mb-1 font-semibold">
+                              Photo #{gIdx + 1}
+                            </span>
+                            <input
+                              type="url"
+                              value={imgUrl}
+                              onChange={(e) => handleUpdateGalleryImage(gIdx, e.target.value)}
+                              placeholder="https://images.unsplash.com/..."
+                              className="w-full px-2.5 py-1.5 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveGalleryImage(gIdx)}
+                            className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-colors"
+                            title="Remove Photo"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
@@ -1782,7 +1970,7 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 mb-1 font-medium">WhatsApp Number (e.g. 919427286755)</label>
+                  <label className="block text-slate-300 mb-1 font-medium">WhatsApp Number (e.g. 919588667027)</label>
                   <input
                     type="text"
                     value={companyInfo.whatsapp}

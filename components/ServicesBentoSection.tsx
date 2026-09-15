@@ -184,10 +184,10 @@ export const ServicesBentoSection: React.FC = () => {
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <a
-              href="tel:+919427286755"
+              href="tel:+919588667027"
               className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-white/10 dark:hover:bg-white/20 border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white font-semibold text-xs tracking-wide transition-all shadow-sm"
             >
-              Call Us: +91 94272 86755
+              Call Us: +91 95886 67027
             </a>
             <Link
               href="#contact"

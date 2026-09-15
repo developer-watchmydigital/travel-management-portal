@@ -27,7 +27,7 @@ import { CuratedPackage } from "@/lib/types";
 import { curatedRegionsList, initialCuratedPackages } from "@/lib/initialData";
 import { getStoredPackages } from "@/lib/storage";
 
-const ITEMS_PER_PAGE = 4;
+const ITEMS_PER_PAGE = 8;
 
 export const CuratedExperiencesSection: React.FC = () => {
   const [selectedRegion, setSelectedRegion] = useState<string>("Goa");
@@ -205,7 +205,7 @@ export const CuratedExperiencesSection: React.FC = () => {
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-[#FF5A3C] hover:text-[#FF5A3C]"
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
-                  <span>{isViewAll ? "Show 4 per page" : `View All (${totalPackages})`}</span>
+                  <span>{isViewAll ? `Show ${ITEMS_PER_PAGE} per page` : `View All (${totalPackages})`}</span>
                 </button>
               )}
             </div>
@@ -318,7 +318,7 @@ export const CuratedExperiencesSection: React.FC = () => {
                       {/* Action Buttons: Phone, WhatsApp, View Itinerary */}
                       <div className="flex items-center gap-2">
                         <a
-                          href="tel:+919427286755"
+                          href="tel:+919588667027"
                           className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 hover:border-[#FF5A3C] text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] transition-colors"
                           title="Call Watch My Trip Package Goa"
                         >
@@ -326,7 +326,7 @@ export const CuratedExperiencesSection: React.FC = () => {
                         </a>
 
                         <a
-                          href={`https://wa.me/919427286755?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20am%20interested%20in%20booking%20the%20${encodeURIComponent(
+                          href={`https://wa.me/919588667027?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20am%20interested%20in%20booking%20the%20${encodeURIComponent(
                             pkg.title
                           )}.`}
                           target="_blank"
@@ -372,7 +372,7 @@ export const CuratedExperiencesSection: React.FC = () => {
                         <span>Prev</span>
                       </button>
 
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                           <button
                             key={page}
@@ -426,7 +426,7 @@ export const CuratedExperiencesSection: React.FC = () => {
                       className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white border border-slate-300 dark:border-white/20 text-xs font-bold transition-all cursor-pointer active:scale-95"
                     >
                       <Layers className="w-4 h-4 text-[#FF5A3C]" />
-                      <span>Collapse to 4 Per Page</span>
+                      <span>Collapse to {ITEMS_PER_PAGE} Per Page</span>
                     </button>
                   </div>
                 )}
@@ -463,7 +463,7 @@ export const CuratedExperiencesSection: React.FC = () => {
               </button>
 
               <a
-                href={`https://wa.me/919427286755?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20want%20to%20inquire%20about%20a%20custom%20trip%20for%20${encodeURIComponent(
+                href={`https://wa.me/919588667027?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20want%20to%20inquire%20about%20a%20custom%20trip%20for%20${encodeURIComponent(
                   selectedRegion
                 )}.`}
                 target="_blank"
@@ -632,7 +632,7 @@ export const CuratedExperiencesSection: React.FC = () => {
                   </button>
 
                   <a
-                    href={`https://wa.me/919427286755?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20want%20to%20book%20the%20${encodeURIComponent(
+                    href={`https://wa.me/919588667027?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20want%20to%20book%20the%20${encodeURIComponent(
                       selectedPackage.title
                     )}.`}
                     target="_blank"

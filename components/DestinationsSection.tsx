@@ -19,16 +19,30 @@ import {
 } from "lucide-react";
 import { Destination } from "@/lib/types";
 import { destinationsData } from "@/lib/initialData";
+import { getStoredDestinations } from "@/lib/storage";
 import { MagicBentoCard } from "./ui/MagicBentoCard";
 
 export const DestinationsSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"india" | "international">("india");
+  const [destinations, setDestinations] = useState<Destination[]>(destinationsData);
   const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    const local = getStoredDestinations();
+    setDestinations(local);
+
+    // Fetch live from database API
+    fetch("/api/destinations")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.isSupabaseActive && data?.destinations && data.destinations.length > 0) {
+          setDestinations(data.destinations);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -60,7 +74,7 @@ export const DestinationsSection: React.FC = () => {
 
   const fallbackImage = "https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?q=80&w=800&auto=format&fit=crop";
 
-  const filteredDestinations = destinationsData.filter(
+  const filteredDestinations = destinations.filter(
     (d) => d.category === activeTab
   );
 
@@ -303,7 +317,7 @@ export const DestinationsSection: React.FC = () => {
                 </button>
 
                 <a
-                  href={`https://wa.me/919588667027?text=Hello%20Small%20Daddy%20Plus!%20I%20want%20to%20inquire%20about%20a%20trip%20for%20${encodeURIComponent(
+                  href={`https://wa.me/919588667027?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20want%20to%20inquire%20about%20a%20tour%20for%20${encodeURIComponent(
                     selectedDestination.name
                   )}.`}
                   target="_blank"

@@ -35,15 +35,16 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getStoredPackageById, getStoredCompanyInfo, saveLead } from "@/lib/storage";
 import { CuratedPackage, CompanyInfo } from "@/lib/types";
+import { getPerDayPrice, calculateTravelersTotal } from "@/lib/pricing";
 
-export default function PackageDetailPage() {
-  const params = useParams();
+export default function PackageDetailPage({ params: propParams }: { params?: { id?: string } }) {
+  const clientParams = useParams();
   const router = useRouter();
-  const packageId = params?.id as string;
+  const packageId = (clientParams?.id as string) || (propParams?.id as string) || "";
 
-  const [pkg, setPkg] = useState<CuratedPackage | null>(null);
-  const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [pkg, setPkg] = useState<CuratedPackage | null>(() => (packageId ? getStoredPackageById(packageId) || null : null));
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(() => getStoredCompanyInfo());
+  const [loading, setLoading] = useState(() => (packageId && getStoredPackageById(packageId) ? false : true));
   const [copiedShare, setCopiedShare] = useState(false);
   const [isFlyerModalOpen, setIsFlyerModalOpen] = useState(false);
   const [galleryLightboxIndex, setGalleryLightboxIndex] = useState<number | null>(null);
@@ -57,8 +58,14 @@ export default function PackageDetailPage() {
     email: "",
     travelDate: "",
     travelersCount: "2",
+    customTravelers: "",
     specialRequests: "",
   });
+
+  const numTravelers =
+    bookingForm.travelersCount === "custom"
+      ? Math.max(1, parseInt(bookingForm.customTravelers || "1", 10) || 1)
+      : parseInt(bookingForm.travelersCount || "1", 10);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -67,9 +74,24 @@ export default function PackageDetailPage() {
         const found = getStoredPackageById(packageId);
         if (found) {
           setPkg(found);
+          setLoading(false);
         }
+        // Check API in case package was updated or added in database
+        fetch("/api/packages")
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data?.packages) {
+              const livePkg = data.packages.find((p: CuratedPackage) => p.id === packageId);
+              if (livePkg) {
+                setPkg(livePkg);
+              }
+            }
+          })
+          .catch(() => {})
+          .finally(() => setLoading(false));
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     }
   }, [packageId]);
 
@@ -113,8 +135,11 @@ export default function PackageDetailPage() {
       return;
     }
 
-    saveLead({
-      type: "package",
+    const calculatedTotal = calculateTravelersTotal(pkg?.discountedPrice || "0", numTravelers);
+    const perDay = getPerDayPrice(pkg?.discountedPrice || "0", pkg?.duration || "4 Days");
+
+    const leadPayload = {
+      type: "package" as const,
       fullName: bookingForm.fullName,
       phone: bookingForm.phone,
       email: bookingForm.email,
@@ -128,14 +153,46 @@ export default function PackageDetailPage() {
           gender: "Not Specified",
         },
       ],
-      specialRequirements: `No. of Travelers: ${bookingForm.travelersCount}. Notes: ${bookingForm.specialRequests || "None"}`,
-    });
+      specialRequirements: `Travelers: ${numTravelers} ${numTravelers === 1 ? "Person" : "Persons"}. Total Tour Cost: ₹${calculatedTotal} (₹${perDay}/Day). Notes: ${bookingForm.specialRequests || "None"}`,
+    };
+
+    saveLead(leadPayload);
+
+    // Asynchronously send to server API for central Supabase storage
+    fetch("/api/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(leadPayload),
+    }).catch((e) => console.error("Supabase lead sync error:", e));
+
+    // Automatically launch WhatsApp with pre-filled booking details
+    const waPhone = companyInfo?.whatsapp || "919588667027";
+    const inquiryWhatsAppText = `*New Booking Request - Watch My Trip Package Goa*%0A%0A*Package:* ${encodeURIComponent(
+      pkg?.title || ""
+    )} (${encodeURIComponent(pkg?.duration || "")})%0A*Total Tour Cost:* ₹${encodeURIComponent(
+      calculatedTotal
+    )} (${numTravelers} ${numTravelers === 1 ? "Person" : "Persons"} @ ₹${encodeURIComponent(
+      pkg?.discountedPrice || ""
+    )}/person)%0A*Per Day Rate:* ₹${encodeURIComponent(
+      perDay
+    )}/day%0A*Name:* ${encodeURIComponent(bookingForm.fullName)}%0A*Phone:* ${encodeURIComponent(
+      bookingForm.phone
+    )}%0A*Email:* ${encodeURIComponent(
+      bookingForm.email || "N/A"
+    )}%0A*Travel Date:* ${encodeURIComponent(
+      bookingForm.travelDate || "Flexible"
+    )}%0A*Total Travelers:* ${numTravelers}%0A*Special Notes:* ${encodeURIComponent(bookingForm.specialRequests || "None")}`;
+
+    const directWhatsAppUrl = `https://wa.me/${waPhone}?text=${inquiryWhatsAppText}`;
+    if (typeof window !== "undefined") {
+      window.open(directWhatsAppUrl, "_blank");
+    }
 
     setFormSubmitted(true);
     setTimeout(() => {
       setFormSubmitted(false);
       setIsModalOpen(false);
-    }, 2800);
+    }, 3000);
   };
 
   const phoneCall = companyInfo?.phones?.[0] || "+91 95886 67027";
@@ -338,6 +395,13 @@ export default function PackageDetailPage() {
                     )}
                     <span className="text-xs text-slate-300">/ person</span>
                   </div>
+
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/15 border border-white/20 text-amber-300 text-xs font-bold mt-1.5">
+                    <span>₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} / Day</span>
+                    <span>•</span>
+                    <span>{pkg.duration}</span>
+                  </div>
+
                   <p className="text-[11px] text-slate-400 mt-1">
                     *Taxes & booking fees included. Customizable.
                   </p>
@@ -360,6 +424,14 @@ export default function PackageDetailPage() {
                   >
                     <MessageCircle className="w-4 h-4 fill-white" />
                     <span>WhatsApp Itinerary</span>
+                  </a>
+
+                  <a
+                    href={`tel:${phoneCall}`}
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white font-bold text-xs backdrop-blur-md transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Call Direct: {phoneCall}</span>
                   </a>
                 </div>
               </div>
@@ -586,7 +658,7 @@ export default function PackageDetailPage() {
             </section>
 
             {/* ========================================================================= */}
-            {/* SECTION: 10-PHOTO VISUAL EXPERIENCE GALLERY */}
+            {/* SECTION: 6-PHOTO VISUAL EXPERIENCE GALLERY */}
             {/* ========================================================================= */}
             {pkg.galleryImages && pkg.galleryImages.length > 0 && (
               <section id="gallery" className="scroll-mt-28">
@@ -594,22 +666,22 @@ export default function PackageDetailPage() {
                   <div>
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold uppercase tracking-wider">
                       <Camera className="w-3.5 h-3.5" />
-                      <span>Visual Experience Gallery</span>
+                      <span>Experience Highlights</span>
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-['Outfit'] mt-2">
-                      Tour Photos & Moments (10 Verified Visuals)
+                      Captivating Tour Moments & Sights
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
-                      High-definition photos capturing your hotels, dinner cruise, party boat, sightseeing spots, and activities. Click any image to view in full-screen gallery.
+                      Get a vivid glimpse of the scenic coastlines, luxury stays, exciting island adventures, and sunset cruises included in your tour. Tap any photo to expand.
                     </p>
                   </div>
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium shrink-0">
-                    10 HD Photos
+                    6 Curated Moments
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-                  {pkg.galleryImages.slice(0, 10).map((imgUrl, gIdx) => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 sm:gap-4">
+                  {pkg.galleryImages.slice(0, 6).map((imgUrl, gIdx) => (
                     <div
                       key={gIdx}
                       onClick={() => setGalleryLightboxIndex(gIdx)}
@@ -620,15 +692,15 @@ export default function PackageDetailPage() {
                         src={imgUrl}
                         alt={`Experience photo ${gIdx + 1}`}
                         fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
+                        sizes="(max-width: 640px) 50vw, 33vw"
                         className="object-cover object-center group-hover:scale-110 transition-transform duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2.5">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
                         <span className="self-end p-1.5 rounded-lg bg-black/60 text-white backdrop-blur-sm shadow-md">
                           <Maximize2 className="w-3.5 h-3.5" />
                         </span>
-                        <span className="text-[10px] font-extrabold text-white tracking-wide">
-                          Photo {String(gIdx + 1).padStart(2, "0")} / 10
+                        <span className="text-xs font-extrabold text-white tracking-wide">
+                          Moment {String(gIdx + 1).padStart(2, "0")} / 06
                         </span>
                       </div>
                     </div>
@@ -757,8 +829,12 @@ export default function PackageDetailPage() {
                   </h3>
                 </div>
                 <div className="text-right">
+                  <div className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-extrabold mb-1">
+                    ₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} / Day
+                  </div>
                   <div className="text-2xl font-black text-slate-900 dark:text-white font-['Outfit']">
                     ₹{pkg.discountedPrice}
+                    <span className="text-xs font-normal text-slate-400 ml-1">/ person</span>
                   </div>
                   {pkg.originalPrice && (
                     <div className="text-xs text-slate-400 line-through">₹{pkg.originalPrice}</div>
@@ -817,11 +893,57 @@ export default function PackageDetailPage() {
                       onChange={(e) => setBookingForm({ ...bookingForm, travelersCount: e.target.value })}
                       className="w-full px-2.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#070B18] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
                     >
-                      <option value="1">1 Person (Solo)</option>
-                      <option value="2">2 Persons (Couple)</option>
-                      <option value="3-4">3-4 Persons (Family)</option>
-                      <option value="5+">5+ Persons (Group)</option>
+                      <option value="1">1 Person</option>
+                      <option value="2">2 Persons</option>
+                      <option value="3">3 Persons</option>
+                      <option value="4">4 Persons</option>
+                      <option value="5">5 Persons</option>
+                      <option value="custom">Custom Travelers...</option>
                     </select>
+                  </div>
+                </div>
+
+                {bookingForm.travelersCount === "custom" && (
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#080D21] border border-slate-200 dark:border-white/10">
+                    <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      Enter Number of Travelers *
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="200"
+                      placeholder="e.g. 8"
+                      value={bookingForm.customTravelers}
+                      onChange={(e) => setBookingForm({ ...bookingForm, customTravelers: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#0C1226] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
+                    />
+                  </div>
+                )}
+
+                {/* Dynamic Price Calculation Box */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-rose-500/10 border border-orange-500/20 dark:border-orange-500/30">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-slate-600 dark:text-slate-300 font-medium">Selected Travelers:</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">
+                      {numTravelers} {numTravelers === 1 ? "Person" : "Persons"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <span className="text-slate-600 dark:text-slate-300 font-medium">Daily Breakdown:</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      ₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} / Day
+                    </span>
+                  </div>
+                  <div className="pt-2 border-t border-orange-500/20 flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                      Total Package Cost:
+                    </span>
+                    <span className="text-base font-extrabold text-[#FF5A3C] font-['Outfit']">
+                      ₹{calculateTravelersTotal(pkg.discountedPrice, numTravelers)}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-0.5 text-right">
+                    (₹{pkg.discountedPrice} × {numTravelers} {numTravelers === 1 ? "Person" : "Persons"})
                   </div>
                 </div>
 
@@ -962,96 +1084,100 @@ export default function PackageDetailPage() {
         </div>
       )}
 
-      {/* POPUP MODAL FOR 10-PHOTO EXPERIENCE GALLERY LIGHTBOX */}
+      {/* POPUP MODAL FOR 6-MOMENT EXPERIENCE GALLERY LIGHTBOX */}
       {galleryLightboxIndex !== null && pkg.galleryImages && (
         <div
           className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-3 sm:p-6"
           onClick={() => setGalleryLightboxIndex(null)}
         >
-          <div
-            className="relative max-w-5xl w-full flex flex-col items-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Top Bar: Counter & Close */}
-            <div className="w-full flex items-center justify-between text-white pb-3 mb-2 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <Camera className="w-4 h-4 text-[#FF5A3C]" />
-                <span className="text-xs sm:text-sm font-bold">
-                  Photo {galleryLightboxIndex + 1} of {pkg.galleryImages.length}
-                </span>
-                <span className="text-xs text-slate-400 hidden sm:inline">• {pkg.title}</span>
+          {(() => {
+            const galleryList = (pkg.galleryImages || []).slice(0, 6);
+            return (
+              <div
+                className="relative max-w-5xl w-full flex flex-col items-center"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Top Bar: Counter & Close */}
+                <div className="w-full flex items-center justify-between text-white pb-3 mb-2 border-b border-white/10">
+                  <div className="flex items-center gap-2">
+                    <Camera className="w-4 h-4 text-[#FF5A3C]" />
+                    <span className="text-xs sm:text-sm font-bold">
+                      Moment {galleryLightboxIndex + 1} of {galleryList.length}
+                    </span>
+                    <span className="text-xs text-slate-400 hidden sm:inline">• {pkg.title}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setGalleryLightboxIndex(null)}
+                    className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                    title="Close Lightbox (Esc)"
+                  >
+                    <XCircle className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Main Image View */}
+                <div className="relative w-full aspect-[16/10] max-h-[72vh] rounded-2xl overflow-hidden bg-black/60 border border-white/15 shadow-2xl">
+                  <Image
+                    src={galleryList[galleryLightboxIndex] || galleryList[0]}
+                    alt={`Moment image ${galleryLightboxIndex + 1}`}
+                    fill
+                    priority
+                    className="object-contain"
+                  />
+
+                  {/* Prev Arrow */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGalleryLightboxIndex(
+                        (galleryLightboxIndex - 1 + galleryList.length) % galleryList.length
+                      );
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 flex items-center justify-center transition-all hover:scale-110 cursor-pointer shadow-lg"
+                    title="Previous Moment (Left Arrow)"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+
+                  {/* Next Arrow */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGalleryLightboxIndex(
+                        (galleryLightboxIndex + 1) % galleryList.length
+                      );
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 flex items-center justify-center transition-all hover:scale-110 cursor-pointer shadow-lg"
+                    title="Next Moment (Right Arrow)"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Thumbnails Strip */}
+                <div className="mt-4 flex items-center justify-center gap-2 overflow-x-auto max-w-full py-1">
+                  {galleryList.map((tImg, tIdx) => (
+                    <button
+                      type="button"
+                      key={tIdx}
+                      onClick={() => setGalleryLightboxIndex(tIdx)}
+                      className={`relative w-14 h-10 sm:w-16 sm:h-12 rounded-lg overflow-hidden shrink-0 transition-all border-2 cursor-pointer ${
+                        galleryLightboxIndex === tIdx
+                          ? "border-[#FF5A3C] scale-105 shadow-md shadow-[#FF5A3C]/40"
+                          : "border-transparent opacity-50 hover:opacity-100"
+                      }`}
+                      title={`Moment ${tIdx + 1}`}
+                    >
+                      <Image src={tImg} alt={`thumb ${tIdx + 1}`} fill className="object-cover" />
+                    </button>
+                  ))}
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setGalleryLightboxIndex(null)}
-                className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-                title="Close Lightbox (Esc)"
-              >
-                <XCircle className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Main Image View */}
-            <div className="relative w-full aspect-[16/10] max-h-[72vh] rounded-2xl overflow-hidden bg-black/60 border border-white/15 shadow-2xl">
-              <Image
-                src={pkg.galleryImages[galleryLightboxIndex]}
-                alt={`Gallery image ${galleryLightboxIndex + 1}`}
-                fill
-                priority
-                className="object-contain"
-              />
-
-              {/* Prev Arrow */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setGalleryLightboxIndex(
-                    (galleryLightboxIndex - 1 + pkg.galleryImages!.length) %
-                      pkg.galleryImages!.length
-                  );
-                }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 flex items-center justify-center transition-all hover:scale-110 cursor-pointer shadow-lg"
-                title="Previous Photo (Left Arrow)"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-
-              {/* Next Arrow */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setGalleryLightboxIndex(
-                    (galleryLightboxIndex + 1) % pkg.galleryImages!.length
-                  );
-                }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 flex items-center justify-center transition-all hover:scale-110 cursor-pointer shadow-lg"
-                title="Next Photo (Right Arrow)"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Thumbnails Strip */}
-            <div className="mt-4 flex items-center justify-center gap-2 overflow-x-auto max-w-full py-1">
-              {pkg.galleryImages.map((tImg, tIdx) => (
-                <button
-                  type="button"
-                  key={tIdx}
-                  onClick={() => setGalleryLightboxIndex(tIdx)}
-                  className={`relative w-12 h-9 sm:w-16 sm:h-12 rounded-lg overflow-hidden shrink-0 transition-all border-2 cursor-pointer ${
-                    galleryLightboxIndex === tIdx
-                      ? "border-[#FF5A3C] scale-105 shadow-md shadow-[#FF5A3C]/40"
-                      : "border-transparent opacity-50 hover:opacity-100"
-                  }`}
-                  title={`Photo ${tIdx + 1}`}
-                >
-                  <Image src={tImg} alt={`thumb ${tIdx + 1}`} fill className="object-cover" />
-                </button>
-              ))}
-            </div>
-          </div>
+            );
+          })()}
         </div>
       )}
 
@@ -1073,9 +1199,14 @@ export default function PackageDetailPage() {
               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-['Outfit'] mt-1">
                 {pkg.title}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Special Offer: ₹{pkg.discountedPrice} / person ({pkg.duration})
-              </p>
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-xs font-extrabold">
+                  ₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} / Day
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  Total: ₹{pkg.discountedPrice} / person ({pkg.duration})
+                </span>
+              </div>
             </div>
 
             <form onSubmit={handleBookingSubmit} className="mt-6 space-y-4">
@@ -1130,9 +1261,55 @@ export default function PackageDetailPage() {
                   >
                     <option value="1">1 Person</option>
                     <option value="2">2 Persons</option>
-                    <option value="3-4">3-4 Persons</option>
-                    <option value="5+">5+ Persons</option>
+                    <option value="3">3 Persons</option>
+                    <option value="4">4 Persons</option>
+                    <option value="5">5 Persons</option>
+                    <option value="custom">Custom Travelers...</option>
                   </select>
+                </div>
+              </div>
+
+              {bookingForm.travelersCount === "custom" && (
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#080D21] border border-slate-200 dark:border-white/10">
+                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Enter Number of Travelers *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="200"
+                    placeholder="e.g. 8"
+                    value={bookingForm.customTravelers}
+                    onChange={(e) => setBookingForm({ ...bookingForm, customTravelers: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#0C1226] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
+                  />
+                </div>
+              )}
+
+              {/* Dynamic Price Calculation Box */}
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-rose-500/10 border border-orange-500/20 dark:border-orange-500/30">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-slate-600 dark:text-slate-300 font-medium">Selected Travelers:</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">
+                    {numTravelers} {numTravelers === 1 ? "Person" : "Persons"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="text-slate-600 dark:text-slate-300 font-medium">Daily Breakdown:</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    ₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} / Day
+                  </span>
+                </div>
+                <div className="pt-2 border-t border-orange-500/20 flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                    Total Package Cost:
+                  </span>
+                  <span className="text-base font-extrabold text-[#FF5A3C] font-['Outfit']">
+                    ₹{calculateTravelersTotal(pkg.discountedPrice, numTravelers)}
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-400 mt-0.5 text-right">
+                  (₹{pkg.discountedPrice} × {numTravelers} {numTravelers === 1 ? "Person" : "Persons"})
                 </div>
               </div>
 
@@ -1167,41 +1344,45 @@ export default function PackageDetailPage() {
       )}
 
       {/* MOBILE STICKY FLOATING BOTTOM BAR */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#090E20]/95 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 p-3 shadow-2xl flex items-center justify-between gap-3">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#090E20]/95 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 p-3 shadow-2xl flex items-center justify-between gap-2.5">
         <div>
-          <div className="text-xs text-slate-500 dark:text-slate-400">Offer Price</div>
-          <div className="text-lg font-black text-slate-900 dark:text-white font-['Outfit']">
+          <div className="flex items-center gap-1">
+            <span className="text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400">
+              ₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)}/Day
+            </span>
+            <span className="text-[10px] text-slate-400">• Total:</span>
+          </div>
+          <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white font-['Outfit'] leading-tight">
             ₹{pkg.discountedPrice}
             <span className="text-[10px] font-normal text-slate-400 ml-1">/ person</span>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {pkg.flyerImage && (
-            <button
-              onClick={() => setIsFlyerModalOpen(true)}
-              className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-bold text-xs"
-              title="View Flyer"
-            >
-              <Sparkles className="w-4 h-4" />
-            </button>
-          )}
+          {/* Direct Call Button (Replacing Flyer Button as requested) */}
+          <a
+            href={`tel:${phoneCall}`}
+            className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 shadow-sm transition-colors"
+            title={`Call Direct: ${phoneCall}`}
+          >
+            <Phone className="w-4 h-4 text-[#FF5A3C]" />
+          </a>
 
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2.5 rounded-xl bg-[#25D366] text-white shadow-md shadow-[#25D366]/30"
+            className="p-2.5 rounded-xl bg-[#25D366] text-white shadow-md shadow-[#25D366]/30 transition-transform active:scale-95"
             title="Chat on WhatsApp"
           >
-            <MessageCircle className="w-5 h-5 fill-white" />
+            <MessageCircle className="w-4 h-4 fill-white" />
           </a>
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-5 py-2.5 rounded-xl bg-[#FF5A3C] text-white font-bold text-xs shadow-lg shadow-[#FF5A3C]/30"
+            className="px-4 py-2.5 rounded-xl bg-[#FF5A3C] text-white font-bold text-xs shadow-lg shadow-[#FF5A3C]/30 hover:bg-[#E04629] transition-all"
           >
-            Book / Inquire
+            Inquire Now
           </button>
         </div>
       </div>

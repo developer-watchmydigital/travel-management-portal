@@ -150,9 +150,13 @@ export function getStoredCompanyInfo(): CompanyInfo {
       return companyData;
     }
     const parsed: CompanyInfo = JSON.parse(data);
-    if (!parsed.whatsapp || parsed.whatsapp !== "919588667027") {
+    if (
+      !parsed.phones?.includes("+91 70583 23165") ||
+      !parsed.address?.includes("Calangute")
+    ) {
       parsed.whatsapp = "919588667027";
-      parsed.phones = ["+91 95886 67027"];
+      parsed.phones = ["+91 95886 67027", "+91 70583 23165"];
+      parsed.address = "Golden Beach Road, Calangute Beach, Calangute, Goa - 403516";
       localStorage.setItem(COMPANY_KEY, JSON.stringify(parsed));
     }
     return parsed;

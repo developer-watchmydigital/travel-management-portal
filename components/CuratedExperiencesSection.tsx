@@ -26,6 +26,7 @@ import {
 import { CuratedPackage } from "@/lib/types";
 import { curatedRegionsList, initialCuratedPackages } from "@/lib/initialData";
 import { getStoredPackages } from "@/lib/storage";
+import { getPerDayPrice } from "@/lib/pricing";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -43,7 +44,18 @@ export const CuratedExperiencesSection: React.FC = () => {
 
   useEffect(() => {
     setMounted(true);
-    setPackages(getStoredPackages());
+    const local = getStoredPackages();
+    setPackages(local);
+
+    // Check database API for live updates
+    fetch("/api/packages")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.isSupabaseActive && data?.packages && data.packages.length > 0) {
+          setPackages(data.packages);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Sync when storage changes (e.g. from admin)
@@ -292,27 +304,33 @@ export const CuratedExperiencesSection: React.FC = () => {
 
                     {/* Price & Actions Row */}
                     <div className="pt-4 border-t border-slate-200 dark:border-white/10">
-                      {/* Pricing */}
-                      <div className="flex items-baseline justify-between mb-3.5">
-                        <div className="flex items-center gap-2">
-                          {pkg.originalPrice && (
-                            <span className="line-through text-xs text-slate-400 font-semibold">
-                              ₹{pkg.originalPrice}
-                            </span>
-                          )}
-                          {pkg.savings && (
-                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase">
-                              SAVE ₹{pkg.savings}
-                            </span>
-                          )}
+                      {/* Pricing with Per Day and Total Package Breakdown */}
+                      <div className="flex items-center justify-between mb-3.5 gap-2">
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-1.5">
+                            {pkg.originalPrice && (
+                              <span className="line-through text-xs text-slate-400 font-semibold">
+                                ₹{pkg.originalPrice}
+                              </span>
+                            )}
+                            {pkg.savings && (
+                              <span className="px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold uppercase">
+                                SAVE ₹{pkg.savings}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[11px] font-bold text-[#FF5A3C] bg-[#FF5A3C]/10 px-2 py-0.5 rounded-md border border-[#FF5A3C]/20 inline-flex items-center w-fit">
+                            ₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} / Day
+                          </span>
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Starting from{" "}
-                          <strong className="text-base font-extrabold text-slate-900 dark:text-white">
+
+                        <div className="text-right">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block leading-none">Total Package</span>
+                          <strong className="text-base font-extrabold text-slate-900 dark:text-white font-['Outfit']">
                             ₹{pkg.discountedPrice}
-                          </strong>{" "}
-                          <span className="text-[10px]">/Person</span>
-                        </p>
+                          </strong>
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 ml-0.5">/Person</span>
+                        </div>
                       </div>
 
                       {/* Action Buttons: Phone, WhatsApp, View Itinerary */}

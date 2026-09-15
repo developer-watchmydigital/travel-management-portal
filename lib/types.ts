@@ -81,7 +81,7 @@ export interface CuratedPackage {
   badgeGradient?: string;
   image: string;
   flyerImage?: string; // Optional promotional flyer image URL
-  galleryImages?: string[]; // 10 Visual Experience Photos
+  galleryImages?: string[]; // 6 Curated Moments & Sights Photos
   originalPrice: string; // e.g. "16,000"
   discountedPrice: string; // e.g. "11,999"
   savings: string; // e.g. "4,501"

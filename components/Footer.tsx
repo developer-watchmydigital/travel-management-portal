@@ -21,7 +21,7 @@ export const Footer: React.FC = () => {
             <Link href="/#home" className="flex items-center gap-2.5 mb-4 group">
               <div className="relative w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
                 <Image
-                  src="/favicon.png"
+                  src="/favicon.png?v=3"
                   alt="Watch My Trip Package Goa"
                   width={32}
                   height={32}
@@ -116,11 +116,14 @@ export const Footer: React.FC = () => {
                   {companyData.address}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-[#FF5A3C] shrink-0" />
-                <div className="flex flex-col">
+              <div className="flex items-start gap-2">
+                <Phone className="w-4 h-4 text-[#FF5A3C] shrink-0 mt-0.5" />
+                <div className="flex flex-col gap-1.5">
                   <a href="tel:+919588667027" className="text-slate-800 dark:text-slate-200 hover:text-[#FF5A3C] font-semibold">
                     +91 95886 67027 <span className="text-[10px] text-amber-500 font-bold">(Direct & WhatsApp)</span>
+                  </a>
+                  <a href="tel:+917058323165" className="text-slate-800 dark:text-slate-200 hover:text-[#FF5A3C] font-semibold">
+                    +91 70583 23165 <span className="text-[10px] text-emerald-500 font-bold">(Support & Bookings)</span>
                   </a>
                 </div>
               </div>

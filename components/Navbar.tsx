@@ -42,7 +42,7 @@ export const Navbar: React.FC = () => {
         <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0 mr-1 xl:mr-2">
           <div className="relative w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
             <Image
-              src="/favicon.png"
+              src="/favicon.png?v=3"
               alt="Watch my trip package Goa"
               width={40}
               height={40}

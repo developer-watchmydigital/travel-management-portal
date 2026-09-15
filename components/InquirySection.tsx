@@ -86,7 +86,7 @@ export const InquirySection: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      saveLead({
+      const leadPayload = {
         type: activeTab,
         fullName,
         phone,
@@ -98,7 +98,22 @@ export const InquirySection: React.FC = () => {
         travelDate,
         travellers,
         specialRequirements,
-      });
+      };
+
+      saveLead(leadPayload);
+
+      // Asynchronously send to server API for central Supabase storage
+      fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(leadPayload),
+      }).catch((e) => console.error("Supabase lead sync error:", e));
+
+      // Automatically launch WhatsApp with pre-filled inquiry details
+      const waUrl = getWhatsAppRedirectUrl();
+      if (typeof window !== "undefined") {
+        window.open(waUrl, "_blank");
+      }
 
       setIsSubmitting(false);
       setIsSubmitted(true);
@@ -173,7 +188,7 @@ export const InquirySection: React.FC = () => {
                     Office Location
                   </span>
                   <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
-                    6/B, Jagdish Chamber, Opp. Rajkamal Petrol pump, Highway, Mehsana 384002 - Gujarat
+                    Golden Beach Road, Calangute Beach, Calangute, Goa - 403516
                   </p>
                 </div>
               </div>
@@ -187,9 +202,12 @@ export const InquirySection: React.FC = () => {
                   <span className="text-[11px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider">
                     Phone Numbers
                   </span>
-                  <div className="flex flex-col text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-semibold mt-0.5">
+                  <div className="flex flex-col text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-semibold mt-0.5 gap-1">
                     <a href="tel:+919588667027" className="hover:text-[#FF5A3C] transition-colors">
-                      +91 95886 67027
+                      +91 95886 67027 <span className="text-[10px] text-amber-500 font-bold">(Direct & WhatsApp)</span>
+                    </a>
+                    <a href="tel:+917058323165" className="hover:text-[#FF5A3C] transition-colors">
+                      +91 70583 23165 <span className="text-[10px] text-emerald-500 font-bold">(Support & Bookings)</span>
                     </a>
                   </div>
                 </div>

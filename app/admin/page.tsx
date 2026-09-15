@@ -29,6 +29,9 @@ import {
   Sparkles,
   MapPin,
   Check,
+  LogOut,
+  Database,
+  ShieldCheck,
 } from "lucide-react";
 import {
   getStoredLeads,
@@ -45,12 +48,13 @@ import {
 } from "@/lib/storage";
 import { InquiryLead, Destination, CompanyInfo, CuratedPackage, ItineraryDay, PackageInclusionItem } from "@/lib/types";
 import { curatedRegionsList } from "@/lib/initialData";
+import { getPerDayPrice } from "@/lib/pricing";
 
 export default function AdminPage() {
   const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [pinInput, setPinInput] = useState("");
-  const [pinError, setPinError] = useState("");
+  const [adminUsername, setAdminUsername] = useState("admin");
+  const [isSupabaseSynced, setIsSupabaseSynced] = useState(false);
 
   const [activeTab, setActiveTab] = useState<"leads" | "packages" | "destinations" | "settings">("leads");
   const [leads, setLeads] = useState<InquiryLead[]>([]);
@@ -95,54 +99,120 @@ export default function AdminPage() {
     highlights: ["Sightseeing", "Hotel Stay", "Transfers"],
   });
 
-  // Load from localStorage on mount & check session auth
+  // Verify server session on mount & load data with Supabase sync
   useEffect(() => {
     setMounted(true);
-    if (typeof window !== "undefined") {
-      const auth = sessionStorage.getItem("r_travel_owner_auth");
-      if (auth === "true") {
-        setIsAuthenticated(true);
-      }
-    }
-    setLeads(getStoredLeads());
-    setDestinations(getStoredDestinations());
-    setPackages(getStoredPackages());
-    setCompanyInfo(getStoredCompanyInfo());
+
+    // 1. Verify server-side session
+    fetch("/api/admin/me")
+      .then((res) => {
+        if (!res.ok) {
+          window.location.href = "/admin/login";
+          return null;
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data?.authenticated) {
+          setAdminUsername(data.username || "admin");
+          setIsAuthenticated(true);
+        } else {
+          window.location.href = "/admin/login";
+        }
+      })
+      .catch(() => {
+        window.location.href = "/admin/login";
+      });
+
+    // 2. Load leads from API (Supabase) with local fallback
+    const localLeads = getStoredLeads();
+    setLeads(localLeads);
+    fetch("/api/leads")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.isSupabaseActive && data?.leads && data.leads.length > 0) {
+          setLeads(data.leads);
+          setIsSupabaseSynced(true);
+        }
+      })
+      .catch(() => {});
+
+    // 3. Load packages: ALWAYS prioritize stored packages to prevent resetting custom edits
+    const localPackages = getStoredPackages();
+    setPackages(localPackages);
+    fetch("/api/packages")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.isSupabaseActive && data?.packages && data.packages.length > 0) {
+          // If Supabase has packages, use them
+          setPackages(data.packages);
+          setIsSupabaseSynced(true);
+        }
+      })
+      .catch(() => {});
+
+    // 4. Load destinations from API with local fallback
+    const localDests = getStoredDestinations();
+    setDestinations(localDests);
+    fetch("/api/destinations")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.isSupabaseActive && data?.destinations && data.destinations.length > 0) {
+          setDestinations(data.destinations);
+          setIsSupabaseSynced(true);
+        }
+      })
+      .catch(() => {});
+
+    // 5. Load company settings with local fallback
+    const localCompany = getStoredCompanyInfo();
+    setCompanyInfo(localCompany);
+    fetch("/api/company-info")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.isSupabaseActive && data?.companyInfo) {
+          setCompanyInfo(data.companyInfo);
+          setIsSupabaseSynced(true);
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Default Owner Passcode
-    if (pinInput === "1234" || pinInput === "rtravel2026") {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("r_travel_owner_auth", "true");
-      setPinError("");
-    } else {
-      setPinError("Invalid Owner PIN. Please try again.");
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } finally {
+      window.location.href = "/admin/login";
     }
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    sessionStorage.removeItem("r_travel_owner_auth");
   };
 
   const handleStatusChange = (id: string, status: InquiryLead["status"]) => {
     updateLeadStatus(id, status);
-    setLeads(getStoredLeads());
+    setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
+    fetch(`/api/leads/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    }).catch((err) => console.error("Lead status sync error:", err));
   };
 
   const handleDeleteLead = (id: string) => {
     if (confirm("Are you sure you want to delete this inquiry?")) {
       deleteLead(id);
-      setLeads(getStoredLeads());
+      setLeads((prev) => prev.filter((l) => l.id !== id));
+      fetch(`/api/leads/${id}`, { method: "DELETE" }).catch((err) =>
+        console.error("Lead delete sync error:", err)
+      );
     }
   };
 
   const handleDeleteDestination = (id: string) => {
     if (confirm("Are you sure you want to remove this destination?")) {
       deleteDestination(id);
-      setDestinations(getStoredDestinations());
+      setDestinations((prev) => prev.filter((d) => d.id !== id));
+      fetch(`/api/destinations/${id}`, { method: "DELETE" }).catch((err) =>
+        console.error("Supabase destination delete error:", err)
+      );
     }
   };
 
@@ -168,15 +238,30 @@ export default function AdminPage() {
     };
 
     saveDestination(created);
-    setDestinations(getStoredDestinations());
+    setDestinations((prev) => [created, ...prev]);
     setIsAddDestOpen(false);
     setNewDest({ category: "india", highlights: [] });
+
+    // Sync to Supabase server API
+    fetch("/api/destinations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(created),
+    }).catch((err) => console.error("Supabase destination save error:", err));
   };
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     saveCompanyInfo(companyInfo);
-    alert("Company settings updated successfully!");
+
+    // Sync to Supabase server API
+    fetch("/api/company-info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(companyInfo),
+    }).catch((err) => console.error("Supabase company info save error:", err));
+
+    alert("Company settings updated and saved successfully!");
   };
 
   // Package Handlers
@@ -259,13 +344,6 @@ export default function AdminPage() {
     setIsPackageModalOpen(true);
   };
 
-  const handleDeletePackage = (id: string) => {
-    if (confirm("Are you sure you want to delete this curated package?")) {
-      deletePackage(id);
-      setPackages(getStoredPackages());
-    }
-  };
-
   const handleAddDetailedInclusion = () => {
     const current = pkgFormData.detailedInclusions || [];
     setPkgFormData({
@@ -308,6 +386,10 @@ export default function AdminPage() {
 
   const handleAddGalleryImage = () => {
     const updated = [...(pkgFormData.galleryImages || [])];
+    if (updated.length >= 6) {
+      alert("Recommended gallery size is 6 curated photos for the 3x2 moments grid.");
+      return;
+    }
     updated.push("https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop");
     setPkgFormData({ ...pkgFormData, galleryImages: updated });
   };
@@ -354,8 +436,31 @@ export default function AdminPage() {
     };
 
     savePackage(packageToSave);
-    setPackages(getStoredPackages());
+    setPackages((prev) => {
+      const exists = prev.some((p) => p.id === packageToSave.id);
+      if (exists) {
+        return prev.map((p) => (p.id === packageToSave.id ? packageToSave : p));
+      }
+      return [packageToSave, ...prev];
+    });
     setIsPackageModalOpen(false);
+
+    // Sync to Supabase server API
+    fetch("/api/packages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(packageToSave),
+    }).catch((err) => console.error("Supabase package save error:", err));
+  };
+
+  const handleDeletePackage = (id: string) => {
+    if (confirm("Are you sure you want to delete this package?")) {
+      deletePackage(id);
+      setPackages((prev) => prev.filter((p) => p.id !== id));
+      fetch(`/api/packages/${id}`, { method: "DELETE" }).catch((err) =>
+        console.error("Supabase package delete error:", err)
+      );
+    }
   };
 
   const handleAddItineraryDay = () => {
@@ -418,52 +523,10 @@ export default function AdminPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#070B18] flex items-center justify-center p-4">
-        <div className="w-full max-w-md p-8 rounded-3xl bg-[#0C142E]/90 border border-white/15 backdrop-blur-2xl shadow-2xl text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#FF5A3C] to-[#F59E0B] p-0.5 mx-auto mb-5 shadow-lg shadow-[#FF5A3C]/30">
-            <div className="w-full h-full bg-[#090E20] rounded-[14px] flex items-center justify-center">
-              <Lock className="w-8 h-8 text-[#FF5A3C]" />
-            </div>
-          </div>
-
-          <h2 className="text-2xl font-extrabold text-white font-['Outfit']">
-            Owner Access Only
-          </h2>
-          <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-            This private administration area is strictly for <strong>Masrur Ahmed, Masum Ahmed</strong> and authorized staff.
-          </p>
-
-          <form onSubmit={handleLogin} className="mt-6 space-y-4">
-            <div>
-              <input
-                type="password"
-                value={pinInput}
-                onChange={(e) => setPinInput(e.target.value)}
-                placeholder="Enter Owner PIN (Default: 1234)"
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-center text-sm font-semibold tracking-widest focus:outline-none focus:border-[#FF5A3C] transition-colors"
-                autoFocus
-              />
-              {pinError && (
-                <p className="text-xs font-semibold text-rose-400 mt-2">{pinError}</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-bold text-sm shadow-lg shadow-[#FF5A3C]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              Unlock Dashboard
-            </button>
-          </form>
-
-          <div className="mt-6 pt-4 border-t border-white/10">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Public Website</span>
-            </Link>
-          </div>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="w-12 h-12 border-4 border-[#FF5A3C] border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-semibold text-slate-300">Verifying secure admin session...</p>
+          <p className="text-xs text-slate-500">Redirecting to login if unauthenticated.</p>
         </div>
       </div>
     );
@@ -486,7 +549,7 @@ export default function AdminPage() {
               <div className="flex items-center gap-2">
                 <div className="relative w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center shrink-0">
                   <Image
-                    src="/favicon.png"
+                    src="/favicon.png?v=3"
                     alt="Watch My Trip Package Goa"
                     width={28}
                     height={28}
@@ -507,20 +570,40 @@ export default function AdminPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Admin ID Badge */}
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-xs">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>ID: {adminUsername}</span>
+            </span>
+
+            {/* Database Sync Status */}
+            <span
+              className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border ${
+                isSupabaseSynced
+                  ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-300"
+                  : "bg-white/5 border-white/10 text-slate-400"
+              }`}
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span>{isSupabaseSynced ? "Supabase Live" : "Local Sync"}</span>
+            </span>
+
             <Link
               href="/"
               target="_blank"
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-all"
             >
               <Eye className="w-4 h-4 text-emerald-400" />
-              <span>Live Website</span>
+              <span className="hidden sm:inline">Live Website</span>
             </Link>
 
             <button
               onClick={handleLogout}
-              className="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-xs font-semibold text-rose-300 transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-xs font-semibold text-rose-300 transition-all cursor-pointer"
+              title="Sign Out of Admin"
             >
-              Lock / Exit
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Log Out</span>
             </button>
           </div>
         </div>
@@ -1375,6 +1458,27 @@ export default function AdminPage() {
                         />
                       </div>
                     </div>
+
+                    {/* Auto-converted Per Day Amount based on Duration */}
+                    <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <div>
+                          <div className="text-xs font-bold text-emerald-300">
+                            Auto-Calculated Daily Rate
+                          </div>
+                          <div className="text-[11px] text-slate-400">
+                            Based on full package amount & {pkgFormData.duration || "4 Days"}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs text-slate-400 mr-2">Per Person Per Day:</span>
+                        <span className="text-base font-black text-emerald-400 font-['Outfit']">
+                          ₹{getPerDayPrice(pkgFormData.discountedPrice || "0", pkgFormData.duration || "4 Days")} / Day
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* 3. Key Highlights */}
@@ -1637,16 +1741,16 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* 7. 10-Photo Visual Experience Gallery */}
+                  {/* 7. Curated Moments Gallery (6 Photos) */}
                   <div className="space-y-4 pt-4 border-t border-white/10">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div>
                         <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
                           <Eye className="w-3.5 h-3.5" />
-                          <span>7. 10-Photo Visual Experience Gallery</span>
+                          <span>7. Curated Moments Gallery (6 Photos)</span>
                         </h4>
                         <p className="text-[11px] text-slate-400 mt-0.5">
-                          HD photo gallery showcase for the Itinerary page. Enter image URLs for high-resolution gallery view & interactive lightbox.
+                          Captivating tour moments & sights showcase for the itinerary page (6 photos grid). Enter image URLs for high-resolution gallery view & interactive lightbox.
                         </p>
                       </div>
 
@@ -1656,7 +1760,7 @@ export default function AdminPage() {
                         className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-[11px] font-semibold border border-cyan-500/30 transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>Add Photo</span>
+                        <span>Add Photo (Max 6)</span>
                       </button>
                     </div>
 

@@ -145,7 +145,7 @@ export const HeroGoaCarousel: React.FC = () => {
 
                 {/* WhatsApp Quick Chat CTA */}
                 <a
-                  href="https://wa.me/919588667027?text=Hello%20Small%20Daddy%20Plus!%20I%20want%20to%20plan%20my%20trip%20to%20Goa%20/%20holiday%20package."
+                  href="https://wa.me/919588667027?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20want%20to%20plan%20my%20trip%20to%20Goa%20/%20holiday%20package."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 border border-[#25D366]/40 text-[#25D366] dark:text-[#25D366] font-semibold text-sm backdrop-blur-md transition-all hover:scale-[1.02]"

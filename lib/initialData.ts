@@ -1,7 +1,7 @@
 import { CompanyInfo, Destination, TravelService, CuratedPackage } from "./types";
 
 export const companyData: CompanyInfo = {
-  name: "WATCH MY TRIP PACKAGE GOA",
+  name: "WATCH MY TRIP PACKAGE",
   tagline: "Your Journey, Our Responsibility",
   founder: "Masrur Ahmed",
   director: "Masum Ahmed",

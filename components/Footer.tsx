@@ -22,14 +22,14 @@ export const Footer: React.FC = () => {
               <div className="relative w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
                 <Image
                   src="/favicon.png?v=4"
-                  alt="Watch My Trip Package Goa"
+                  alt="Watch My Trip Package"
                   width={32}
                   height={32}
                   className="w-full h-full object-contain drop-shadow-sm"
                 />
               </div>
               <span className="text-base font-extrabold text-slate-900 dark:text-white font-['Outfit'] tracking-tight group-hover:text-[#FF5A3C] transition-colors">
-                Watch My Trip Package <span className="text-[#FF5A3C]">Goa</span>
+                Watch My Trip <span className="text-[#FF5A3C]">Package</span>
               </span>
             </Link>
 
@@ -154,7 +154,7 @@ export const Footer: React.FC = () => {
         {/* Bottom copyright & Back to top */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <p className="text-slate-500">
-            © {new Date().getFullYear()} WATCH MY TRIP PACKAGE GOA. All rights reserved. Registered in Mehsana, Gujarat.
+            © {new Date().getFullYear()} WATCH MY TRIP PACKAGE. All rights reserved. Registered in Mehsana, Gujarat.
           </p>
 
           <div className="flex items-center gap-4">

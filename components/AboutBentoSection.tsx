@@ -45,7 +45,7 @@ export const AboutBentoSection: React.FC = () => {
             className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FF5A3C]/10 border border-[#FF5A3C]/30 text-xs font-bold text-[#FF5A3C] uppercase tracking-wider mb-3"
           >
             <Compass className="w-3.5 h-3.5" />
-            <span>About Watch My Trip Package Goa</span>
+            <span>About Watch My Trip Package</span>
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -101,10 +101,10 @@ export const AboutBentoSection: React.FC = () => {
               </div>
 
               <p className="text-slate-700 dark:text-slate-300 text-sm sm:text-base leading-relaxed mb-4">
-                <strong className="text-slate-900 dark:text-white font-semibold">WATCH MY TRIP PACKAGE GOA</strong> is a trusted and customer-focused travel enterprise dedicated to making every journey smooth, comfortable, affordable, and memorable.
+                <strong className="text-slate-900 dark:text-white font-semibold">WATCH MY TRIP PACKAGE</strong> is a trusted and customer-focused travel enterprise dedicated to making every journey smooth, comfortable, affordable, and memorable.
               </p>
               <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6">
-                Before establishing WATCH MY TRIP PACKAGE GOA, we successfully operated under the name{" "}
+                Before establishing WATCH MY TRIP PACKAGE, we successfully operated under the name{" "}
                 <span className="text-slate-900 dark:text-white font-semibold">Ranjan Services</span> in Mehsana, gaining valuable experience and deep-rooted relationships across Gujarat and India.
               </p>
 
@@ -234,7 +234,7 @@ export const AboutBentoSection: React.FC = () => {
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white font-['Outfit']">Our Vision</h3>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-                To establish Watch My Trip Package Goa as a revered name in tourism, known for transparent guidance, competitive pricing, and cherished memories.
+                To establish Watch My Trip Package as a revered name in tourism, known for transparent guidance, competitive pricing, and cherished memories.
               </p>
 
               {/* Commitment Box */}

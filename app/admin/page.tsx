@@ -603,15 +603,15 @@ export default function AdminPage() {
               <div className="flex items-center gap-2">
                 <div className="relative w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center shrink-0">
                   <Image
-                    src="/favicon.png?v=3"
-                    alt="Watch My Trip Package Goa"
+                    src="/favicon.png?v=4"
+                    alt="Watch My Trip Package"
                     width={28}
                     height={28}
                     className="w-full h-full object-contain"
                   />
                 </div>
                 <span className="text-sm font-bold text-white font-['Outfit']">
-                  Watch My Trip Package Goa
+                  Watch My Trip Package
                 </span>
                 <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] font-bold text-amber-400 uppercase tracking-wide">
                   Owner Portal

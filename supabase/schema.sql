@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS public.destinations (
 -- 4. COMPANY INFO TABLE
 CREATE TABLE IF NOT EXISTS public.company_info (
     id TEXT PRIMARY KEY DEFAULT 'default',
-    name TEXT NOT NULL DEFAULT 'WATCH MY TRIP PACKAGE GOA',
+    name TEXT NOT NULL DEFAULT 'WATCH MY TRIP PACKAGE',
     tagline TEXT DEFAULT 'Your Journey, Our Responsibility',
     founder TEXT DEFAULT 'Masrur Ahmed',
     director TEXT DEFAULT 'Masum Ahmed',

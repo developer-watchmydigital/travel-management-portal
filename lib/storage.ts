@@ -153,8 +153,10 @@ export function getStoredCompanyInfo(): CompanyInfo {
     if (
       !parsed.phones?.includes("+91 70583 23165") ||
       !parsed.address?.includes("Calangute") ||
-      !parsed.instagram?.includes("watchmytrippackage")
+      !parsed.instagram?.includes("watchmytrippackage") ||
+      parsed.name !== "WATCH MY TRIP PACKAGE"
     ) {
+      parsed.name = "WATCH MY TRIP PACKAGE";
       parsed.whatsapp = "919588667027";
       parsed.phones = ["+91 95886 67027", "+91 70583 23165"];
       parsed.address = "Golden Beach Road, Calangute Beach, Calangute, Goa - 403516";

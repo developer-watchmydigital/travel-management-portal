@@ -125,7 +125,7 @@ export const InquirySection: React.FC = () => {
   };
 
   const getWhatsAppRedirectUrl = () => {
-    const message = `*New Travel Inquiry - Watch My Trip Package Goa*%0A%0A*Name:* ${encodeURIComponent(
+    const message = `*New Travel Inquiry - Watch My Trip Package*%0A%0A*Name:* ${encodeURIComponent(
       fullName || "Customer"
     )}%0A*Phone:* ${encodeURIComponent(phone)}%0A*Type:* ${encodeURIComponent(
       activeTab.toUpperCase()

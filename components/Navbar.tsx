@@ -80,12 +80,12 @@ export const Navbar: React.FC = () => {
       }`}
     >
       <div className="max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-3 lg:gap-6 xl:gap-8">
-        {/* Brand: Favicon + "Watch my trip package Goa" */}
+        {/* Brand: Favicon + "Watch my trip package" */}
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
           <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-md">
             <Image
               src="/favicon.png?v=4"
-              alt="Watch my trip package Goa"
+              alt="Watch my trip package"
               width={44}
               height={44}
               className="w-full h-full object-contain drop-shadow-md"
@@ -93,7 +93,7 @@ export const Navbar: React.FC = () => {
             />
           </div>
           <span className="text-sm sm:text-base lg:text-lg font-extrabold text-slate-900 dark:text-white font-['Outfit'] tracking-tight leading-tight group-hover:text-[#FF5A3C] transition-colors whitespace-nowrap">
-            Watch my trip package <span className="text-[#FF5A3C]">Goa</span>
+            Watch my trip <span className="text-[#FF5A3C]">package</span>
           </span>
         </Link>
 

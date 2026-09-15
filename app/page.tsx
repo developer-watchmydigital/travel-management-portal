@@ -42,11 +42,11 @@ export default function Home() {
       {/* Floating Action WhatsApp & Phone Pill */}
       <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
         <a
-          href="https://wa.me/919588667027?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20am%20interested%20in%20planning%20a%20journey."
+          href="https://wa.me/919588667027?text=Hello%20Watch%20My%20Trip%20Package!%20I%20am%20interested%20in%20planning%20a%20journey."
           target="_blank"
           rel="noopener noreferrer"
           className="group relative flex items-center gap-2 p-3.5 sm:px-4 sm:py-3 rounded-full bg-[#25D366] text-white font-bold shadow-2xl shadow-[#25D366]/40 hover:scale-110 active:scale-95 transition-all"
-          title="Chat with Watch My Trip Package Goa on WhatsApp"
+          title="Chat with Watch My Trip Package on WhatsApp"
         >
           <MessageCircle className="w-6 h-6 fill-current" />
           <span className="hidden sm:inline text-xs">WhatsApp Us</span>

@@ -338,13 +338,13 @@ export const CuratedExperiencesSection: React.FC = () => {
                         <a
                           href="tel:+919588667027"
                           className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 hover:border-[#FF5A3C] text-slate-700 dark:text-slate-200 hover:text-[#FF5A3C] transition-colors"
-                          title="Call Watch My Trip Package Goa"
+                          title="Call Watch My Trip Package"
                         >
                           <Phone className="w-4 h-4" />
                         </a>
 
                         <a
-                          href={`https://wa.me/919588667027?text=Hello%20Watch%20My%20Trip%20Package%20Goa!%20I%20am%20interested%20in%20booking%20the%20${encodeURIComponent(
+                          href={`https://wa.me/919588667027?text=Hello%20Watch%20My%20Trip%20Package!%20I%20am%20interested%20in%20booking%20the%20${encodeURIComponent(
                             pkg.title
                           )}.`}
                           target="_blank"

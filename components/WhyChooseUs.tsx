@@ -26,7 +26,7 @@ export const WhyChooseUs: React.FC = () => {
     {
       name: "Pooja & Hardik Shah",
       location: "Ahmedabad",
-      comment: "Watch My Trip Package Goa planned our Kashmir honeymoon package. The houseboat experience in Dal Lake and Gondola ride in Gulmarg were magical. Very honest pricing and 24/7 personal care.",
+      comment: "Watch My Trip Package planned our Kashmir honeymoon package. The houseboat experience in Dal Lake and Gondola ride in Gulmarg were magical. Very honest pricing and 24/7 personal care.",
       rating: 5,
       trip: "Kashmir Romantic Special",
     },

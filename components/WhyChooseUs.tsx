@@ -42,7 +42,7 @@ export const WhyChooseUs: React.FC = () => {
   const pillars = [
     {
       icon: <Award className="w-6 h-6 text-[#FF5A3C]" />,
-      title: "15+ Years of Industry Trust",
+      title: "3+ Years of Industry Trust",
       desc: "A rich legacy of over a decade and a half serving thousands of happy travelers across India with integrity.",
     },
     {
@@ -65,7 +65,7 @@ export const WhyChooseUs: React.FC = () => {
   return (
     <section id="why-us" className="py-24 relative bg-white dark:bg-[#090E20] transition-colors duration-300 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FF5A3C]/10 border border-[#FF5A3C]/30 text-xs font-bold text-[#FF5A3C] uppercase tracking-wider mb-3">

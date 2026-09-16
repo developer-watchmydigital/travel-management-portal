@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
     <footer className="bg-slate-100 dark:bg-[#050814] border-t border-slate-200 dark:border-white/10 pt-16 pb-12 relative text-slate-600 dark:text-slate-400 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-slate-200 dark:border-white/10">
-          
+
           {/* Col 1 & 2: Brand & Story */}
           <div className="lg:col-span-2 text-left">
             <Link href="/#home" className="flex items-center mb-4 group select-none">
@@ -34,7 +34,7 @@ export const Footer: React.FC = () => {
             </Link>
 
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4 max-w-sm">
-              Dedicated to crafting smooth, memorable, and personalized journeys with 15+ years of trust. Formerly operating as <strong className="text-slate-900 dark:text-white font-semibold">Ranjan Services</strong>, Mehsana.
+              Dedicated to crafting smooth, memorable, and personalized journeys with 3+ years of trust. Formerly operating as <strong className="text-slate-900 dark:text-white font-semibold">Ranjan Services</strong>, Mehsana.
             </p>
 
             <div className="flex items-center gap-3">
@@ -44,7 +44,7 @@ export const Footer: React.FC = () => {
                 <span>Director: <strong className="text-slate-900 dark:text-white">Masum Ahmed</strong></span>
               </div>
               <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                15+ Yrs Trust
+                3+ Yrs Trust
               </div>
             </div>
           </div>

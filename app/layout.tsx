@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Watch My Trip Package | Your Journey, Our Responsibility | Holiday & Tour Packages",
   description:
-    "Trusted travel agency Watch My Trip Package founded by Masrur Ahmed and led by Director Masum Ahmed (formerly Ranjan Services) with 15+ years experience and 25,000+ happy travelers. Domestic & International flights, Goa packages, Kashmir, Himachal, train bookings & customized holidays.",
+    "Trusted travel agency Watch My Trip Package founded by Masrur Ahmed and led by Director Masum Ahmed (formerly Ranjan Services) with 3+ years experience and 25,000+ happy travelers. Domestic & International flights, Goa packages, Kashmir, Himachal, train bookings & customized holidays.",
   keywords: [
     "Watch My Trip Package",
     "WATCH MY TRIP PACKAGE",

@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS public.company_info (
     tagline TEXT DEFAULT 'Your Journey, Our Responsibility',
     founder TEXT DEFAULT 'Masrur Ahmed',
     director TEXT DEFAULT 'Masum Ahmed',
-    experience_years TEXT DEFAULT '15+',
+    experience_years TEXT DEFAULT '3+',
     satisfied_customers TEXT DEFAULT '25,000+',
     former_name TEXT DEFAULT 'Ranjan Services',
     address TEXT DEFAULT 'Golden Beach Road, Calangute Beach, Calangute, Goa - 403516',

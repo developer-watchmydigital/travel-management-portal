@@ -21,7 +21,7 @@ export default function Home() {
       {/* 2. Curated Experiences - State Itinerary Packages */}
       <CuratedExperiencesSection />
 
-      {/* 3. About Us - Magic Bento Grid (15+ Years Trust & Legacy) */}
+      {/* 3. About Us - Magic Bento Grid (3+ Years Trust & Legacy) */}
       <AboutBentoSection />
 
       {/* 4. Services & Packages - 3D Hover Magic Bento Cards */}

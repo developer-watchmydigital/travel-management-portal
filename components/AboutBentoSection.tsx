@@ -35,7 +35,7 @@ export const AboutBentoSection: React.FC = () => {
       <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-[#F59E0B]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <motion.div
@@ -64,7 +64,7 @@ export const AboutBentoSection: React.FC = () => {
             className="mt-4 text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed"
           >
             Founded by <strong className="text-slate-900 dark:text-white font-semibold">Masrur Ahmed</strong> and led by Director <strong className="text-slate-900 dark:text-white font-semibold">Masum Ahmed</strong>, with nearly{" "}
-            <strong className="text-[#FF5A3C] font-semibold">15+ years of trusted experience</strong> (formerly{" "}
+            <strong className="text-[#FF5A3C] font-semibold">3+ years of trusted experience</strong> (formerly{" "}
             <strong className="text-slate-900 dark:text-white font-semibold">Ranjan Services</strong>), we craft journeys built on honesty, flawless execution, and unforgettable memories.
           </motion.p>
         </div>
@@ -132,14 +132,14 @@ export const AboutBentoSection: React.FC = () => {
 
           {/* Tile 2: Dual Key Stats Cards (5 Cols) */}
           <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
-            {/* Stat 1: 15+ Years */}
+            {/* Stat 1: 3+ Years */}
             <MagicBentoCard className="p-6 flex items-center gap-5" glowColor="rgba(245, 158, 11, 0.2)">
               <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
                 <Award className="w-7 h-7 text-amber-500 dark:text-amber-400" />
               </div>
               <div>
                 <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-['Outfit'] flex items-baseline gap-1">
-                  15+ <span className="text-base font-semibold text-amber-500 dark:text-amber-400">Years</span>
+                  3+ <span className="text-base font-semibold text-amber-500 dark:text-amber-400">Years</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1">
                   Industry experience delivering unwavering trust & satisfaction.

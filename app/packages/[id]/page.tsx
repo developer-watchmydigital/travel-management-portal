@@ -95,7 +95,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
               }
             }
           })
-          .catch(() => {})
+          .catch(() => { })
           .finally(() => setLoading(false));
       } else {
         setLoading(false);
@@ -129,9 +129,9 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
           setRoomLightbox((prev) =>
             prev
               ? {
-                  ...prev,
-                  activeIndex: (prev.activeIndex - 1 + prev.images.length) % prev.images.length,
-                }
+                ...prev,
+                activeIndex: (prev.activeIndex - 1 + prev.images.length) % prev.images.length,
+              }
               : null
           );
         } else if (e.key === "Escape") {
@@ -314,9 +314,8 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
             <div className="relative z-10 flex items-center justify-between gap-4 mb-auto">
               <div className="flex flex-wrap items-center gap-2.5">
                 <span
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold text-white shadow-lg bg-gradient-to-r ${
-                    pkg.badgeGradient || "from-pink-500 to-rose-500"
-                  }`}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold text-white shadow-lg bg-gradient-to-r ${pkg.badgeGradient || "from-pink-500 to-rose-500"
+                    }`}
                 >
                   {pkg.categoryBadge}
                 </span>
@@ -599,13 +598,12 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-0 items-stretch">
                           {/* Text Content */}
                           <div
-                            className={`p-6 sm:p-8 flex flex-col justify-between ${
-                              hasImage
+                            className={`p-6 sm:p-8 flex flex-col justify-between ${hasImage
                                 ? isEven
                                   ? "md:col-span-7 order-1"
                                   : "md:col-span-7 order-1 md:order-2"
                                 : "md:col-span-12 order-1"
-                            }`}
+                              }`}
                           >
                             <div>
                               <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -654,11 +652,10 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                           {/* Picture Component: 3 Room Photos Collage or Single Photo */}
                           {hasMultipleImages ? (
                             <div
-                              className={`p-3 bg-slate-900 flex flex-col justify-between ${
-                                isEven
+                              className={`p-3 bg-slate-900 flex flex-col justify-between ${isEven
                                   ? "md:col-span-5 order-2"
                                   : "md:col-span-5 order-2 md:order-1"
-                              }`}
+                                }`}
                             >
                               {/* Primary Room Photo */}
                               <div
@@ -753,11 +750,10 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                                   activeIndex: 0,
                                 })
                               }
-                              className={`relative h-64 sm:h-72 md:h-auto min-h-[260px] overflow-hidden bg-slate-900 cursor-pointer group/single ${
-                                isEven
+                              className={`relative h-64 sm:h-72 md:h-auto min-h-[260px] overflow-hidden bg-slate-900 cursor-pointer group/single ${isEven
                                   ? "md:col-span-5 order-2"
                                   : "md:col-span-5 order-2 md:order-1"
-                              }`}
+                                }`}
                             >
                               <Image
                                 src={item.image!}
@@ -1145,7 +1141,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
               <div className="mt-5 p-3 rounded-xl bg-slate-50 dark:bg-[#080D21] border border-slate-100 dark:border-white/5 flex items-center gap-3">
                 <ShieldCheck className="w-8 h-8 text-emerald-500 shrink-0" />
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  <span className="font-bold text-slate-700 dark:text-slate-300">Watch My Trip Package Guarantee</span>: 15+ years experience, verified hotels & 24/7 dedicated support.
+                  <span className="font-bold text-slate-700 dark:text-slate-300">Watch My Trip Package Guarantee</span>: 3+ years experience, verified hotels & 24/7 dedicated support.
                 </div>
               </div>
             </div>
@@ -1308,11 +1304,10 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                       type="button"
                       key={tIdx}
                       onClick={() => setGalleryLightboxIndex(tIdx)}
-                      className={`relative w-14 h-10 sm:w-16 sm:h-12 rounded-lg overflow-hidden shrink-0 transition-all border-2 cursor-pointer ${
-                        galleryLightboxIndex === tIdx
+                      className={`relative w-14 h-10 sm:w-16 sm:h-12 rounded-lg overflow-hidden shrink-0 transition-all border-2 cursor-pointer ${galleryLightboxIndex === tIdx
                           ? "border-[#FF5A3C] scale-105 shadow-md shadow-[#FF5A3C]/40"
                           : "border-transparent opacity-50 hover:opacity-100"
-                      }`}
+                        }`}
                       title={`Moment ${tIdx + 1}`}
                     >
                       <Image src={tImg} alt={`thumb ${tIdx + 1}`} fill className="object-cover" />
@@ -1374,10 +1369,10 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                   setRoomLightbox((prev) =>
                     prev
                       ? {
-                          ...prev,
-                          activeIndex:
-                            (prev.activeIndex - 1 + prev.images.length) % prev.images.length,
-                        }
+                        ...prev,
+                        activeIndex:
+                          (prev.activeIndex - 1 + prev.images.length) % prev.images.length,
+                      }
                       : null
                   )
                 }
@@ -1394,9 +1389,9 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                   setRoomLightbox((prev) =>
                     prev
                       ? {
-                          ...prev,
-                          activeIndex: (prev.activeIndex + 1) % prev.images.length,
-                        }
+                        ...prev,
+                        activeIndex: (prev.activeIndex + 1) % prev.images.length,
+                      }
                       : null
                   )
                 }
@@ -1416,11 +1411,10 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                   onClick={() =>
                     setRoomLightbox((prev) => (prev ? { ...prev, activeIndex: tIdx } : null))
                   }
-                  className={`relative w-20 sm:w-24 h-14 sm:h-16 rounded-xl overflow-hidden transition-all border-2 cursor-pointer ${
-                    roomLightbox.activeIndex === tIdx
+                  className={`relative w-20 sm:w-24 h-14 sm:h-16 rounded-xl overflow-hidden transition-all border-2 cursor-pointer ${roomLightbox.activeIndex === tIdx
                       ? "border-[#FF5A3C] scale-105 shadow-lg shadow-[#FF5A3C]/40"
                       : "border-transparent opacity-50 hover:opacity-100"
-                  }`}
+                    }`}
                   title={`View Room Photo ${tIdx + 1}`}
                 >
                   <Image

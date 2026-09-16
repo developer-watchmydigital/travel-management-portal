@@ -5,7 +5,7 @@ export const companyData: CompanyInfo = {
   tagline: "Your Journey, Our Responsibility",
   founder: "Masrur Ahmed",
   director: "Masum Ahmed",
-  experienceYears: "15+",
+  experienceYears: "3+",
   satisfiedCustomers: "25,000+",
   formerName: "Ranjan Services",
   address: "Golden Beach Road, Calangute Beach, Calangute, Goa - 403516",

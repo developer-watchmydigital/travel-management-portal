@@ -77,9 +77,8 @@ export const HeroGoaCarousel: React.FC = () => {
         {goaCarouselSlides.map((slide, idx) => (
           <div
             key={slide.id}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-            }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+              }`}
           >
             <Image
               src={slide.image}
@@ -100,7 +99,7 @@ export const HeroGoaCarousel: React.FC = () => {
       {/* Hero Content Container with 7XL width */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 xl:gap-20 items-stretch">
-          
+
           {/* Left Column: Headlines, Details, Actions & Metrics aligned with Card Height */}
           <div className="lg:col-span-7 flex flex-col justify-between h-full text-left py-1 lg:py-2">
             <div>
@@ -167,7 +166,7 @@ export const HeroGoaCarousel: React.FC = () => {
             {/* Quick Metrics Bar aligned at the bottom of the card */}
             <div className="mt-8 lg:mt-10 pt-5 border-t border-slate-200 dark:border-white/10 grid grid-cols-3 gap-6 max-w-md">
               <div>
-                <p className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-['Outfit']">15+ <span className="text-[#FF5A3C]">Yrs</span></p>
+                <p className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-['Outfit']">3+ <span className="text-[#FF5A3C]">Yrs</span></p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Industry Legacy</p>
               </div>
               <div>
@@ -194,9 +193,8 @@ export const HeroGoaCarousel: React.FC = () => {
                   {goaCarouselSlides.map((slide, idx) => (
                     <div
                       key={slide.id}
-                      className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                        idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-                      }`}
+                      className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                        }`}
                     >
                       <Image
                         src={slide.image}
@@ -231,11 +229,10 @@ export const HeroGoaCarousel: React.FC = () => {
                       <button
                         key={slide.id}
                         onClick={() => setCurrentIndex(idx)}
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          idx === currentIndex
+                        className={`h-2 rounded-full transition-all duration-300 ${idx === currentIndex
                             ? "w-7 bg-[#FF5A3C]"
                             : "w-2 bg-slate-300 dark:bg-white/30 hover:bg-[#FF5A3C]/60"
-                        }`}
+                          }`}
                         aria-label={`Go to slide ${idx + 1}`}
                       />
                     ))}

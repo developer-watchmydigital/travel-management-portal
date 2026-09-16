@@ -47,7 +47,7 @@ export const Navbar: React.FC = () => {
   const exploreDropdownItems = [
     {
       name: "Curated Tour Packages",
-      description: "42+ Handcrafted Goa Tour Itineraries",
+      description: "42+ Handcrafted Tour Itineraries",
       href: "/#curated",
       icon: Package,
       badge: "42 Tours",
@@ -75,30 +75,30 @@ export const Navbar: React.FC = () => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white/95 dark:bg-[#070B18]/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 shadow-lg shadow-black/5 dark:shadow-2xl py-2 sm:py-2.5"
-          : "bg-gradient-to-b from-black/60 via-black/30 to-transparent py-3 sm:py-4"
+          ? "bg-white/95 dark:bg-[#070B18]/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 shadow-lg shadow-black/5 dark:shadow-2xl pt-2.5 pb-4 sm:pt-3 sm:pb-5 lg:pt-3.5 lg:pb-5.5"
+          : "bg-gradient-to-b from-black/60 via-black/30 to-transparent pt-3 pb-5 sm:pt-3.5 sm:pb-6 lg:pt-4 lg:pb-7"
       }`}
     >
       <div className="max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-8 flex items-center justify-between gap-3 lg:gap-6 xl:gap-8">
-        {/* Brand: Favicon + "Watch my trip package" */}
-        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
-          <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-md">
+        {/* Brand: Bird Logo + "Watch my trip package" nestled inside the bird semi-circle with equal margins */}
+        <Link href="/" className="flex items-center group shrink-0 select-none">
+          <div className="relative w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 shrink-0 group-hover:scale-105 transition-transform duration-300">
             <Image
               src="/favicon.png?v=4"
               alt="Watch my trip package"
-              width={44}
-              height={44}
+              width={64}
+              height={64}
               className="w-full h-full object-contain drop-shadow-md"
               priority
             />
           </div>
-          <span className="text-sm sm:text-base lg:text-lg font-extrabold text-slate-900 dark:text-white font-['Outfit'] tracking-tight leading-tight group-hover:text-[#FF5A3C] transition-colors whitespace-nowrap">
+          <span className="-ml-[11px] sm:-ml-[13px] lg:-ml-[15px] translate-y-[8px] sm:translate-y-[9.5px] lg:translate-y-[11px] relative z-10 text-base sm:text-lg lg:text-xl xl:text-[22px] font-black text-slate-900 dark:text-white font-['Outfit'] tracking-tight leading-none group-hover:text-[#FF5A3C] transition-colors whitespace-nowrap">
             Watch my trip <span className="text-[#FF5A3C]">package</span>
           </span>
         </Link>
 
-        {/* Desktop Nav Links - Prominent Text Size & Single Dropdown */}
-        <nav className="hidden lg:flex items-center gap-5 xl:gap-7 2xl:gap-8 flex-nowrap shrink-0">
+        {/* Desktop Nav Links - Aligned with brand name height */}
+        <nav className="hidden lg:flex items-center gap-5 xl:gap-7 2xl:gap-8 flex-nowrap shrink-0 translate-y-[8px] sm:translate-y-[9.5px] lg:translate-y-[11px]">
           {/* 1. Home */}
           <Link
             href="/#home"
@@ -205,8 +205,8 @@ export const Navbar: React.FC = () => {
           </Link>
         </nav>
 
-        {/* Right CTA Actions - Spacious & Guaranteed Single Line Uncut */}
-        <div className="hidden lg:flex items-center gap-3 xl:gap-4 shrink-0 flex-nowrap">
+        {/* Right CTA Actions - Aligned with brand name height */}
+        <div className="hidden lg:flex items-center gap-3 xl:gap-4 shrink-0 flex-nowrap translate-y-[8px] sm:translate-y-[9.5px] lg:translate-y-[11px]">
           {/* Dark / White Theme Toggle Button */}
           <button
             onClick={toggleTheme}
@@ -240,8 +240,8 @@ export const Navbar: React.FC = () => {
           </Link>
         </div>
 
-        {/* Mobile & Tablet Hamburger */}
-        <div className="flex lg:hidden items-center gap-2 shrink-0">
+        {/* Mobile & Tablet Hamburger - Aligned with brand name height */}
+        <div className="flex lg:hidden items-center gap-2 shrink-0 translate-y-[8px] sm:translate-y-[9.5px]">
           {/* Mobile Theme Toggle */}
           <button
             onClick={toggleTheme}

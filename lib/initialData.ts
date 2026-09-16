@@ -11,7 +11,7 @@ export const companyData: CompanyInfo = {
   address: "Golden Beach Road, Calangute Beach, Calangute, Goa - 403516",
   phones: ["+91 95886 67027", "+91 70583 23165"],
   whatsapp: "919588667027",
-  emails: ["info@rtravelworld.com", "rtravelworldmehsana@gmail.com"],
+  emails: ["support-package@watchmydigital.com", "rtravelworldmehsana@gmail.com"],
   instagram: "https://www.instagram.com/watchmytrippackage?stkn=MWxieXNncG5hcDl4OA%3D%3D&utm_source=qr",
 };
 

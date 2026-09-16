@@ -18,17 +18,17 @@ export const Footer: React.FC = () => {
           
           {/* Col 1 & 2: Brand & Story */}
           <div className="lg:col-span-2 text-left">
-            <Link href="/#home" className="flex items-center gap-2.5 mb-4 group">
-              <div className="relative w-8 h-8 rounded-xl overflow-hidden flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
+            <Link href="/#home" className="flex items-center mb-4 group select-none">
+              <div className="relative w-11 h-11 sm:w-12 sm:h-12 shrink-0 group-hover:scale-105 transition-transform duration-300">
                 <Image
                   src="/favicon.png?v=4"
                   alt="Watch My Trip Package"
-                  width={32}
-                  height={32}
+                  width={48}
+                  height={48}
                   className="w-full h-full object-contain drop-shadow-sm"
                 />
               </div>
-              <span className="text-base font-extrabold text-slate-900 dark:text-white font-['Outfit'] tracking-tight group-hover:text-[#FF5A3C] transition-colors">
+              <span className="-ml-[10px] sm:-ml-[12px] translate-y-[7.5px] sm:translate-y-[8.5px] relative z-10 text-lg sm:text-xl font-black text-slate-900 dark:text-white font-['Outfit'] tracking-tight group-hover:text-[#FF5A3C] transition-colors">
                 Watch My Trip <span className="text-[#FF5A3C]">Package</span>
               </span>
             </Link>
@@ -129,8 +129,8 @@ export const Footer: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
-                <a href="mailto:info@rtravelworld.com" className="text-slate-600 dark:text-slate-300 hover:text-[#FF5A3C]">
-                  info@rtravelworld.com
+                <a href="mailto:support-package@watchmydigital.com" className="text-slate-600 dark:text-slate-300 hover:text-[#FF5A3C]">
+                  support-package@watchmydigital.com
                 </a>
               </div>
               <div className="flex items-center gap-2 pt-1 border-t border-slate-200 dark:border-white/5">

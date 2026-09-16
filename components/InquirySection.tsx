@@ -223,8 +223,8 @@ export const InquirySection: React.FC = () => {
                     Email Address
                   </span>
                   <div className="flex flex-col text-xs text-slate-700 dark:text-slate-200 font-medium mt-0.5">
-                    <a href="mailto:info@rtravelworld.com" className="hover:text-[#FF5A3C] transition-colors">
-                      info@rtravelworld.com
+                    <a href="mailto:support-package@watchmydigital.com" className="hover:text-[#FF5A3C] transition-colors">
+                      support-package@watchmydigital.com
                     </a>
                     <a href="mailto:rtravelworldmehsana@gmail.com" className="hover:text-[#FF5A3C] transition-colors">
                       rtravelworldmehsana@gmail.com

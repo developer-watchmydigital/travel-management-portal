@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS public.company_info (
     founder TEXT DEFAULT 'Masrur Ahmed',
     director TEXT DEFAULT 'Masum Ahmed',
     experience_years TEXT DEFAULT '3+',
-    satisfied_customers TEXT DEFAULT '25,000+',
+    satisfied_customers TEXT DEFAULT '1,000+',
     former_name TEXT DEFAULT 'Ranjan Services',
     address TEXT DEFAULT 'Golden Beach Road, Calangute Beach, Calangute, Goa - 403516',
     phones JSONB DEFAULT '["+91 95886 67027", "+91 70583 23165"]'::jsonb,

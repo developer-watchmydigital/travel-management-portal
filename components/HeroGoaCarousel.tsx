@@ -170,7 +170,7 @@ export const HeroGoaCarousel: React.FC = () => {
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Industry Legacy</p>
               </div>
               <div>
-                <p className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-['Outfit']">25,000+</p>
+                <p className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-['Outfit']">1,000+</p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Happy Travelers</p>
               </div>
               <div>
@@ -230,8 +230,8 @@ export const HeroGoaCarousel: React.FC = () => {
                         key={slide.id}
                         onClick={() => setCurrentIndex(idx)}
                         className={`h-2 rounded-full transition-all duration-300 ${idx === currentIndex
-                            ? "w-7 bg-[#FF5A3C]"
-                            : "w-2 bg-slate-300 dark:bg-white/30 hover:bg-[#FF5A3C]/60"
+                          ? "w-7 bg-[#FF5A3C]"
+                          : "w-2 bg-slate-300 dark:bg-white/30 hover:bg-[#FF5A3C]/60"
                           }`}
                         aria-label={`Go to slide ${idx + 1}`}
                       />

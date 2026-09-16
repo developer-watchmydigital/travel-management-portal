@@ -147,14 +147,14 @@ export const AboutBentoSection: React.FC = () => {
               </div>
             </MagicBentoCard>
 
-            {/* Stat 2: 25,000+ Travelers */}
+            {/* Stat 2: 1,000+ Travelers */}
             <MagicBentoCard className="p-6 flex items-center gap-5" glowColor="rgba(255, 90, 60, 0.2)">
               <div className="w-14 h-14 rounded-2xl bg-[#FF5A3C]/15 border border-[#FF5A3C]/30 flex items-center justify-center shrink-0">
                 <Users className="w-7 h-7 text-[#FF5A3C]" />
               </div>
               <div>
                 <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-['Outfit'] flex items-baseline gap-1">
-                  25,000+ <span className="text-base font-semibold text-[#FF5A3C]">Served</span>
+                  1,000+ <span className="text-base font-semibold text-[#FF5A3C]">Served</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1">
                   Satisfied customers happily served with tailor-made journeys.

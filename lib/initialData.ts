@@ -6,7 +6,7 @@ export const companyData: CompanyInfo = {
   founder: "Masrur Ahmed",
   director: "Masum Ahmed",
   experienceYears: "3+",
-  satisfiedCustomers: "25,000+",
+  satisfiedCustomers: "1,000+",
   formerName: "Ranjan Services",
   address: "Golden Beach Road, Calangute Beach, Calangute, Goa - 403516",
   phones: ["+91 95886 67027", "+91 70583 23165"],

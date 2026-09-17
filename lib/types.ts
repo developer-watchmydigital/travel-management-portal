@@ -93,3 +93,16 @@ export interface CuratedPackage {
   exclusions: string[];
   featured?: boolean;
 }
+
+export interface Review {
+  id: string;
+  name: string;
+  location: string;
+  rating: number; // 1 to 5
+  experience: "Excellent" | "Good" | "Average" | "Bad" | "Terrible";
+  category: "package" | "hotel"; // "package" for Goa packages, "hotel" for Hotel Small Daddy Plus
+  targetName: string; // e.g. "Goa Honeymoon & Cruise Package" or "Hotel Small Daddy Plus, Calangute"
+  comment: string;
+  createdAt: string;
+  verified?: boolean;
+}

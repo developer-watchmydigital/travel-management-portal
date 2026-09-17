@@ -470,58 +470,58 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
 
         {/* QUICK KEY FEATURES STRIP */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-5">
-            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0D142A] border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-pink-500/10 text-pink-500 flex items-center justify-center shrink-0">
-                <Calendar className="w-5 h-5" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
+            <div className="p-3 sm:p-5 rounded-2xl bg-white dark:bg-[#0D142A] border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-2.5 sm:gap-3.5 min-w-0 overflow-hidden">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-pink-500/10 text-pink-500 flex items-center justify-center shrink-0">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 block truncate">
                   Duration
                 </span>
-                <p className="text-sm font-bold text-slate-800 dark:text-white mt-0.5">
+                <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white mt-0.5 leading-snug break-words">
                   {pkg.duration}
                 </p>
               </div>
             </div>
 
-            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0D142A] border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                <Hotel className="w-5 h-5" />
+            <div className="p-3 sm:p-5 rounded-2xl bg-white dark:bg-[#0D142A] border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-2.5 sm:gap-3.5 min-w-0 overflow-hidden">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                <Hotel className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 block truncate">
                   Stay Class
                 </span>
-                <p className="text-sm font-bold text-slate-800 dark:text-white mt-0.5">
+                <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white mt-0.5 leading-snug break-words">
                   Handpicked Deluxe
                 </p>
               </div>
             </div>
 
-            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0D142A] border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center shrink-0">
-                <Car className="w-5 h-5" />
+            <div className="p-3 sm:p-5 rounded-2xl bg-white dark:bg-[#0D142A] border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-2.5 sm:gap-3.5 min-w-0 overflow-hidden">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center shrink-0">
+                <Car className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 block truncate">
                   Transfers
                 </span>
-                <p className="text-sm font-bold text-slate-800 dark:text-white mt-0.5">
+                <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white mt-0.5 leading-snug break-words">
                   Private Sanitized Cab
                 </p>
               </div>
             </div>
 
-            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0D142A] border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5" />
+            <div className="p-3 sm:p-5 rounded-2xl bg-white dark:bg-[#0D142A] border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-2.5 sm:gap-3.5 min-w-0 overflow-hidden">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400">
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 block truncate">
                   Guidance
                 </span>
-                <p className="text-sm font-bold text-slate-800 dark:text-white mt-0.5">
+                <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-white mt-0.5 leading-snug break-words">
                   24/7 Concierge Care
                 </p>
               </div>

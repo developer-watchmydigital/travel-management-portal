@@ -154,13 +154,14 @@ export function getStoredCompanyInfo(): CompanyInfo {
       !parsed.phones?.includes("+91 70583 23165") ||
       !parsed.address?.includes("Calangute") ||
       !parsed.instagram?.includes("watchmytrippackage") ||
+      parsed.emails?.length !== 1 ||
       !parsed.emails?.includes("support-package@watchmydigital.com") ||
       parsed.name !== "WATCH MY TRIP PACKAGE"
     ) {
       parsed.name = "WATCH MY TRIP PACKAGE";
       parsed.whatsapp = "919588667027";
       parsed.phones = ["+91 95886 67027", "+91 70583 23165"];
-      parsed.emails = ["support-package@watchmydigital.com", "rtravelworldmehsana@gmail.com"];
+      parsed.emails = ["support-package@watchmydigital.com"];
       parsed.address = "Golden Beach Road, Calangute Beach, Calangute, Goa - 403516";
       parsed.instagram = "https://www.instagram.com/watchmytrippackage?stkn=MWxieXNncG5hcDl4OA%3D%3D&utm_source=qr";
       localStorage.setItem(COMPANY_KEY, JSON.stringify(parsed));

@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS public.company_info (
     address TEXT DEFAULT 'Golden Beach Road, Calangute Beach, Calangute, Goa - 403516',
     phones JSONB DEFAULT '["+91 95886 67027", "+91 70583 23165"]'::jsonb,
     whatsapp TEXT DEFAULT '919588667027',
-    emails JSONB DEFAULT '["support-package@watchmydigital.com", "rtravelworldmehsana@gmail.com"]'::jsonb,
+    emails JSONB DEFAULT '["support-package@watchmydigital.com"]'::jsonb,
     instagram TEXT DEFAULT 'https://www.instagram.com/watchmytrippackage?stkn=MWxieXNncG5hcDl4OA%3D%3D&utm_source=qr',
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -141,3 +141,48 @@ ON public.company_info FOR ALL
 TO service_role 
 USING (true) 
 WITH CHECK (true);
+
+-- =========================================================================
+-- 5. REVIEWS TABLE (Goa Packages & Hotel Small Daddy Plus 5-Star Reviews)
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS public.reviews (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    location TEXT DEFAULT 'Goa Traveler',
+    rating INTEGER NOT NULL DEFAULT 5,
+    experience TEXT NOT NULL DEFAULT 'Excellent',
+    category TEXT NOT NULL DEFAULT 'package', -- 'package' or 'hotel'
+    target_name TEXT NOT NULL,
+    comment TEXT NOT NULL,
+    verified BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public select on reviews" 
+ON public.reviews FOR SELECT 
+TO anon, authenticated 
+USING (true);
+
+CREATE POLICY "Allow public insert on reviews" 
+ON public.reviews FOR INSERT 
+TO anon, authenticated 
+WITH CHECK (true);
+
+CREATE POLICY "Allow service role full access on reviews" 
+ON public.reviews FOR ALL 
+TO service_role 
+USING (true) 
+WITH CHECK (true);
+
+-- Seed Initial 5 Goa Reviews (3 Goa Packages, 2 Hotel Small Daddy Plus)
+INSERT INTO public.reviews (id, name, location, rating, experience, category, target_name, comment, verified, created_at)
+VALUES
+  ('rev-pkg-1', 'Rahul & Neha Sharma', 'Mumbai, Maharashtra', 5, 'Excellent', 'package', 'Goa Honeymoon & Mandovi Dinner Cruise Package', 'Our 5D/4N Goa holiday package with Watch My Trip Package was completely magical! The open-deck Mandovi river cruise with Goan folk dance, private sanitised cab for North & South Goa sightseeing, and seamless transfers were handled with perfection.', true, now() - interval '8 days'),
+  ('rev-pkg-2', 'Amit Patel', 'Ahmedabad, Gujarat', 5, 'Excellent', 'package', 'Goa 4N/5D Family Adventure & Beach Tour', 'Traveled with our entire family including parents and kids. Everything was transparently itemized with zero surprise charges. From Calangute & Baga beaches to Aguada Fort and Old Goa churches, the driver was courteous and punctual.', true, now() - interval '22 days'),
+  ('rev-pkg-3', 'Vikram Singh & Friends', 'Delhi NCR', 5, 'Good', 'package', 'Goa Grand Island Scuba & Adventure Boat Package', 'The Grand Island boat trip and scuba diving in Goa were top-notch! The team coordinated our railway pickups, daily breakfast, and beach excursions flawlessly. 24/7 on-call support made the trip stress-free.', true, now() - interval '45 days'),
+  ('rev-hotel-1', 'Sneha Kulkarni', 'Pune, Maharashtra', 5, 'Excellent', 'hotel', 'Hotel Small Daddy Plus, Calangute', 'Stayed at Hotel Small Daddy Plus near Calangute beach. The deluxe room was clean, AC was chilly, and the swimming pool was well-maintained. The staff was super helpful and the breakfast spread had delicious varieties every morning.', true, now() - interval '15 days'),
+  ('rev-hotel-2', 'Dr. Jayesh Mehta', 'Mehsana, Gujarat', 5, 'Good', 'hotel', 'Hotel Small Daddy Plus, Calangute', 'Very peaceful yet only a 5-minute walk from Calangute beach. Safe family atmosphere, prompt room service, and comfortable bedding. Director Masum Ahmed personally ensured our stay was hassle-free. Highly recommended!', true, now() - interval '34 days')
+ON CONFLICT (id) DO NOTHING;
+

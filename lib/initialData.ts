@@ -1,4 +1,4 @@
-import { CompanyInfo, Destination, TravelService, CuratedPackage } from "./types";
+import { CompanyInfo, Destination, TravelService, CuratedPackage, Review } from "./types";
 
 export const companyData: CompanyInfo = {
   name: "WATCH MY TRIP PACKAGE",
@@ -11,7 +11,7 @@ export const companyData: CompanyInfo = {
   address: "Golden Beach Road, Calangute Beach, Calangute, Goa - 403516",
   phones: ["+91 95886 67027", "+91 70583 23165"],
   whatsapp: "919588667027",
-  emails: ["support-package@watchmydigital.com", "rtravelworldmehsana@gmail.com"],
+  emails: ["support-package@watchmydigital.com"],
   instagram: "https://www.instagram.com/watchmytrippackage?stkn=MWxieXNncG5hcDl4OA%3D%3D&utm_source=qr",
 };
 
@@ -396,3 +396,71 @@ export const curatedRegionsList = [
 ];
 
 export { initialCuratedPackages } from "./curatedPackagesData";
+
+export const initialGoaReviews: Review[] = [
+  {
+    id: "rev-pkg-1",
+    name: "Rahul & Neha Sharma",
+    location: "Mumbai, Maharashtra",
+    rating: 5,
+    experience: "Excellent",
+    category: "package",
+    targetName: "Goa Honeymoon & Mandovi Dinner Cruise Package",
+    comment:
+      "Our 5D/4N Goa holiday package with Watch My Trip Package was completely magical! The open-deck Mandovi river cruise with Goan folk dance, private sanitised cab for North & South Goa sightseeing, and seamless transfers were handled with perfection.",
+    createdAt: "2026-03-08",
+    verified: true,
+  },
+  {
+    id: "rev-pkg-2",
+    name: "Amit Patel",
+    location: "Ahmedabad, Gujarat",
+    rating: 5,
+    experience: "Excellent",
+    category: "package",
+    targetName: "Goa 4N/5D Family Adventure & Beach Tour",
+    comment:
+      "Traveled with our entire family including parents and kids. Everything was transparently itemized with zero surprise charges. From Calangute & Baga beaches to Aguada Fort and Old Goa churches, the driver was courteous and punctual.",
+    createdAt: "2026-02-21",
+    verified: true,
+  },
+  {
+    id: "rev-pkg-3",
+    name: "Vikram Singh & Friends",
+    location: "Delhi NCR",
+    rating: 5,
+    experience: "Good",
+    category: "package",
+    targetName: "Goa Grand Island Scuba & Adventure Boat Package",
+    comment:
+      "The Grand Island boat trip and scuba diving in Goa were top-notch! The team coordinated our railway pickups, daily breakfast, and beach excursions flawlessly. 24/7 on-call support made the trip stress-free.",
+    createdAt: "2026-01-14",
+    verified: true,
+  },
+  {
+    id: "rev-hotel-1",
+    name: "Sneha Kulkarni",
+    location: "Pune, Maharashtra",
+    rating: 5,
+    experience: "Excellent",
+    category: "hotel",
+    targetName: "Hotel Small Daddy Plus, Calangute",
+    comment:
+      "Stayed at Hotel Small Daddy Plus near Calangute beach. The deluxe room was clean, AC was chilly, and the swimming pool was well-maintained. The staff was super helpful and the breakfast spread had delicious varieties every morning.",
+    createdAt: "2026-03-01",
+    verified: true,
+  },
+  {
+    id: "rev-hotel-2",
+    name: "Dr. Jayesh Mehta",
+    location: "Mehsana, Gujarat",
+    rating: 5,
+    experience: "Good",
+    category: "hotel",
+    targetName: "Hotel Small Daddy Plus, Calangute",
+    comment:
+      "Very peaceful yet only a 5-minute walk from Calangute beach. Safe family atmosphere, prompt room service, and comfortable bedding. Director Masum Ahmed personally ensured our stay was hassle-free. Highly recommended!",
+    createdAt: "2026-02-10",
+    verified: true,
+  },
+];

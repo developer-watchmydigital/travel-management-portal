@@ -13,32 +13,9 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { MagicBentoCard } from "./ui/MagicBentoCard";
+import { ReviewsSection } from "./ReviewsSection";
 
 export const WhyChooseUs: React.FC = () => {
-  const testimonials = [
-    {
-      name: "Chirag Bhavsar",
-      location: "Mehsana, Gujarat",
-      comment: "Booked our family Goa holiday package through Priykant bhai. From flight tickets to the beachfront resort and cab transfers, everything was flawless and timely. Highly recommended!",
-      rating: 5,
-      trip: "Goa 4N/5D Family Tour",
-    },
-    {
-      name: "Pooja & Hardik Shah",
-      location: "Ahmedabad",
-      comment: "Watch My Trip Package planned our Kashmir honeymoon package. The houseboat experience in Dal Lake and Gondola ride in Gulmarg were magical. Very honest pricing and 24/7 personal care.",
-      rating: 5,
-      trip: "Kashmir Romantic Special",
-    },
-    {
-      name: "Mukeshbhai Patel",
-      location: "Visnagar, Gujarat",
-      comment: "We have been booking train tickets and pilgrimage yatra packages with them since the Ranjan Services days. 15 years of uninterrupted trust and dedicated assistance.",
-      rating: 5,
-      trip: "Char Dham & Jyotirlinga Yatra",
-    },
-  ];
-
   const pillars = [
     {
       icon: <Award className="w-6 h-6 text-[#FF5A3C]" />,
@@ -106,44 +83,8 @@ export const WhyChooseUs: React.FC = () => {
           ))}
         </div>
 
-        {/* Real Testimonials Bento Row */}
-        <div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 text-center font-['Outfit']">
-            Stories From Happy Travelers
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t, idx) => (
-              <MagicBentoCard
-                key={idx}
-                className="p-6 flex flex-col justify-between"
-                glowColor="rgba(245, 158, 11, 0.2)"
-              >
-                <div>
-                  {/* Rating Stars */}
-                  <div className="flex items-center gap-1 mb-3">
-                    {[...Array(t.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400" />
-                    ))}
-                  </div>
-
-                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed italic mb-4">
-                    &ldquo;{t.comment}&rdquo;
-                  </p>
-                </div>
-
-                <div className="pt-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">{t.name}</h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{t.location}</p>
-                  </div>
-                  <span className="px-2 py-1 rounded bg-[#FF5A3C]/10 border border-[#FF5A3C]/20 text-[10px] font-bold text-[#FF5A3C]">
-                    {t.trip}
-                  </span>
-                </div>
-              </MagicBentoCard>
-            ))}
-          </div>
-        </div>
+        {/* Dedicated Goa & Hotel Small Daddy Plus Review System */}
+        <ReviewsSection />
 
       </div>
     </section>

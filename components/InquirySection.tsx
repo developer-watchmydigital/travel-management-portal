@@ -226,9 +226,6 @@ export const InquirySection: React.FC = () => {
                     <a href="mailto:support-package@watchmydigital.com" className="hover:text-[#FF5A3C] transition-colors">
                       support-package@watchmydigital.com
                     </a>
-                    <a href="mailto:rtravelworldmehsana@gmail.com" className="hover:text-[#FF5A3C] transition-colors">
-                      rtravelworldmehsana@gmail.com
-                    </a>
                   </div>
                 </div>
               </div>

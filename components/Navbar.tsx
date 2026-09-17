@@ -135,11 +135,12 @@ export const Navbar: React.FC = () => {
 
             {/* Dropdown Menu Box */}
             {dropdownOpen && (
-              <div className="absolute top-full left-0 mt-2 w-80 rounded-2xl bg-white/98 dark:bg-[#0B1124]/98 backdrop-blur-2xl border border-slate-200 dark:border-white/15 shadow-2xl p-2.5 transition-all z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="px-3 py-1.5 mb-1 border-b border-slate-100 dark:border-white/5">
+              <div className="absolute top-full left-0 mt-2.5 w-84 rounded-2xl bg-white dark:bg-[#0C1226] border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-900/20 dark:shadow-black/70 ring-1 ring-black/5 dark:ring-white/10 p-2.5 transition-all z-[60] animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-3 py-1.5 mb-1.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#FF5A3C]">
                     Tour Highlights & Guide
                   </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF5A3C] animate-pulse" />
                 </div>
                 <div className="space-y-1">
                   {exploreDropdownItems.map((item) => {
@@ -149,7 +150,7 @@ export const Navbar: React.FC = () => {
                         key={item.name}
                         href={item.href}
                         onClick={() => setDropdownOpen(false)}
-                        className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all group"
+                        className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all group border border-transparent hover:border-slate-100 dark:hover:border-white/5"
                       >
                         <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/5 group-hover:bg-[#FF5A3C]/10 text-slate-700 dark:text-slate-300 group-hover:text-[#FF5A3C] flex items-center justify-center shrink-0 border border-slate-200 dark:border-white/10 transition-colors">
                           <Icon className="w-4 h-4" />
@@ -267,7 +268,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile & Tablet Menu Dropdown Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden px-4 pt-4 pb-6 bg-white/98 dark:bg-[#090E20]/98 backdrop-blur-2xl border-b border-slate-200 dark:border-white/10 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200 max-h-[85vh] overflow-y-auto">
+        <div className="lg:hidden px-4 pt-4 pb-6 bg-white dark:bg-[#090E20] border-b border-slate-200 dark:border-white/10 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200 max-h-[85vh] overflow-y-auto">
           <div className="flex flex-col gap-2">
             <Link
               href="/#home"

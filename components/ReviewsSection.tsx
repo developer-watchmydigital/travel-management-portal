@@ -13,6 +13,8 @@ import {
   Filter,
   ShieldCheck,
   MessageSquareHeart,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Review } from "@/lib/types";
 import { initialGoaReviews } from "@/lib/initialData";
@@ -21,6 +23,8 @@ import { MagicBentoCard } from "./ui/MagicBentoCard";
 export const ReviewsSection: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>(initialGoaReviews);
   const [activeTab, setActiveTab] = useState<"all" | "package" | "hotel">("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const REVIEWS_PER_PAGE = 3;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successToast, setSuccessToast] = useState("");
@@ -99,6 +103,7 @@ export const ReviewsSection: React.FC = () => {
       const data = await res.json();
       if (data.success && data.review) {
         setReviews((prev) => [data.review, ...prev]);
+        setCurrentPage(1);
         setSuccessToast("Thank you! Your 5-star review has been recorded.");
         setIsModalOpen(false);
 
@@ -120,6 +125,11 @@ export const ReviewsSection: React.FC = () => {
     }
   };
 
+  const handleTabChange = (tab: "all" | "package" | "hotel") => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+
   // Filter reviews
   const filteredReviews = reviews.filter((r) => {
     if (activeTab === "all") return true;
@@ -128,6 +138,12 @@ export const ReviewsSection: React.FC = () => {
 
   const packageCount = reviews.filter((r) => r.category === "package").length;
   const hotelCount = reviews.filter((r) => r.category === "hotel").length;
+
+  // Pagination calculations: 3 reviews per page
+  const totalPages = Math.ceil(filteredReviews.length / REVIEWS_PER_PAGE) || 1;
+  const validPage = Math.min(currentPage, totalPages);
+  const startIndex = (validPage - 1) * REVIEWS_PER_PAGE;
+  const currentReviews = filteredReviews.slice(startIndex, startIndex + REVIEWS_PER_PAGE);
 
   // Average Rating
   const avgRating = (
@@ -187,7 +203,7 @@ export const ReviewsSection: React.FC = () => {
       {/* Category Filter Tabs */}
       <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none">
         <button
-          onClick={() => setActiveTab("all")}
+          onClick={() => handleTabChange("all")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "all"
               ? "bg-[#FF5A3C] text-white shadow-md shadow-[#FF5A3C]/30"
@@ -199,7 +215,7 @@ export const ReviewsSection: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab("package")}
+          onClick={() => handleTabChange("package")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "package"
               ? "bg-[#FF5A3C] text-white shadow-md shadow-[#FF5A3C]/30"
@@ -211,7 +227,7 @@ export const ReviewsSection: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab("hotel")}
+          onClick={() => handleTabChange("hotel")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "hotel"
               ? "bg-[#FF5A3C] text-white shadow-md shadow-[#FF5A3C]/30"
@@ -223,9 +239,9 @@ export const ReviewsSection: React.FC = () => {
         </button>
       </div>
 
-      {/* Reviews Grid */}
+      {/* Reviews Grid: Exactly 3 Reviews Per Page */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredReviews.map((rev) => {
+        {currentReviews.map((rev) => {
           const isHotel = rev.category === "hotel";
           const initials = rev.name
             .split(" ")
@@ -318,6 +334,56 @@ export const ReviewsSection: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Pagination Controls Bar: 3 Reviews Per Page */}
+      {totalPages > 1 && (
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-white/10">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            Showing <span className="font-bold text-slate-800 dark:text-white">{startIndex + 1}–{Math.min(startIndex + REVIEWS_PER_PAGE, filteredReviews.length)}</span> of <span className="font-bold text-slate-800 dark:text-white">{filteredReviews.length}</span> Goa reviews
+          </p>
+
+          <div className="flex items-center gap-2">
+            {/* Previous Button */}
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={validPage === 1}
+              className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer shadow-sm"
+              aria-label="Previous Page"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>Prev</span>
+            </button>
+
+            {/* Numbered Page Buttons */}
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-8 h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    validPage === page
+                      ? "bg-[#FF5A3C] text-white shadow-md shadow-[#FF5A3C]/35 scale-105"
+                      : "border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            {/* Next Button */}
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={validPage === totalPages}
+              className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer shadow-sm"
+              aria-label="Next Page"
+            >
+              <span>Next</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* COMPACT INTERACTIVE REVIEW MODAL (z-[100] above navbar, never cut off) */}

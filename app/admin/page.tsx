@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
@@ -32,10 +32,23 @@ import {
   LogOut,
   Database,
   ShieldCheck,
+  Building2,
+  Car,
+  Camera,
+  Layers,
+  RefreshCw,
+  Star,
+  MessageSquareHeart,
+  AlertTriangle,
+  ChevronDown,
+  Wallet,
+  CreditCard,
+  Ban,
 } from "lucide-react";
 import {
   getStoredLeads,
   updateLeadStatus,
+  updateLeadBookingDetails,
   deleteLead,
   getStoredDestinations,
   saveDestination,
@@ -45,9 +58,24 @@ import {
   getStoredPackages,
   savePackage,
   deletePackage,
+  getStoredServices,
+  saveService,
+  updateServicePhotos,
+  getStoredReviews,
+  deleteStoredReview,
 } from "@/lib/storage";
-import { InquiryLead, Destination, CompanyInfo, CuratedPackage, ItineraryDay, PackageInclusionItem } from "@/lib/types";
-import { curatedRegionsList } from "@/lib/initialData";
+import {
+  InquiryLead,
+  Destination,
+  CompanyInfo,
+  CuratedPackage,
+  ItineraryDay,
+  PackageInclusionItem,
+  TravelService,
+  ServicePhoto,
+  Review,
+} from "@/lib/types";
+import { curatedRegionsList, initialGoaReviews } from "@/lib/initialData";
 import { getPerDayPrice } from "@/lib/pricing";
 
 export default function AdminPage() {
@@ -56,8 +84,52 @@ export default function AdminPage() {
   const [adminUsername, setAdminUsername] = useState("admin");
   const [isSupabaseSynced, setIsSupabaseSynced] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<"leads" | "packages" | "destinations" | "settings">("leads");
+  const [activeTab, setActiveTab] = useState<"leads" | "packages" | "destinations" | "cash" | "online" | "cancelled" | "services" | "reviews" | "settings">("leads");
   const [leads, setLeads] = useState<InquiryLead[]>([]);
+  const [isRefreshingLeads, setIsRefreshingLeads] = useState(false);
+  const [lastLeadsSync, setLastLeadsSync] = useState<string>("Just now");
+
+  // Booking confirmation & payment modal state
+  const [bookingModal, setBookingModal] = useState<{
+    isOpen: boolean;
+    lead: InquiryLead | null;
+    amount: string;
+    paymentMode: "cash" | "online";
+    reference: string;
+    bookingDate: string;
+  }>({
+    isOpen: false,
+    lead: null,
+    amount: "",
+    paymentMode: "online",
+    reference: "",
+    bookingDate: new Date().toISOString().slice(0, 10),
+  });
+
+  // Booking cancellation modal state
+  const [cancellationModal, setCancellationModal] = useState<{
+    isOpen: boolean;
+    lead: InquiryLead | null;
+    reason: string;
+    refundAmount: string;
+  }>({
+    isOpen: false,
+    lead: null,
+    reason: "",
+    refundAmount: "",
+  });
+
+  // Reviews moderation state - initialized with initialGoaReviews so it never starts as 0
+  const [reviewsList, setReviewsList] = useState<Review[]>(initialGoaReviews);
+  const [reviewSearchQuery, setReviewSearchQuery] = useState("");
+  const [reviewCategoryFilter, setReviewCategoryFilter] = useState("all");
+  const [reviewRatingFilter, setReviewRatingFilter] = useState("all");
+  const [isDeletingReviewId, setIsDeletingReviewId] = useState<string | null>(null);
+  const [reviewToast, setReviewToast] = useState("");
+  const [servicesList, setServicesList] = useState<TravelService[]>([]);
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("hotel-booking");
+  const [servicePhotosState, setServicePhotosState] = useState<{ [serviceId: string]: ServicePhoto[] }>({});
+  const [serviceToast, setServiceToast] = useState("");
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [packages, setPackages] = useState<CuratedPackage[]>([]);
   const [packageFilterState, setPackageFilterState] = useState<string>("all");
@@ -89,8 +161,34 @@ export default function AdminPage() {
   });
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(getStoredCompanyInfo());
   const [searchQuery, setSearchQuery] = useState("");
-  const [leadFilter, setLeadFilter] = useState<"all" | "package" | "flight" | "train">("all");
+  const [leadFilter, setLeadFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [cashSearchQuery, setCashSearchQuery] = useState("");
+  const [onlineSearchQuery, setOnlineSearchQuery] = useState("");
+  const [cancelledSearchQuery, setCancelledSearchQuery] = useState("");
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "yesterday" | "last7days" | "thisMonth" | "custom">("all");
+  const [customDate, setCustomDate] = useState<string>("");
+  const [isDateMenuOpen, setIsDateMenuOpen] = useState(false);
+  const dateMenuRef = useRef<HTMLDivElement>(null);
+
+  const dateFilterLabels: Record<string, string> = {
+    all: "All Dates",
+    today: "Today",
+    yesterday: "Yesterday",
+    last7days: "Last 7 Days",
+    thisMonth: "This Month",
+    custom: "Specific Day...",
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dateMenuRef.current && !dateMenuRef.current.contains(event.target as Node)) {
+        setIsDateMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Destination modal state
   const [isAddDestOpen, setIsAddDestOpen] = useState(false);
@@ -98,6 +196,37 @@ export default function AdminPage() {
     category: "india",
     highlights: ["Sightseeing", "Hotel Stay", "Transfers"],
   });
+
+  // Custom In-App Modal Dialog States (Replaces native browser window.confirm and window.alert)
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: "danger" | "warning" | "info";
+    onConfirm: () => void | Promise<void>;
+  } | null>(null);
+
+  const [alertModal, setAlertModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type?: "info" | "success" | "warning" | "error";
+  } | null>(null);
+
+  const showAlert = (
+    title: string,
+    message: string,
+    type: "info" | "success" | "warning" | "error" = "info"
+  ) => {
+    setAlertModal({
+      isOpen: true,
+      title,
+      message,
+      type,
+    });
+  };
 
   // Verify server session on mount & load data with Supabase sync
   useEffect(() => {
@@ -176,7 +305,165 @@ export default function AdminPage() {
         }
       })
       .catch(() => {});
+
+    // 6. Load services & showcase photos (Hotel Booking, Car Rental, etc.)
+    const localServices = getStoredServices();
+    setServicesList(localServices);
+    const initialPhotosMap: { [id: string]: ServicePhoto[] } = {};
+    localServices.forEach((s) => {
+      initialPhotosMap[s.id] = s.photos ? [...s.photos] : [];
+    });
+    setServicePhotosState(initialPhotosMap);
+
+    fetch("/api/services")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.services && Array.isArray(data.services) && data.services.length > 0) {
+          setServicesList(data.services);
+          const serverPhotosMap: { [id: string]: ServicePhoto[] } = {};
+          data.services.forEach((s: TravelService) => {
+            if (s.photos && s.photos.length > 0) {
+              serverPhotosMap[s.id] = s.photos;
+            }
+          });
+          setServicePhotosState((prev) => ({ ...prev, ...serverPhotosMap }));
+        }
+      })
+      .catch(() => {});
+
+    // 7. Load reviews from Supabase API with local fallback
+    refreshReviews();
+
+    // Listen for instant local / cross-tab lead submissions & reviews updates
+    const handleNewLead = () => refreshLeads(true);
+    const handleReviewsSync = () => refreshReviews();
+
+    window.addEventListener("wmt-new-lead", handleNewLead);
+    window.addEventListener("reviews-updated", handleReviewsSync);
+    window.addEventListener("storage", (e) => {
+      if (e.key === "r_travel_leads_v2") refreshLeads(true);
+      if (e.key === "r_travel_reviews_v2") refreshReviews();
+    });
+
+    let leadsChannel: BroadcastChannel | null = null;
+    try {
+      leadsChannel = new BroadcastChannel("wmt_leads_channel");
+      leadsChannel.onmessage = (event) => {
+        if (event.data?.type === "NEW_LEAD") {
+          refreshLeads(true);
+        }
+      };
+    } catch {}
+
+    // Auto-polling every 4 seconds so enquiries from other devices arrive automatically
+    const pollInterval = setInterval(() => {
+      refreshLeads(true);
+    }, 4000);
+
+    return () => {
+      window.removeEventListener("wmt-new-lead", handleNewLead);
+      window.removeEventListener("reviews-updated", handleReviewsSync);
+      if (leadsChannel) leadsChannel.close();
+      clearInterval(pollInterval);
+    };
   }, []);
+
+  const refreshLeads = async (silent = false) => {
+    if (!silent) setIsRefreshingLeads(true);
+    try {
+      const res = await fetch("/api/leads");
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.leads && Array.isArray(data.leads)) {
+          setLeads(data.leads);
+          if (data.isSupabaseActive) setIsSupabaseSynced(true);
+        }
+      } else {
+        setLeads(getStoredLeads());
+      }
+      setLastLeadsSync(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+    } catch {
+      setLeads(getStoredLeads());
+    } finally {
+      if (!silent) setTimeout(() => setIsRefreshingLeads(false), 400);
+    }
+  };
+
+  const refreshReviews = async () => {
+    try {
+      const res = await fetch("/api/reviews");
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.reviews && Array.isArray(data.reviews) && data.reviews.length > 0) {
+          setReviewsList(data.reviews);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("r_travel_reviews_v2", JSON.stringify(data.reviews));
+          }
+          return;
+        }
+      }
+    } catch {}
+    const stored = getStoredReviews();
+    setReviewsList(stored && stored.length > 0 ? stored : initialGoaReviews);
+  };
+
+  const handleDeleteReview = (id: string) => {
+    const targetRev = reviewsList.find((r) => r.id === id);
+    const reviewer = targetRev ? `"${targetRev.name}"` : "this review";
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Customer Review",
+      message: `Are you sure you want to permanently delete the review by ${reviewer}? It will be removed immediately from the live website and Supabase database.`,
+      confirmText: "Yes, Delete Review",
+      cancelText: "Cancel",
+      variant: "danger",
+      onConfirm: async () => {
+        setIsDeletingReviewId(id);
+        try {
+          deleteStoredReview(id);
+          setReviewsList((prev) => prev.filter((r) => r.id !== id));
+          await fetch(`/api/reviews?id=${id}`, { method: "DELETE" });
+          setReviewToast("Review removed successfully from the website.");
+          setTimeout(() => setReviewToast(""), 3500);
+        } catch (err) {
+          console.error("Failed to delete review:", err);
+        } finally {
+          setIsDeletingReviewId(null);
+          setConfirmModal(null);
+        }
+      },
+    });
+  };
+
+  const handlePhotoChange = (serviceId: string, index: number, field: keyof ServicePhoto, value: string) => {
+    setServicePhotosState((prev) => {
+      const current = prev[serviceId] ? [...prev[serviceId]] : [];
+      while (current.length <= index) {
+        current.push({ url: "", title: "", caption: "" });
+      }
+      current[index] = { ...current[index], [field]: value };
+      return { ...prev, [serviceId]: current };
+    });
+  };
+
+  const handleSaveServicePhotos = async (serviceId: string) => {
+    const photos = servicePhotosState[serviceId] || [];
+    updateServicePhotos(serviceId, photos);
+    const updated = getStoredServices();
+    setServicesList(updated);
+    const targetTitle = servicesList.find((s) => s.id === serviceId)?.title || "Service";
+    setServiceToast(`Showcase photos for ${targetTitle} saved and live on website!`);
+    setTimeout(() => setServiceToast(""), 4000);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("services-updated"));
+    }
+
+    await fetch("/api/services", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ serviceId, photos }),
+    }).catch((err) => console.warn("Service photo sync API error:", err));
+  };
 
   const handleLogout = async () => {
     try {
@@ -187,6 +474,31 @@ export default function AdminPage() {
   };
 
   const handleStatusChange = (id: string, status: InquiryLead["status"]) => {
+    const targetLead = leads.find((l) => l.id === id);
+    if (!targetLead) return;
+
+    if (status === "Booked") {
+      setBookingModal({
+        isOpen: true,
+        lead: targetLead,
+        amount: targetLead.bookingAmount ? String(targetLead.bookingAmount) : "",
+        paymentMode: targetLead.paymentMode || "online",
+        reference: targetLead.paymentReference || "",
+        bookingDate: targetLead.bookingDate ? targetLead.bookingDate.slice(0, 10) : new Date().toISOString().slice(0, 10),
+      });
+      return;
+    }
+
+    if (status === "Cancelled") {
+      setCancellationModal({
+        isOpen: true,
+        lead: targetLead,
+        reason: targetLead.cancellationReason || "",
+        refundAmount: targetLead.bookingAmount ? String(targetLead.bookingAmount) : "0",
+      });
+      return;
+    }
+
     updateLeadStatus(id, status);
     setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
     fetch(`/api/leads/${id}`, {
@@ -196,30 +508,150 @@ export default function AdminPage() {
     }).catch((err) => console.error("Lead status sync error:", err));
   };
 
-  const handleDeleteLead = (id: string) => {
-    if (confirm("Are you sure you want to delete this inquiry?")) {
-      deleteLead(id);
-      setLeads((prev) => prev.filter((l) => l.id !== id));
-      fetch(`/api/leads/${id}`, { method: "DELETE" }).catch((err) =>
-        console.error("Lead delete sync error:", err)
-      );
+  const handleConfirmBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bookingModal.lead) return;
+    const numAmount = parseFloat(bookingModal.amount.replace(/[^0-9.]/g, "")) || 0;
+    if (numAmount <= 0) {
+      showAlert("Invalid Amount", "Please enter a valid booking amount in Rupees (₹).", "warning");
+      return;
     }
+
+    const leadId = bookingModal.lead.id;
+    const bookingDetails = {
+      status: "Booked" as const,
+      bookingAmount: numAmount,
+      paymentMode: bookingModal.paymentMode,
+      paymentReference: bookingModal.reference.trim() || undefined,
+      bookingDate: bookingModal.bookingDate || new Date().toISOString(),
+      cancellationReason: undefined,
+      cancelledAt: undefined,
+      refundAmount: 0,
+    };
+
+    updateLeadBookingDetails(leadId, bookingDetails);
+    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, ...bookingDetails } : l)));
+
+    fetch(`/api/leads/${leadId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bookingDetails),
+    }).catch((err) => console.error("Supabase booking details sync error:", err));
+
+    const modeLabel = bookingModal.paymentMode === "cash" ? "Cash" : "Online";
+    showAlert("Booking Confirmed!", `Successfully booked for ₹${numAmount.toLocaleString("en-IN")} via ${modeLabel} payment. Record added to ${modeLabel} Payments tab!`, "success");
+    setBookingModal({ isOpen: false, lead: null, amount: "", paymentMode: "online", reference: "", bookingDate: "" });
+  };
+
+  const handleConfirmCancellation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cancellationModal.lead) return;
+    if (!cancellationModal.reason.trim()) {
+      showAlert("Reason Required", "Please provide a reason for cancelling this booking.", "warning");
+      return;
+    }
+
+    const leadId = cancellationModal.lead.id;
+    const refundNum = parseFloat(cancellationModal.refundAmount.replace(/[^0-9.]/g, "")) || 0;
+
+    const cancellationDetails = {
+      status: "Cancelled" as const,
+      cancellationReason: cancellationModal.reason.trim(),
+      cancelledAt: new Date().toISOString(),
+      refundAmount: refundNum,
+    };
+
+    updateLeadBookingDetails(leadId, cancellationDetails);
+    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, ...cancellationDetails } : l)));
+
+    fetch(`/api/leads/${leadId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cancellationDetails),
+    }).catch((err) => console.error("Supabase cancellation sync error:", err));
+
+    showAlert("Booking Cancelled", `The booking has been marked cancelled and ₹${refundNum.toLocaleString("en-IN")} has been deducted. You can review it in the Cancelled Bookings tab.`, "info");
+    setCancellationModal({ isOpen: false, lead: null, reason: "", refundAmount: "" });
+  };
+
+  const handleReactivateBooking = (lead: InquiryLead) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Re-activate Booking",
+      message: `Do you want to re-activate the booking for "${lead.fullName}"? It will restore the booking amount of ₹${(lead.bookingAmount || 0).toLocaleString("en-IN")} to ${lead.paymentMode === "cash" ? "Cash" : "Online"} payments.`,
+      confirmText: "Yes, Re-activate",
+      cancelText: "Cancel",
+      variant: "info",
+      onConfirm: () => {
+        const details = {
+          status: "Booked" as const,
+          cancellationReason: undefined,
+          cancelledAt: undefined,
+          refundAmount: 0,
+        };
+        updateLeadBookingDetails(lead.id, details);
+        setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, ...details } : l)));
+        fetch(`/api/leads/${lead.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(details),
+        }).catch((err) => console.error("Supabase reactivate error:", err));
+        setConfirmModal(null);
+        showAlert("Booking Restored", `Booking for ${lead.fullName} is now active again.`, "success");
+      },
+    });
+  };
+
+  const handleDeleteLead = (id: string) => {
+    const targetLead = leads.find((l) => l.id === id);
+    const leadDesc = targetLead
+      ? `"${targetLead.fullName}" (${targetLead.packageName || targetLead.destination || "Inquiry"})`
+      : "this customer inquiry";
+
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Customer Inquiry",
+      message: `Are you sure you want to delete the inquiry for ${leadDesc}? This action cannot be undone.`,
+      confirmText: "Yes, Delete Inquiry",
+      cancelText: "Cancel",
+      variant: "danger",
+      onConfirm: () => {
+        deleteLead(id);
+        setLeads((prev) => prev.filter((l) => l.id !== id));
+        fetch(`/api/leads/${id}`, { method: "DELETE" }).catch((err) =>
+          console.error("Lead delete sync error:", err)
+        );
+        setConfirmModal(null);
+      },
+    });
   };
 
   const handleDeleteDestination = (id: string) => {
-    if (confirm("Are you sure you want to remove this destination?")) {
-      deleteDestination(id);
-      setDestinations((prev) => prev.filter((d) => d.id !== id));
-      fetch(`/api/destinations/${id}`, { method: "DELETE" }).catch((err) =>
-        console.error("Supabase destination delete error:", err)
-      );
-    }
+    const targetDest = destinations.find((d) => d.id === id);
+    const destName = targetDest ? `"${targetDest.name}"` : "this destination";
+
+    setConfirmModal({
+      isOpen: true,
+      title: "Remove Destination",
+      message: `Are you sure you want to remove ${destName} from featured destinations?`,
+      confirmText: "Yes, Remove Destination",
+      cancelText: "Cancel",
+      variant: "danger",
+      onConfirm: () => {
+        deleteDestination(id);
+        setDestinations((prev) => prev.filter((d) => d.id !== id));
+        fetch(`/api/destinations/${id}`, { method: "DELETE" }).catch((err) =>
+          console.error("Supabase destination delete error:", err)
+        );
+        setConfirmModal(null);
+      },
+    });
   };
 
   const handleAddDestination = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDest.name || !newDest.startingPrice) {
-      alert("Please fill in destination name and starting price.");
+      showAlert("Missing Information", "Please fill in both the destination name and starting price.", "warning");
       return;
     }
 
@@ -261,7 +693,7 @@ export default function AdminPage() {
       body: JSON.stringify(companyInfo),
     }).catch((err) => console.error("Supabase company info save error:", err));
 
-    alert("Company settings updated and saved successfully!");
+    showAlert("Settings Saved", "Company business settings and contact numbers updated and saved successfully!", "success");
   };
 
   // Package Handlers
@@ -366,7 +798,7 @@ export default function AdminPage() {
 
   const handleUpdateDetailedInclusion = (
     index: number,
-    field: "title" | "description" | "image" | "category",
+    field: "title" | "description" | "image" | "category" | "badge",
     value: string
   ) => {
     const updated = [...(pkgFormData.detailedInclusions || [])];
@@ -441,7 +873,7 @@ export default function AdminPage() {
   const handleAddGalleryImage = () => {
     const updated = [...(pkgFormData.galleryImages || [])];
     if (updated.length >= 6) {
-      alert("Recommended gallery size is 6 curated photos for the 3x2 moments grid.");
+      showAlert("Gallery Limit", "Recommended gallery size is 6 curated photos for the 3x2 moments grid.", "info");
       return;
     }
     updated.push("https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop");
@@ -456,7 +888,7 @@ export default function AdminPage() {
   const handleSavePackage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!pkgFormData.title || !pkgFormData.discountedPrice || !pkgFormData.state) {
-      alert("Please enter package title, state, and discounted price.");
+      showAlert("Missing Package Details", "Please enter package title, state, and discounted price before saving.", "warning");
       return;
     }
 
@@ -508,13 +940,25 @@ export default function AdminPage() {
   };
 
   const handleDeletePackage = (id: string) => {
-    if (confirm("Are you sure you want to delete this package?")) {
-      deletePackage(id);
-      setPackages((prev) => prev.filter((p) => p.id !== id));
-      fetch(`/api/packages/${id}`, { method: "DELETE" }).catch((err) =>
-        console.error("Supabase package delete error:", err)
-      );
-    }
+    const targetPkg = packages.find((p) => p.id === id);
+    const pkgName = targetPkg ? `"${targetPkg.title}"` : "this package";
+
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Tour Package",
+      message: `Are you sure you want to permanently delete ${pkgName}? It will be removed from the package listings on the website.`,
+      confirmText: "Yes, Delete Package",
+      cancelText: "Cancel",
+      variant: "danger",
+      onConfirm: () => {
+        deletePackage(id);
+        setPackages((prev) => prev.filter((p) => p.id !== id));
+        fetch(`/api/packages/${id}`, { method: "DELETE" }).catch((err) =>
+          console.error("Supabase package delete error:", err)
+        );
+        setConfirmModal(null);
+      },
+    });
   };
 
   const handleAddItineraryDay = () => {
@@ -563,8 +1007,61 @@ export default function AdminPage() {
     packagePage * packagesPerPage
   );
 
+  // Date-filtered leads (base for KPI metrics and date-filtered views)
+  const dateFilteredLeads = useMemo(() => {
+    return leads.filter((lead) => {
+      if (dateFilter === "all") return true;
+      let leadDateStr = "";
+      if (lead.createdAt) {
+        try {
+          const d = new Date(lead.createdAt);
+          if (!isNaN(d.getTime())) {
+            leadDateStr = d.toISOString().slice(0, 10);
+          }
+        } catch {}
+      }
+
+      if (!leadDateStr) return true;
+
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0, 10);
+
+      if (dateFilter === "today") {
+        return leadDateStr === todayStr;
+      }
+      if (dateFilter === "yesterday") {
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        return leadDateStr === yesterday.toISOString().slice(0, 10);
+      }
+      if (dateFilter === "last7days") {
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        return leadDateStr >= sevenDaysAgo && leadDateStr <= todayStr;
+      }
+      if (dateFilter === "thisMonth") {
+        const currentMonth = todayStr.slice(0, 7);
+        return leadDateStr.startsWith(currentMonth);
+      }
+      if (dateFilter === "custom") {
+        if (!customDate) return true;
+        return leadDateStr === customDate;
+      }
+      return true;
+    });
+  }, [leads, dateFilter, customDate]);
+
+  // KPI Metrics (strictly recalculated dynamically from dateFilteredLeads!)
+  const kpiTotalLeads = dateFilteredLeads.length;
+  const kpiNewLeads = dateFilteredLeads.filter((l) => l.status === "New").length;
+  const kpiBookedLeads = dateFilteredLeads.filter((l) => l.status === "Booked");
+  const kpiCashLeads = dateFilteredLeads.filter((l) => l.status === "Booked" && l.paymentMode === "cash");
+  const kpiCashTotal = kpiCashLeads.reduce((sum, l) => sum + (Number(l.bookingAmount) || 0), 0);
+  const kpiOnlineLeads = dateFilteredLeads.filter((l) => l.status === "Booked" && l.paymentMode === "online");
+  const kpiOnlineTotal = kpiOnlineLeads.reduce((sum, l) => sum + (Number(l.bookingAmount) || 0), 0);
+  const kpiCancelledLeads = dateFilteredLeads.filter((l) => l.status === "Cancelled");
+  const kpiCancelledTotal = kpiCancelledLeads.reduce((sum, l) => sum + (Number(l.refundAmount ?? l.bookingAmount) || 0), 0);
+
   // Filtered Leads
-  const filteredLeads = leads.filter((lead) => {
+  const filteredLeads = dateFilteredLeads.filter((lead) => {
     const matchesSearch =
       lead.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       lead.phone.includes(searchQuery) ||
@@ -572,6 +1069,64 @@ export default function AdminPage() {
     const matchesType = leadFilter === "all" || lead.type === leadFilter;
     const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
     return matchesSearch && matchesType && matchesStatus;
+  });
+
+  // Filtered Cash Bookings (status === "Booked" && paymentMode === "cash")
+  const filteredCashLeads = dateFilteredLeads.filter((lead) => {
+    if (lead.status !== "Booked" || lead.paymentMode !== "cash") return false;
+    const q = cashSearchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      lead.fullName.toLowerCase().includes(q) ||
+      lead.phone.includes(q) ||
+      (lead.destination && lead.destination.toLowerCase().includes(q)) ||
+      (lead.paymentReference && lead.paymentReference.toLowerCase().includes(q))
+    );
+  });
+
+  // Filtered Online Bookings (status === "Booked" && paymentMode === "online")
+  const filteredOnlineLeads = dateFilteredLeads.filter((lead) => {
+    if (lead.status !== "Booked" || lead.paymentMode !== "online") return false;
+    const q = onlineSearchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      lead.fullName.toLowerCase().includes(q) ||
+      lead.phone.includes(q) ||
+      (lead.destination && lead.destination.toLowerCase().includes(q)) ||
+      (lead.paymentReference && lead.paymentReference.toLowerCase().includes(q))
+    );
+  });
+
+  // Filtered Cancelled Bookings (status === "Cancelled")
+  const filteredCancelledLeads = dateFilteredLeads.filter((lead) => {
+    if (lead.status !== "Cancelled") return false;
+    const q = cancelledSearchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      lead.fullName.toLowerCase().includes(q) ||
+      lead.phone.includes(q) ||
+      (lead.destination && lead.destination.toLowerCase().includes(q)) ||
+      (lead.cancellationReason && lead.cancellationReason.toLowerCase().includes(q))
+    );
+  });
+
+  // Filtered Reviews
+  const filteredReviewsList = reviewsList.filter((rev) => {
+    const q = reviewSearchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      rev.name.toLowerCase().includes(q) ||
+      rev.comment.toLowerCase().includes(q) ||
+      rev.targetName.toLowerCase().includes(q) ||
+      (rev.location && rev.location.toLowerCase().includes(q));
+
+    const matchesCategory =
+      reviewCategoryFilter === "all" || rev.category === reviewCategoryFilter;
+
+    const matchesRating =
+      reviewRatingFilter === "all" || rev.rating === parseInt(reviewRatingFilter, 10);
+
+    return matchesSearch && matchesCategory && matchesRating;
   });
 
   if (!isAuthenticated) {
@@ -666,88 +1221,233 @@ export default function AdminPage() {
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* KPI Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-          <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Leads</span>
-              <div className="p-2 rounded-lg bg-[#FF5A3C]/20 text-[#FF5A3C]">
+        {/* Top Control Toolbar with Date Filter and Live Sync */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-[#090E20]/90 border border-white/10 backdrop-blur-xl mb-6 shadow-xl text-left">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-[#FF5A3C]/20 text-[#FF5A3C]">
                 <LayoutDashboard className="w-4 h-4" />
-              </div>
+              </span>
+              <h2 className="text-lg font-black text-white font-['Outfit']">
+                Business Overview & KPI Metrics
+              </h2>
             </div>
-            <div className="text-3xl font-extrabold text-white font-['Outfit']">{leads.length}</div>
-            <p className="text-[11px] text-slate-400 mt-1">Direct website enquiries</p>
+            <p className="text-xs text-slate-400 mt-1">
+              Showing dynamic revenue, booking and enquiry metrics for:{" "}
+              <strong className="text-white">
+                {dateFilterLabels[dateFilter] || "All Dates"}
+                {dateFilter === "custom" && customDate ? ` (${customDate})` : ""}
+              </strong>
+            </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Live Refresh Button */}
+            <button
+              type="button"
+              onClick={() => refreshLeads(false)}
+              disabled={isRefreshingLeads}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 border border-white/15 text-xs text-white font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+              title="Refresh all leads and bookings from Supabase"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-[#FF5A3C] ${isRefreshingLeads ? "animate-spin" : ""}`} />
+              <span>{isRefreshingLeads ? "Syncing..." : "Refresh Live"}</span>
+              <span className="text-[10px] text-emerald-400 font-semibold hidden sm:inline">
+                • {lastLeadsSync}
+              </span>
+            </button>
+
+            {/* Date-wise Filter Custom Dropdown */}
+            <div className="relative flex items-center gap-1.5" ref={dateMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsDateMenuOpen((prev) => !prev)}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold focus:outline-none border transition-all cursor-pointer shadow-sm ${
+                  dateFilter !== "all"
+                    ? "bg-[#1E293B] border-[#FF5A3C] text-[#FF8E79] ring-1 ring-[#FF5A3C]/50 font-bold"
+                    : "bg-[#0F172A] border-white/15 text-white hover:border-white/30"
+                }`}
+                title="Filter metrics and enquiries date-wise"
+              >
+                <Calendar className={`w-3.5 h-3.5 ${dateFilter !== "all" ? "text-[#FF5A3C]" : "text-slate-400"}`} />
+                <span>Filter: {dateFilterLabels[dateFilter] || "All Dates"}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isDateMenuOpen ? "rotate-180 text-white" : ""}`} />
+              </button>
+
+              {/* Dropdown Menu Popup */}
+              {isDateMenuOpen && (
+                <div className="absolute top-full right-0 mt-1.5 w-56 rounded-2xl bg-[#0F172A] border border-white/15 shadow-2xl shadow-black/90 p-1.5 z-50 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-100">
+                  <div className="text-[10px] uppercase font-bold text-slate-400 px-2.5 py-1.5 tracking-wider border-b border-white/10 mb-1">
+                    Select Date Period
+                  </div>
+                  {[
+                    { key: "all", label: "All Dates (Lifetime)", icon: "📅" },
+                    { key: "today", label: "Today", icon: "⚡" },
+                    { key: "yesterday", label: "Yesterday", icon: "⏮️" },
+                    { key: "last7days", label: "Last 7 Days", icon: "📊" },
+                    { key: "thisMonth", label: "This Month", icon: "🗓️" },
+                    { key: "custom", label: "Specific Day...", icon: "🎯" },
+                  ].map((opt) => {
+                    const isSelected = dateFilter === opt.key;
+                    return (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => {
+                          setDateFilter(opt.key as any);
+                          setIsDateMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white shadow-md shadow-[#FF5A3C]/30"
+                            : "text-slate-200 hover:bg-white/10 hover:text-white"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span>{opt.icon}</span>
+                          <span>{opt.label}</span>
+                        </span>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {dateFilter === "custom" && (
+                <input
+                  type="date"
+                  value={customDate}
+                  onChange={(e) => setCustomDate(e.target.value)}
+                  className="px-2.5 py-1.5 rounded-xl bg-[#0F172A] border border-[#FF5A3C] text-xs text-white focus:outline-none shadow-sm"
+                  title="Select a specific date to filter"
+                />
+              )}
+
+              {dateFilter !== "all" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDateFilter("all");
+                    setCustomDate("");
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-[11px] text-slate-300 font-bold cursor-pointer border border-white/10 transition-colors"
+                  title="Clear date filter to show all dates"
+                >
+                  Clear Date
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 6 Recalculated KPI Summary Cards (Dynamically updated by date filter) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8 text-left">
+          {/* 1. Total Leads */}
+          <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md hover:border-white/20 transition-all">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">New Enquiries</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Leads</span>
+              <div className="p-2 rounded-lg bg-[#FF5A3C]/20 text-[#FF5A3C]">
+                <Users className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-3xl font-extrabold text-white font-['Outfit']">{kpiTotalLeads}</div>
+            <p className="text-[11px] text-slate-400 mt-1">In selected timeframe</p>
+          </div>
+
+          {/* 2. New Enquiries */}
+          <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md hover:border-rose-500/30 transition-all">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">New Enquiries</span>
               <div className="p-2 rounded-lg bg-rose-500/20 text-rose-400">
                 <Clock className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-3xl font-extrabold text-white font-['Outfit']">
-              {leads.filter((l) => l.status === "New").length}
-            </div>
-            <p className="text-[11px] text-rose-400 mt-1">Pending first call</p>
+            <div className="text-3xl font-extrabold text-rose-400 font-['Outfit']">{kpiNewLeads}</div>
+            <p className="text-[11px] text-rose-300/80 mt-1">Pending first contact</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+          {/* 3. Confirmed Booked */}
+          <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md hover:border-emerald-500/30 transition-all">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Confirmed Booked</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Confirmed Booked</span>
               <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
                 <CheckCircle className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-3xl font-extrabold text-white font-['Outfit']">
-              {leads.filter((l) => l.status === "Booked").length}
-            </div>
-            <p className="text-[11px] text-emerald-400 mt-1">Successful tours planned</p>
+            <div className="text-3xl font-extrabold text-emerald-400 font-['Outfit']">{kpiBookedLeads.length}</div>
+            <p className="text-[11px] text-emerald-300/80 mt-1">Active confirmed tours</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+          {/* 4. Cash Payments Received */}
+          <div className="p-5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 backdrop-blur-md hover:border-emerald-500/50 transition-all">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Curated Packages</span>
-              <div className="p-2 rounded-lg bg-pink-500/20 text-pink-400">
-                <Package className="w-4 h-4" />
+              <span className="text-[11px] font-bold text-emerald-300 uppercase tracking-wider">Cash Received</span>
+              <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
+                <Wallet className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-3xl font-extrabold text-white font-['Outfit']">{packages.length}</div>
-            <p className="text-[11px] text-pink-400 mt-1">State-wise tours & plans</p>
+            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-['Outfit'] truncate">
+              ₹{kpiCashTotal.toLocaleString("en-IN")}
+            </div>
+            <p className="text-[11px] text-emerald-300/80 mt-1">
+              {kpiCashLeads.length} cash {kpiCashLeads.length === 1 ? "booking" : "bookings"}
+            </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+          {/* 5. Online Payments */}
+          <div className="p-5 rounded-2xl bg-cyan-950/20 border border-cyan-500/30 backdrop-blur-md hover:border-cyan-500/50 transition-all">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Destinations</span>
-              <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400">
-                <Compass className="w-4 h-4" />
+              <span className="text-[11px] font-bold text-cyan-300 uppercase tracking-wider">Online Payments</span>
+              <div className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400">
+                <CreditCard className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-3xl font-extrabold text-white font-['Outfit']">{destinations.length}</div>
-            <p className="text-[11px] text-amber-400 mt-1">India & International</p>
+            <div className="text-2xl sm:text-3xl font-extrabold text-cyan-400 font-['Outfit'] truncate">
+              ₹{kpiOnlineTotal.toLocaleString("en-IN")}
+            </div>
+            <p className="text-[11px] text-cyan-300/80 mt-1">
+              {kpiOnlineLeads.length} online {kpiOnlineLeads.length === 1 ? "booking" : "bookings"}
+            </p>
+          </div>
+
+          {/* 6. Cancelled Bookings */}
+          <div className="p-5 rounded-2xl bg-rose-950/20 border border-rose-500/30 backdrop-blur-md hover:border-rose-500/50 transition-all">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-bold text-rose-300 uppercase tracking-wider">Cancelled</span>
+              <div className="p-2 rounded-lg bg-rose-500/20 text-rose-400">
+                <Ban className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-3xl font-extrabold text-rose-400 font-['Outfit']">
+              {kpiCancelledLeads.length}
+            </div>
+            <p className="text-[11px] text-rose-300/80 mt-1 truncate" title={`-₹${kpiCancelledTotal.toLocaleString("en-IN")} deducted`}>
+              -₹{kpiCancelledTotal.toLocaleString("en-IN")} deducted
+            </p>
           </div>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex flex-wrap items-center gap-3 border-b border-white/10 pb-4 mb-8">
+        <div className="flex flex-wrap items-center gap-2.5 border-b border-white/10 pb-4 mb-8">
           <button
             onClick={() => setActiveTab("leads")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeTab === "leads"
                 ? "bg-[#FF5A3C] text-white shadow-lg shadow-[#FF5A3C]/30"
-                : "bg-white/5 text-slate-300 hover:bg-white/10"
+                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
             }`}
           >
             <Users className="w-4 h-4" />
-            <span>Customer Enquiries & Leads ({leads.length})</span>
+            <span>Customer Enquiries ({filteredLeads.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab("packages")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeTab === "packages"
                 ? "bg-[#FF5A3C] text-white shadow-lg shadow-[#FF5A3C]/30"
-                : "bg-white/5 text-slate-300 hover:bg-white/10"
+                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
             }`}
           >
             <Package className="w-4 h-4" />
@@ -756,10 +1456,10 @@ export default function AdminPage() {
 
           <button
             onClick={() => setActiveTab("destinations")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeTab === "destinations"
                 ? "bg-[#FF5A3C] text-white shadow-lg shadow-[#FF5A3C]/30"
-                : "bg-white/5 text-slate-300 hover:bg-white/10"
+                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
             }`}
           >
             <Compass className="w-4 h-4" />
@@ -767,23 +1467,83 @@ export default function AdminPage() {
           </button>
 
           <button
+            onClick={() => setActiveTab("cash")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "cash"
+                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30"
+                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            <Wallet className="w-4 h-4 text-emerald-400" />
+            <span>Cash Payments ({filteredCashLeads.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("online")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "online"
+                ? "bg-cyan-600 text-white shadow-lg shadow-cyan-600/30"
+                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            <CreditCard className="w-4 h-4 text-cyan-400" />
+            <span>Online Payments ({filteredOnlineLeads.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("cancelled")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "cancelled"
+                ? "bg-rose-600 text-white shadow-lg shadow-rose-600/30"
+                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            <Ban className="w-4 h-4 text-rose-400" />
+            <span>Cancelled Bookings ({filteredCancelledLeads.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("services")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "services"
+                ? "bg-[#FF5A3C] text-white shadow-lg shadow-[#FF5A3C]/30"
+                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            <Building2 className="w-4 h-4" />
+            <span>Services & Showcase Photos</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("reviews")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "reviews"
+                ? "bg-[#FF5A3C] text-white shadow-lg shadow-[#FF5A3C]/30"
+                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+            <span>Customer Reviews ({reviewsList.length})</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab("settings")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeTab === "settings"
                 ? "bg-[#FF5A3C] text-white shadow-lg shadow-[#FF5A3C]/30"
-                : "bg-white/5 text-slate-300 hover:bg-white/10"
+                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
             }`}
           >
             <Edit className="w-4 h-4" />
-            <span>Company Info & Numbers</span>
+            <span>Company Info</span>
           </button>
         </div>
 
         {/* TAB 1: CUSTOMER LEADS */}
         {activeTab === "leads" && (
           <div>
-            {/* Filters and Search Bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+            {/* Filters, Search Bar, and Live Refresh Button */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
               <div className="relative w-full sm:w-80">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
@@ -795,29 +1555,58 @@ export default function AdminPage() {
                 />
               </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => refreshLeads(false)}
+                  disabled={isRefreshingLeads}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 border border-white/15 text-xs text-white font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                  title="Refresh leads on the same page without reload"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 text-[#FF5A3C] ${isRefreshingLeads ? "animate-spin" : ""}`} />
+                  <span>{isRefreshingLeads ? "Syncing..." : "Refresh Live"}</span>
+                  <span className="text-[10px] text-emerald-400 font-semibold hidden sm:inline">
+                    • {lastLeadsSync}
+                  </span>
+                </button>
+
                 <select
                   value={leadFilter}
-                  onChange={(e) => setLeadFilter(e.target.value as any)}
-                  className="px-3 py-2 rounded-xl bg-[#0F172A] border border-white/10 text-xs text-white focus:outline-none focus:border-[#FF5A3C]"
+                  onChange={(e) => setLeadFilter(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-[#0F172A] border border-white/15 text-xs text-white focus:outline-none focus:border-[#FF5A3C] shadow-sm"
+                  style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}
                 >
-                  <option value="all">All Service Types</option>
-                  <option value="package">Tour Packages</option>
-                  <option value="flight">Flight Bookings</option>
-                  <option value="train">Train Bookings</option>
+                  <option value="all" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>All Service Types ({leads.length})</option>
+                  <option value="hotel" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>🏨 Hotel Bookings ({leads.filter((l) => l.type === "hotel").length})</option>
+                  <option value="car" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>🚗 Car Rentals ({leads.filter((l) => l.type === "car").length})</option>
+                  <option value="flight" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>✈️ Flight Bookings ({leads.filter((l) => l.type === "flight").length})</option>
+                  <option value="train" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>🚆 Train Bookings ({leads.filter((l) => l.type === "train").length})</option>
+                  <option value="package" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>📦 Tour Packages ({leads.filter((l) => l.type === "package").length})</option>
+                  <option value="group" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>👥 Group Tours ({leads.filter((l) => l.type === "group").length})</option>
+                  <option value="corporate" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>💼 Corporate MICE ({leads.filter((l) => l.type === "corporate").length})</option>
+                  <option value="service" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>🌟 General Services ({leads.filter((l) => l.type === "service").length})</option>
                 </select>
 
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 rounded-xl bg-[#0F172A] border border-white/10 text-xs text-white focus:outline-none focus:border-[#FF5A3C]"
+                  className="px-3 py-2 rounded-xl bg-[#0F172A] border border-white/15 text-xs text-white focus:outline-none focus:border-[#FF5A3C] shadow-sm"
+                  style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}
                 >
-                  <option value="all">All Statuses</option>
-                  <option value="New">New</option>
-                  <option value="Contacted">Contacted</option>
-                  <option value="Booked">Booked</option>
-                  <option value="Closed">Closed</option>
+                  <option value="all" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>All Statuses</option>
+                  <option value="New" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>New ({leads.filter(l => l.status === "New").length})</option>
+                  <option value="Contacted" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>Contacted ({leads.filter(l => l.status === "Contacted").length})</option>
+                  <option value="Booked" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>Booked ({leads.filter(l => l.status === "Booked").length})</option>
+                  <option value="Cancelled" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>Cancelled ({leads.filter(l => l.status === "Cancelled").length})</option>
+                  <option value="Closed" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>Closed ({leads.filter(l => l.status === "Closed").length})</option>
                 </select>
+
+                {dateFilter !== "all" && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FF5A3C]/15 border border-[#FF5A3C]/30 text-[#FF8E79] text-xs font-bold">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>Date: {dateFilterLabels[dateFilter]}</span>
+                  </span>
+                )}
               </div>
             </div>
 
@@ -834,7 +1623,7 @@ export default function AdminPage() {
                   const whatsappUrl = `https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
                     lead.fullName
                   )}!%20This%20is%20Watch%20My%20Trip%20Package%20Goa.%20Thank%20you%20for%20your%20inquiry%20for%20${encodeURIComponent(
-                    lead.destination || "travel package"
+                    lead.destination || lead.packageName || "travel services"
                   )}.`;
 
                   return (
@@ -844,20 +1633,44 @@ export default function AdminPage() {
                     >
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-4">
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <h3 className="text-lg font-bold text-white font-['Outfit']">
                               {lead.fullName}
                             </h3>
                             <span
                               className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                                lead.type === "package"
+                                lead.type === "hotel"
+                                  ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
+                                  : lead.type === "car"
+                                  ? "bg-orange-500/20 text-orange-300 border border-orange-500/40"
+                                  : lead.type === "package"
                                   ? "bg-[#FF5A3C]/20 text-[#FF5A3C] border border-[#FF5A3C]/40"
                                   : lead.type === "flight"
                                   ? "bg-sky-500/20 text-sky-400 border border-sky-500/40"
-                                  : "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                                  : lead.type === "train"
+                                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                                  : lead.type === "group"
+                                  ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40"
+                                  : lead.type === "corporate"
+                                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
+                                  : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
                               }`}
                             >
-                              {lead.type}
+                              {lead.type === "hotel"
+                                ? "🏨 Hotel Booking"
+                                : lead.type === "car"
+                                ? "🚗 Car Rental"
+                                : lead.type === "flight"
+                                ? "✈️ Flight"
+                                : lead.type === "train"
+                                ? "🚆 Train"
+                                : lead.type === "package"
+                                ? "📦 Package"
+                                : lead.type === "group"
+                                ? "👥 Group"
+                                : lead.type === "corporate"
+                                ? "💼 MICE"
+                                : lead.type}
                             </span>
                             <span className="text-[11px] text-slate-400">
                               {new Date(lead.createdAt).toLocaleDateString("en-IN", {
@@ -866,6 +1679,19 @@ export default function AdminPage() {
                                 year: "numeric",
                               })}
                             </span>
+
+                            {lead.status === "Booked" && (
+                              <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-emerald-300 flex items-center gap-1">
+                                <Wallet className="w-3 h-3" />
+                                <span>₹{(lead.bookingAmount || 0).toLocaleString("en-IN")} via {lead.paymentMode === "cash" ? "Cash" : "Online"}</span>
+                              </span>
+                            )}
+                            {lead.status === "Cancelled" && (
+                              <span className="px-2 py-0.5 rounded-md bg-rose-500/15 border border-rose-500/30 text-[10px] font-bold text-rose-300 flex items-center gap-1">
+                                <Ban className="w-3 h-3" />
+                                <span>Cancelled (-₹{(lead.refundAmount ?? lead.bookingAmount ?? 0).toLocaleString("en-IN")})</span>
+                              </span>
+                            )}
                           </div>
 
                           <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-300">
@@ -904,12 +1730,15 @@ export default function AdminPage() {
                                   ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
                                   : lead.status === "Booked"
                                   ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                                  : lead.status === "Cancelled"
+                                  ? "bg-rose-950/40 text-rose-300 border-rose-600/50"
                                   : "bg-slate-700 text-slate-300 border-slate-600"
                               }`}
                             >
                               <option value="New" className="bg-[#0F172A] text-rose-300">New</option>
                               <option value="Contacted" className="bg-[#0F172A] text-amber-300">Contacted</option>
                               <option value="Booked" className="bg-[#0F172A] text-emerald-300">Booked</option>
+                              <option value="Cancelled" className="bg-[#0F172A] text-rose-400">Cancelled</option>
                               <option value="Closed" className="bg-[#0F172A] text-slate-300">Closed</option>
                             </select>
                           </div>
@@ -974,20 +1803,293 @@ export default function AdminPage() {
                           </div>
                         </div>
 
-                        <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
-                            Special Requirements
-                          </span>
-                          <p className="text-slate-300 text-[11px] italic leading-relaxed">
-                            {lead.specialRequirements || "No special dietary or accommodation notes given."}
-                          </p>
-                        </div>
+                        {lead.specialRequirements && (
+                          <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+                              Special Requirements
+                            </span>
+                            <p className="text-slate-300 text-[11px] italic leading-relaxed">
+                              {lead.specialRequirements}
+                            </p>
+                          </div>
+                        )}
+
+                        {lead.serviceDetails && Object.keys(lead.serviceDetails).length > 0 && (
+                          <div className="sm:col-span-3 p-3.5 rounded-xl bg-black/40 border border-white/10 space-y-2">
+                            <span className="text-[10px] uppercase font-bold text-[#FF5A3C] flex items-center gap-1.5">
+                              <Sparkles className="w-3 h-3" />
+                              <span>Enquiry Questionnaire Responses ({lead.serviceName || lead.type})</span>
+                            </span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                              {Object.entries(lead.serviceDetails).map(([key, val]) => (
+                                <div
+                                  key={key}
+                                  className="p-2.5 rounded-lg bg-white/5 border border-white/5 flex items-start justify-between gap-2"
+                                >
+                                  <span className="text-[10px] text-slate-400 font-semibold">{key}:</span>
+                                  <span className="text-xs font-bold text-white text-right">{val}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
                 })}
               </div>
             )}
+          </div>
+        )}
+
+        {/* TAB: SERVICES & 3 SHOWCASE PHOTOS MANAGEMENT */}
+        {activeTab === "services" && (
+          <div className="space-y-6">
+            {/* Top Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF5A3C]/15 border border-[#FF5A3C]/30 text-[10px] font-extrabold text-[#FF5A3C] uppercase tracking-wider mb-1">
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>Enquiry Flow & Photos</span>
+                </div>
+                <h3 className="text-xl font-black text-white font-['Outfit']">
+                  Services & Showcase Photos
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Manage the 3 showcase photos displayed in the customer enquiry modal for Hotel Booking & Car Rental.
+                </p>
+              </div>
+
+              {serviceToast && (
+                <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center gap-2 animate-in fade-in">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>{serviceToast}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Service Selection Pills */}
+            <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-white/5 border border-white/10">
+              {servicesList.map((service) => {
+                const isSelected = selectedServiceId === service.id;
+                const isFeatured = service.id === "hotel-booking" || service.id === "car-rental";
+                return (
+                  <button
+                    key={service.id}
+                    type="button"
+                    onClick={() => setSelectedServiceId(service.id)}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                      isSelected
+                        ? "bg-[#FF5A3C] text-white shadow-lg shadow-[#FF5A3C]/30"
+                        : "text-slate-300 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    {service.id === "hotel-booking" && <Building2 className="w-3.5 h-3.5" />}
+                    {service.id === "car-rental" && <Car className="w-3.5 h-3.5" />}
+                    {service.id === "flight-booking" && <Plane className="w-3.5 h-3.5" />}
+                    {service.id === "railway-reservation" && <Train className="w-3.5 h-3.5" />}
+                    {service.id !== "hotel-booking" &&
+                      service.id !== "car-rental" &&
+                      service.id !== "flight-booking" &&
+                      service.id !== "railway-reservation" && <Compass className="w-3.5 h-3.5" />}
+                    <span>{service.title}</span>
+                    {isFeatured && (
+                      <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-extrabold ${isSelected ? "bg-white/25 text-white" : "bg-teal-500/20 text-teal-300"}`}>
+                        3 Photos
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Selected Service Editor */}
+            {(() => {
+              const currentService = servicesList.find((s) => s.id === selectedServiceId) || servicesList[0];
+              if (!currentService) return null;
+
+              const photos = servicePhotosState[currentService.id] || [
+                { url: "", title: "", caption: "" },
+                { url: "", title: "", caption: "" },
+                { url: "", title: "", caption: "" },
+              ];
+
+              return (
+                <div className="space-y-6">
+                  {/* Service Header Card */}
+                  <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900/90 via-[#0C1226] to-slate-900/90 border border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-[#FF5A3C]/10 border border-[#FF5A3C]/20 flex items-center justify-center text-[#FF5A3C] shrink-0">
+                        {currentService.id === "hotel-booking" && <Building2 className="w-7 h-7" />}
+                        {currentService.id === "car-rental" && <Car className="w-7 h-7" />}
+                        {currentService.id === "flight-booking" && <Plane className="w-7 h-7" />}
+                        {currentService.id === "railway-reservation" && <Train className="w-7 h-7" />}
+                        {currentService.id !== "hotel-booking" &&
+                          currentService.id !== "car-rental" &&
+                          currentService.id !== "flight-booking" &&
+                          currentService.id !== "railway-reservation" && <Compass className="w-7 h-7" />}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-lg font-black text-white font-['Outfit']">
+                            {currentService.title}
+                          </h4>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold uppercase">
+                            {currentService.badge}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                          {currentService.shortDesc}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleSaveServicePhotos(currentService.id)}
+                        className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-[#FF5A3C]/30 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>Save Showcase Photos</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 3 Photos Editor Section */}
+                  <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                      <div className="flex items-center gap-2">
+                        <Camera className="w-4 h-4 text-[#FF5A3C]" />
+                        <h4 className="text-sm font-bold uppercase tracking-wider text-white">
+                          3 Verified Showcase Photos for {currentService.title}
+                        </h4>
+                      </div>
+                      <span className="text-[11px] text-slate-400">
+                        These photos appear inside the customer enquiry modal on the website.
+                      </span>
+                    </div>
+
+                    {/* Grid of 3 Photos */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                      {[0, 1, 2].map((idx) => {
+                        const currentPhoto = photos[idx] || { url: "", title: "", caption: "" };
+                        return (
+                          <div
+                            key={idx}
+                            className="p-4 rounded-2xl bg-[#0F172A] border border-white/10 space-y-3 flex flex-col justify-between"
+                          >
+                            <div className="space-y-3">
+                              {/* Photo Number & Badge */}
+                              <div className="flex items-center justify-between">
+                                <span className="px-2 py-0.5 rounded-md bg-[#FF5A3C]/20 border border-[#FF5A3C]/30 text-[10px] font-extrabold text-[#FF5A3C]">
+                                  Showcase Photo #{idx + 1}
+                                </span>
+                                {currentPhoto.url && (
+                                  <a
+                                    href={currentPhoto.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[10px] text-slate-400 hover:text-white transition-colors"
+                                  >
+                                    Test Link ↗
+                                  </a>
+                                )}
+                              </div>
+
+                              {/* Photo Preview */}
+                              <div className="relative h-36 w-full rounded-xl overflow-hidden border border-white/10 bg-black/40">
+                                {currentPhoto.url ? (
+                                  <Image
+                                    src={currentPhoto.url}
+                                    alt={`Showcase ${idx + 1}`}
+                                    fill
+                                    className="object-cover"
+                                    sizes="350px"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 gap-1">
+                                    <Camera className="w-6 h-6" />
+                                    <span className="text-[10px]">No photo URL entered</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Image URL Input */}
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                  Image URL *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={currentPhoto.url}
+                                  onChange={(e) =>
+                                    handlePhotoChange(currentService.id, idx, "url", e.target.value)
+                                  }
+                                  placeholder="https://images.unsplash.com/..."
+                                  className="w-full px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5A3C]"
+                                />
+                              </div>
+
+                              {/* Title Input */}
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                  Photo Title *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={currentPhoto.title || ""}
+                                  onChange={(e) =>
+                                    handlePhotoChange(currentService.id, idx, "title", e.target.value)
+                                  }
+                                  placeholder={
+                                    currentService.id === "hotel-booking"
+                                      ? "e.g. Deluxe Suite & Room"
+                                      : "e.g. Toyota Innova Crysta AC"
+                                  }
+                                  className="w-full px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5A3C]"
+                                />
+                              </div>
+
+                              {/* Caption Input */}
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                  Short Caption / Highlights
+                                </label>
+                                <input
+                                  type="text"
+                                  value={currentPhoto.caption || ""}
+                                  onChange={(e) =>
+                                    handlePhotoChange(currentService.id, idx, "caption", e.target.value)
+                                  }
+                                  placeholder="e.g. King bed, balcony, sea breeze comfort"
+                                  className="w-full px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5A3C]"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Bottom Save Action */}
+                    <div className="pt-4 flex items-center justify-between border-t border-white/10">
+                      <span className="text-xs text-slate-400">
+                        Changes will immediately reflect on the live website enquiry modal.
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleSaveServicePhotos(currentService.id)}
+                        className="px-6 py-2.5 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-[#FF5A3C]/30 transition-all cursor-pointer"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>Save Photos for {currentService.title}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -1028,13 +2130,14 @@ export default function AdminPage() {
                     setPackageFilterState(e.target.value);
                     setPackagePage(1);
                   }}
-                  className="px-3 py-2 rounded-xl bg-[#0F172A] border border-white/10 text-xs text-white focus:outline-none focus:border-[#FF5A3C]"
+                  className="px-3 py-2 rounded-xl bg-[#0F172A] border border-white/15 text-xs text-white focus:outline-none focus:border-[#FF5A3C] shadow-sm"
+                  style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}
                 >
-                  <option value="all">All States ({packages.length})</option>
+                  <option value="all" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>All States ({packages.length})</option>
                   {curatedRegionsList.map((state) => {
                     const count = packages.filter((p) => p.state === state).length;
                     return (
-                      <option key={state} value={state}>
+                      <option key={state} value={state} style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>
                         {state} ({count})
                       </option>
                     );
@@ -1702,7 +2805,7 @@ export default function AdminPage() {
                                   </span>
                                 ) : (
                                   <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1">
-                                    <span>📑 Middle Mode (Centered, No Photo Space)</span>
+                                    <span>📄 Center Clean Mode (No Image)</span>
                                   </span>
                                 )}
                               </div>
@@ -1710,50 +2813,52 @@ export default function AdminPage() {
                               <button
                                 type="button"
                                 onClick={() => handleRemoveDetailedInclusion(idx)}
-                                className="text-rose-400 hover:text-rose-300 text-[11px] font-medium flex items-center gap-1 transition-colors"
+                                className="text-rose-400 hover:text-rose-300 text-[11px] font-medium flex items-center gap-1"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
-                                <span>Remove</span>
+                                <span>Remove Service</span>
                               </button>
                             </div>
 
                             <div className="space-y-3">
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div className="sm:col-span-2">
-                                  <label className="block text-[11px] text-slate-400 mb-1">
-                                    Service Title *
-                                  </label>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                  <label className="block text-[11px] text-slate-400 mb-1">Service Title *</label>
                                   <input
                                     type="text"
-                                    placeholder="e.g. Grand Island Scuba Diving & Dolphin Safari Cruise"
+                                    required
+                                    placeholder="e.g. Scuba Diving & Island Cruise"
                                     value={item.title}
-                                    onChange={(e) => handleUpdateDetailedInclusion(idx, "title", e.target.value)}
+                                    onChange={(e) =>
+                                      handleUpdateDetailedInclusion(idx, "title", e.target.value)
+                                    }
                                     className="w-full px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
                                   />
                                 </div>
+
                                 <div>
-                                  <label className="block text-[11px] text-slate-400 mb-1">
-                                    Category Badge (Optional)
-                                  </label>
+                                  <label className="block text-[11px] text-slate-400 mb-1">Badge Tag</label>
                                   <input
                                     type="text"
-                                    placeholder="e.g. Watersports, Cruise, Spa"
-                                    value={item.category || ""}
-                                    onChange={(e) => handleUpdateDetailedInclusion(idx, "category", e.target.value)}
+                                    placeholder="e.g. Top Rated Experience, AC Transport"
+                                    value={item.badge || ""}
+                                    onChange={(e) =>
+                                      handleUpdateDetailedInclusion(idx, "badge", e.target.value)
+                                    }
                                     className="w-full px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
                                   />
                                 </div>
                               </div>
 
                               <div>
-                                <label className="block text-[11px] text-slate-400 mb-1">
-                                  Service Description *
-                                </label>
+                                <label className="block text-[11px] text-slate-400 mb-1">Service Description</label>
                                 <textarea
                                   rows={2}
-                                  placeholder="Explain what is included in this service (resort amenities, boat details, transfers, etc.)..."
+                                  placeholder="Describe the inclusions, timings, hotel details, or experience..."
                                   value={item.description}
-                                  onChange={(e) => handleUpdateDetailedInclusion(idx, "description", e.target.value)}
+                                  onChange={(e) =>
+                                    handleUpdateDetailedInclusion(idx, "description", e.target.value)
+                                  }
                                   className="w-full px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
                                 />
                               </div>
@@ -1761,19 +2866,27 @@ export default function AdminPage() {
                               <div>
                                 <div className="flex items-center justify-between mb-1">
                                   <label className="block text-[11px] text-slate-400">
-                                    Picture URL (Optional)
+                                    Service Image URL (Optional - leave blank for clean centered card)
                                   </label>
-                                  <span className="text-[10px] text-slate-500">
-                                    Leave blank for centered middle layout
-                                  </span>
+                                  {hasImg && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleUpdateDetailedInclusion(idx, "image", "")}
+                                      className="text-[10px] text-amber-400 hover:text-amber-300 underline"
+                                    >
+                                      Clear image (Switch to Center Mode)
+                                    </button>
+                                  )}
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2">
                                   <input
                                     type="url"
                                     placeholder="https://images.unsplash.com/... (optional)"
                                     value={item.image || ""}
-                                    onChange={(e) => handleUpdateDetailedInclusion(idx, "image", e.target.value)}
-                                    className="flex-1 px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
+                                    onChange={(e) =>
+                                      handleUpdateDetailedInclusion(idx, "image", e.target.value)
+                                    }
+                                    className="w-full px-3 py-2 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-cyan-400"
                                   />
                                   {hasImg && (
                                     <div className="relative w-12 h-10 rounded-lg overflow-hidden border border-white/20 shrink-0 bg-black">
@@ -1960,16 +3073,21 @@ export default function AdminPage() {
             document.body
           )}
 
-        {/* TAB 2: DESTINATIONS MANAGEMENT */}
+        {/* TAB: DESTINATIONS MANAGEMENT */}
         {activeTab === "destinations" && (
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-xs sm:text-sm text-slate-400">
-                Add, preview, or manage travel destinations featured on the homepage.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h3 className="text-lg font-bold text-white font-['Outfit']">
+                  Featured Destinations
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Add, preview, or manage travel destinations featured on the homepage.
+                </p>
+              </div>
               <button
                 onClick={() => setIsAddDestOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs tracking-wide shadow-lg shadow-[#FF5A3C]/30 transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs tracking-wide shadow-lg shadow-[#FF5A3C]/30 transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Destination</span>
@@ -2013,7 +3131,7 @@ export default function AdminPage() {
                       </span>
                       <button
                         onClick={() => handleDeleteDestination(dest.id)}
-                        className="p-1.5 rounded-lg hover:bg-rose-500/20 text-rose-400 text-xs"
+                        className="p-1.5 rounded-lg hover:bg-rose-500/20 text-rose-400 text-xs transition-colors cursor-pointer"
                         title="Delete Destination"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -2033,7 +3151,7 @@ export default function AdminPage() {
                   </h3>
                   <form onSubmit={handleAddDestination} className="space-y-4 text-xs">
                     <div>
-                      <label className="block text-slate-300 mb-1 font-medium">Destination Name</label>
+                      <label className="block text-slate-300 mb-1 font-medium">Destination Name *</label>
                       <input
                         type="text"
                         required
@@ -2094,9 +3212,10 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="block text-slate-300 mb-1 font-medium">Image URL (Unsplash or direct image)</label>
+                      <label className="block text-slate-300 mb-1 font-medium">Image URL (Unsplash or direct image) *</label>
                       <input
                         type="url"
+                        required
                         placeholder="https://images.unsplash.com/..."
                         value={newDest.image || ""}
                         onChange={(e) => setNewDest({ ...newDest, image: e.target.value })}
@@ -2108,19 +3227,643 @@ export default function AdminPage() {
                       <button
                         type="button"
                         onClick={() => setIsAddDestOpen(false)}
-                        className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium"
+                        className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium cursor-pointer"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
-                        className="px-5 py-2 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold"
+                        className="px-5 py-2 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold cursor-pointer"
                       >
                         Add Destination
                       </button>
                     </div>
                   </form>
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 2: CASH PAYMENTS */}
+        {activeTab === "cash" && (
+          <div className="space-y-6">
+            {/* Header & Metric Banner */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-[#0F172A] to-[#0F172A] border border-emerald-500/30 text-left">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-extrabold text-emerald-400 uppercase tracking-wider mb-2">
+                  <Wallet className="w-3.5 h-3.5" />
+                  <span>Cash Accounting</span>
+                </div>
+                <h3 className="text-xl font-black text-white font-['Outfit']">
+                  Cash Payments Received
+                </h3>
+                <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                  Track physical cash collected at Mehsana / Goa offices for confirmed tours. When bookings are cancelled, deducted amounts are subtracted automatically.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="px-5 py-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-right">
+                  <span className="text-[10px] uppercase font-bold text-emerald-300 block">Total Cash Collected</span>
+                  <span className="text-2xl font-black text-emerald-400 font-['Outfit']">
+                    ₹{filteredCashLeads.reduce((s, l) => s + (Number(l.bookingAmount) || 0), 0).toLocaleString("en-IN")}
+                  </span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">
+                    {filteredCashLeads.length} {filteredCashLeads.length === 1 ? "record" : "records"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Search Bar */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="relative w-full sm:w-80">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={cashSearchQuery}
+                  onChange={(e) => setCashSearchQuery(e.target.value)}
+                  placeholder="Search cash bookings by name, phone, ref..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            {/* Cash Bookings List / Table */}
+            {filteredCashLeads.length === 0 ? (
+              <div className="py-16 text-center rounded-2xl bg-white/5 border border-white/10">
+                <Wallet className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                <h4 className="text-base font-bold text-white">No cash bookings found</h4>
+                <p className="text-xs text-slate-400 mt-1">
+                  Mark any enquiry as &quot;Booked&quot; with &quot;Cash&quot; mode to record cash payments here.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredCashLeads.map((lead) => {
+                  const whatsappUrl = `https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
+                    lead.fullName
+                  )}!%20Your%20cash%20booking%20of%20₹${(lead.bookingAmount || 0).toLocaleString("en-IN")}%20with%20Watch%20My%20Trip%20Package%20is%20confirmed.`;
+
+                  return (
+                    <div
+                      key={lead.id}
+                      className="p-5 rounded-2xl bg-[#0F172A]/90 border border-emerald-500/20 backdrop-blur-md shadow-lg text-left"
+                    >
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-white font-['Outfit']">
+                              {lead.fullName}
+                            </h3>
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                              <Wallet className="w-3 h-3" />
+                              <span>Cash Payment</span>
+                            </span>
+                            <span className="text-[11px] text-slate-400">
+                              Booked: {lead.bookingDate ? new Date(lead.bookingDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Recent"}
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-300">
+                            <a
+                              href={`tel:${lead.phone}`}
+                              className="flex items-center gap-1.5 hover:text-emerald-400 font-semibold text-white"
+                            >
+                              <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>{lead.phone}</span>
+                            </a>
+                            {lead.email && (
+                              <a
+                                href={`mailto:${lead.email}`}
+                                className="flex items-center gap-1.5 hover:text-emerald-400"
+                              >
+                                <Mail className="w-3.5 h-3.5 text-slate-400" />
+                                <span>{lead.email}</span>
+                              </a>
+                            )}
+                            {lead.paymentReference && (
+                              <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[11px] text-slate-300">
+                                Receipt/Note: <strong className="text-white">{lead.paymentReference}</strong>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Amount & Actions */}
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Amount Collected</span>
+                            <span className="text-2xl font-extrabold text-emerald-400 font-['Outfit']">
+                              ₹{(lead.bookingAmount || 0).toLocaleString("en-IN")}
+                            </span>
+                          </div>
+
+                          <a
+                            href={whatsappUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#25D366] text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
+                            title="WhatsApp Receipt Message"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                            <span>WhatsApp</span>
+                          </a>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCancellationModal({
+                                isOpen: true,
+                                lead,
+                                reason: "",
+                                refundAmount: lead.bookingAmount ? String(lead.bookingAmount) : "0",
+                              })
+                            }
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold transition-all cursor-pointer"
+                            title="Cancel Booking & Deduct Amount"
+                          >
+                            <Ban className="w-3.5 h-3.5" />
+                            <span>Cancel Booking</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Summary breakdown */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Destination / Tour</span>
+                          <p className="font-bold text-white">{lead.destination || lead.packageName || "Custom Tour"}</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Travel Date</span>
+                          <p className="font-semibold text-white">{lead.travelDate || "Flexible"}</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Travellers</span>
+                          <p className="font-semibold text-white">{lead.travellers?.length || 1} Persons</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 3: ONLINE PAYMENTS */}
+        {activeTab === "online" && (
+          <div className="space-y-6">
+            {/* Header & Metric Banner */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-[#0F172A] to-[#0F172A] border border-cyan-500/30 text-left">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-[10px] font-extrabold text-cyan-400 uppercase tracking-wider mb-2">
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>Digital Gateway & UPI</span>
+                </div>
+                <h3 className="text-xl font-black text-white font-['Outfit']">
+                  Online Payments & Gateway Records
+                </h3>
+                <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                  Track all digital tour booking payments (UPI, Cards, NetBanking, and Payment Gateway). When payment gateways are integrated, online checkouts will automatically log here.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="px-5 py-3 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-right">
+                  <span className="text-[10px] uppercase font-bold text-cyan-300 block">Total Online Revenue</span>
+                  <span className="text-2xl font-black text-cyan-400 font-['Outfit']">
+                    ₹{filteredOnlineLeads.reduce((s, l) => s + (Number(l.bookingAmount) || 0), 0).toLocaleString("en-IN")}
+                  </span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">
+                    {filteredOnlineLeads.length} {filteredOnlineLeads.length === 1 ? "transaction" : "transactions"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Search Bar */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="relative w-full sm:w-80">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={onlineSearchQuery}
+                  onChange={(e) => setOnlineSearchQuery(e.target.value)}
+                  placeholder="Search online payments by name, phone, txn ID..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+            </div>
+
+            {/* Online Bookings List / Table */}
+            {filteredOnlineLeads.length === 0 ? (
+              <div className="py-16 text-center rounded-2xl bg-white/5 border border-white/10">
+                <CreditCard className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                <h4 className="text-base font-bold text-white">No online payments found</h4>
+                <p className="text-xs text-slate-400 mt-1">
+                  Mark any enquiry as &quot;Booked&quot; with &quot;Online Payment&quot; mode or connect a payment gateway.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredOnlineLeads.map((lead) => {
+                  const whatsappUrl = `https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(
+                    lead.fullName
+                  )}!%20Your%20online%20payment%20of%20₹${(lead.bookingAmount || 0).toLocaleString("en-IN")}%20for%20Watch%20My%20Trip%20Package%20is%20received%20successfully.`;
+
+                  return (
+                    <div
+                      key={lead.id}
+                      className="p-5 rounded-2xl bg-[#0F172A]/90 border border-cyan-500/20 backdrop-blur-md shadow-lg text-left"
+                    >
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-white font-['Outfit']">
+                              {lead.fullName}
+                            </h3>
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center gap-1">
+                              <CreditCard className="w-3 h-3" />
+                              <span>Online Payment</span>
+                            </span>
+                            <span className="text-[11px] text-slate-400">
+                              Date: {lead.bookingDate ? new Date(lead.bookingDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Recent"}
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-300">
+                            <a
+                              href={`tel:${lead.phone}`}
+                              className="flex items-center gap-1.5 hover:text-cyan-400 font-semibold text-white"
+                            >
+                              <Phone className="w-3.5 h-3.5 text-cyan-400" />
+                              <span>{lead.phone}</span>
+                            </a>
+                            {lead.email && (
+                              <a
+                                href={`mailto:${lead.email}`}
+                                className="flex items-center gap-1.5 hover:text-cyan-400"
+                              >
+                                <Mail className="w-3.5 h-3.5 text-slate-400" />
+                                <span>{lead.email}</span>
+                              </a>
+                            )}
+                            {lead.paymentReference && (
+                              <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[11px] text-cyan-300 font-mono">
+                                Txn ID: <strong className="text-white">{lead.paymentReference}</strong>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Amount & Actions */}
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 block">Online Amount</span>
+                            <span className="text-2xl font-extrabold text-cyan-400 font-['Outfit']">
+                              ₹{(lead.bookingAmount || 0).toLocaleString("en-IN")}
+                            </span>
+                          </div>
+
+                          <a
+                            href={whatsappUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#25D366] text-white font-bold text-xs shadow-md hover:scale-105 transition-all"
+                            title="Send Online Receipt via WhatsApp"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                            <span>WhatsApp</span>
+                          </a>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCancellationModal({
+                                isOpen: true,
+                                lead,
+                                reason: "",
+                                refundAmount: lead.bookingAmount ? String(lead.bookingAmount) : "0",
+                              })
+                            }
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold transition-all cursor-pointer"
+                            title="Cancel Booking & Deduct Amount"
+                          >
+                            <Ban className="w-3.5 h-3.5" />
+                            <span>Cancel Booking</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Summary breakdown */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Destination / Tour</span>
+                          <p className="font-bold text-white">{lead.destination || lead.packageName || "Custom Tour"}</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Travel Date</span>
+                          <p className="font-semibold text-white">{lead.travelDate || "Flexible"}</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Travellers</span>
+                          <p className="font-semibold text-white">{lead.travellers?.length || 1} Persons</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 4: CANCELLED BOOKINGS */}
+        {activeTab === "cancelled" && (
+          <div className="space-y-6">
+            {/* Header & Metric Banner */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-rose-950/40 via-[#0F172A] to-[#0F172A] border border-rose-500/30 text-left">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-[10px] font-extrabold text-rose-400 uppercase tracking-wider mb-2">
+                  <Ban className="w-3.5 h-3.5" />
+                  <span>Cancellations & Refunds</span>
+                </div>
+                <h3 className="text-xl font-black text-white font-['Outfit']">
+                  Cancelled Bookings & Deductions
+                </h3>
+                <p className="text-xs text-slate-400 mt-1 max-w-xl">
+                  Bookings that were cancelled after confirmation. The refunded amounts shown here have been subtracted from active Cash or Online payment revenue.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="px-5 py-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-right">
+                  <span className="text-[10px] uppercase font-bold text-rose-300 block">Total Deductions</span>
+                  <span className="text-2xl font-black text-rose-400 font-['Outfit']">
+                    -₹{filteredCancelledLeads.reduce((s, l) => s + (Number(l.refundAmount ?? l.bookingAmount) || 0), 0).toLocaleString("en-IN")}
+                  </span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">
+                    {filteredCancelledLeads.length} cancelled {filteredCancelledLeads.length === 1 ? "tour" : "tours"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Search Bar */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="relative w-full sm:w-80">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={cancelledSearchQuery}
+                  onChange={(e) => setCancelledSearchQuery(e.target.value)}
+                  placeholder="Search cancelled bookings by name, reason..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-rose-500"
+                />
+              </div>
+            </div>
+
+            {/* Cancelled Bookings List / Table */}
+            {filteredCancelledLeads.length === 0 ? (
+              <div className="py-16 text-center rounded-2xl bg-white/5 border border-white/10">
+                <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+                <h4 className="text-base font-bold text-white">No cancelled bookings</h4>
+                <p className="text-xs text-slate-400 mt-1">
+                  All confirmed tours are currently active with zero cancellations!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredCancelledLeads.map((lead) => {
+                  const refund = lead.refundAmount ?? lead.bookingAmount ?? 0;
+                  return (
+                    <div
+                      key={lead.id}
+                      className="p-5 rounded-2xl bg-[#0F172A]/90 border border-rose-500/30 backdrop-blur-md shadow-lg text-left"
+                    >
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-white font-['Outfit']">
+                              {lead.fullName}
+                            </h3>
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1">
+                              <Ban className="w-3 h-3" />
+                              <span>Cancelled Booking</span>
+                            </span>
+                            <span className="text-[11px] text-slate-400">
+                              Cancelled on: {lead.cancelledAt ? new Date(lead.cancelledAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Recent"}
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-slate-300">
+                            <a
+                              href={`tel:${lead.phone}`}
+                              className="flex items-center gap-1.5 hover:text-rose-400 font-semibold text-white"
+                            >
+                              <Phone className="w-3.5 h-3.5 text-rose-400" />
+                              <span>{lead.phone}</span>
+                            </a>
+                            <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[11px] text-slate-300">
+                              Original Mode: <strong className="text-white capitalize">{lead.paymentMode || "Online"}</strong>
+                            </span>
+                            {lead.bookingAmount && (
+                              <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[11px] text-slate-300">
+                                Original Booking: <strong className="text-white">₹{lead.bookingAmount.toLocaleString("en-IN")}</strong>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Refund & Reactivate Action */}
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <span className="text-[10px] uppercase font-bold text-rose-300 block">Deducted / Refunded</span>
+                            <span className="text-2xl font-extrabold text-rose-400 font-['Outfit']">
+                              -₹{refund.toLocaleString("en-IN")}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleReactivateBooking(lead)}
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all cursor-pointer"
+                            title="Reactivate this booking and re-credit payment"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            <span>Reactivate Booking</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Reason & Details */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div className="sm:col-span-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20">
+                          <span className="text-[10px] uppercase font-bold text-rose-300 block mb-1">Cancellation Reason</span>
+                          <p className="text-rose-200 font-medium">{lead.cancellationReason || "Customer cancelled travel plan"}</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Destination</span>
+                          <p className="font-semibold text-white">{lead.destination || lead.packageName || "Tour"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 5: CUSTOMER REVIEWS & MODERATION */}
+        {activeTab === "reviews" && (
+          <div className="space-y-6">
+            {/* Header & Controls */}
+            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-5 rounded-2xl bg-[#0F172A] border border-white/10 text-left">
+              <div>
+                <h3 className="text-lg font-bold text-white font-['Outfit'] flex items-center gap-2">
+                  <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+                  <span>Customer Reviews Moderation</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Live reviews submitted by travelers for Goa Packages and Hotel Small Daddy Plus. You can moderate or delete unwanted reviews at any time.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={refreshReviews}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-white font-bold transition-all border border-white/10 cursor-pointer"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-[#FF5A3C]" />
+                  <span>Refresh Reviews</span>
+                </button>
+              </div>
+            </div>
+
+            {reviewToast && (
+              <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold text-left">
+                {reviewToast}
+              </div>
+            )}
+
+            {/* Filter controls */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-left">
+              <div className="relative w-full sm:w-80">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={reviewSearchQuery}
+                  onChange={(e) => setReviewSearchQuery(e.target.value)}
+                  placeholder="Search by name, comment, or hotel..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-[#FF5A3C]"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                <select
+                  value={reviewCategoryFilter}
+                  onChange={(e) => setReviewCategoryFilter(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-[#0F172A] border border-white/15 text-xs text-white focus:outline-none focus:border-[#FF5A3C] shadow-sm"
+                  style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}
+                >
+                  <option value="all" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>All Categories ({reviewsList.length})</option>
+                  <option value="package" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>📦 Tour Packages ({reviewsList.filter((r) => r.category === "package").length})</option>
+                  <option value="hotel" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>🏨 Hotel Small Daddy Plus ({reviewsList.filter((r) => r.category === "hotel").length})</option>
+                </select>
+
+                <select
+                  value={reviewRatingFilter}
+                  onChange={(e) => setReviewRatingFilter(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-[#0F172A] border border-white/15 text-xs text-white focus:outline-none focus:border-[#FF5A3C] shadow-sm"
+                  style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}
+                >
+                  <option value="all" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>All Star Ratings</option>
+                  <option value="5" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>⭐⭐⭐⭐⭐ 5 Stars</option>
+                  <option value="4" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>⭐⭐⭐⭐ 4 Stars</option>
+                  <option value="3" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>⭐⭐⭐ 3 Stars</option>
+                  <option value="2" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>⭐⭐ 2 Stars</option>
+                  <option value="1" style={{ backgroundColor: "#0F172A", color: "#FFFFFF" }}>⭐ 1 Star</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Reviews Grid */}
+            {filteredReviewsList.length === 0 ? (
+              <div className="py-16 text-center rounded-2xl bg-white/5 border border-white/10">
+                <MessageSquareHeart className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                <h4 className="text-base font-bold text-white">No reviews found</h4>
+                <p className="text-xs text-slate-400 mt-1">Try resetting search filters or submit a review on the website.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                {filteredReviewsList.map((rev) => (
+                  <div
+                    key={rev.id}
+                    className="p-5 rounded-2xl bg-[#0F172A]/90 border border-white/10 backdrop-blur-md shadow-lg flex flex-col justify-between space-y-3"
+                  >
+                    <div>
+                      {/* Top bar: Reviewer, Location, Category, Delete */}
+                      <div className="flex items-start justify-between gap-3 border-b border-white/10 pb-3">
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-bold text-sm text-white font-['Outfit']">{rev.name}</h4>
+                            <span className="text-[10px] text-slate-400">({rev.location})</span>
+                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold">
+                              Verified
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#FF5A3C] font-semibold mt-1 flex items-center gap-1">
+                            <span>{rev.category === "hotel" ? "🏨" : "📦"}</span>
+                            <span>{rev.targetName}</span>
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteReview(rev.id)}
+                          disabled={isDeletingReviewId === rev.id}
+                          className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 hover:text-rose-300 transition-all cursor-pointer shrink-0 disabled:opacity-50"
+                          title="Delete this review from website and database"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Rating & Experience */}
+                      <div className="flex items-center gap-2 mt-3">
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3.5 h-3.5 ${
+                                i < rev.rating ? "text-amber-400 fill-amber-400" : "text-slate-600"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="px-2 py-0.5 rounded-md bg-white/10 text-[10px] font-bold text-slate-300">
+                          {rev.experience || "Excellent"}
+                        </span>
+                        <span className="text-[10px] text-slate-500 ml-auto">{rev.createdAt}</span>
+                      </div>
+
+                      {/* Comment */}
+                      <p className="text-xs text-slate-300 leading-relaxed mt-2.5 bg-white/5 p-3 rounded-xl border border-white/5">
+                        &ldquo;{rev.comment}&rdquo;
+                      </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-500">
+                      <span>Review ID: {rev.id}</span>
+                      <span className="text-emerald-400 font-semibold">Live on Website</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -2229,6 +3972,422 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+        {/* Custom Confirmation Modal (Replaces native browser window.confirm) */}
+        {mounted && confirmModal?.isOpen && typeof document !== "undefined" &&
+          createPortal(
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
+              <div
+                className="relative w-full max-w-md rounded-2xl bg-[#0F172A] border border-white/15 p-6 shadow-2xl text-left overflow-hidden transform animate-in zoom-in-95 duration-150"
+                role="dialog"
+                aria-modal="true"
+              >
+                {/* Accent top gradient bar */}
+                <div
+                  className={`absolute top-0 left-0 right-0 h-1 ${
+                    confirmModal.variant === "danger"
+                      ? "bg-gradient-to-r from-rose-500 via-red-500 to-rose-600"
+                      : confirmModal.variant === "warning"
+                      ? "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600"
+                      : "bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600"
+                  }`}
+                />
+
+                {/* Close Button */}
+                <button
+                  type="button"
+                  onClick={() => setConfirmModal(null)}
+                  className="absolute top-4 right-4 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-start gap-4">
+                  <div
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                      confirmModal.variant === "danger"
+                        ? "bg-rose-500/15 border border-rose-500/30 text-rose-400 shadow-lg shadow-rose-500/10"
+                        : confirmModal.variant === "warning"
+                        ? "bg-amber-500/15 border border-amber-500/30 text-amber-400"
+                        : "bg-cyan-500/15 border border-cyan-500/30 text-cyan-400"
+                    }`}
+                  >
+                    {confirmModal.variant === "danger" ? (
+                      <Trash2 className="w-6 h-6" />
+                    ) : (
+                      <AlertTriangle className="w-6 h-6" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0 pr-4">
+                    <h3 className="text-base font-bold text-white font-['Outfit']">
+                      {confirmModal.title}
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+                      {confirmModal.message}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmModal(null)}
+                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold border border-white/10 transition-colors cursor-pointer"
+                  >
+                    {confirmModal.cancelText || "Cancel"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => confirmModal.onConfirm()}
+                    className={`px-5 py-2 rounded-xl text-white text-xs font-bold transition-all shadow-lg cursor-pointer ${
+                      confirmModal.variant === "danger"
+                        ? "bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 shadow-rose-600/30"
+                        : "bg-gradient-to-r from-[#FF5A3C] to-[#E04629] hover:from-[#ff6b50] hover:to-[#ea5235] shadow-[#FF5A3C]/30"
+                    }`}
+                  >
+                    {confirmModal.confirmText || "Confirm"}
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
+
+        {/* Custom Booking Confirmation & Payment Modal Dialog */}
+        {mounted && bookingModal.isOpen && bookingModal.lead && typeof document !== "undefined" &&
+          createPortal(
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
+              <div
+                className="relative w-full max-w-lg rounded-3xl bg-[#0F172A] border border-white/15 p-6 sm:p-7 shadow-2xl text-left overflow-hidden transform animate-in zoom-in-95 duration-150"
+                role="dialog"
+                aria-modal="true"
+              >
+                {/* Accent top gradient bar */}
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setBookingModal({ isOpen: false, lead: null, amount: "", paymentMode: "online", reference: "", bookingDate: "" })
+                  }
+                  className="absolute top-4 right-4 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-start gap-4 mb-5">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/10">
+                    <CheckCircle className="w-6 h-6" />
+                  </div>
+
+                  <div className="flex-1 min-w-0 pr-3">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      Confirm Tour Booking
+                    </span>
+                    <h3 className="text-lg font-bold text-white font-['Outfit'] mt-1">
+                      {bookingModal.lead.fullName}
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-0.5">
+                      Phone: <strong className="text-white">{bookingModal.lead.phone}</strong> • {bookingModal.lead.destination || bookingModal.lead.packageName || "Tour"}
+                    </p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleConfirmBooking} className="space-y-4">
+                  {/* Mode of Payment Selection */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-2">
+                      Select Mode of Payment *
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setBookingModal({ ...bookingModal, paymentMode: "cash" })}
+                        className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer text-left ${
+                          bookingModal.paymentMode === "cash"
+                            ? "bg-emerald-500/20 border-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+                            : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white"
+                        }`}
+                      >
+                        <div className={`p-2 rounded-xl ${bookingModal.paymentMode === "cash" ? "bg-emerald-500 text-white" : "bg-white/5 text-slate-400"}`}>
+                          <Wallet className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold">💵 Cash Payment</div>
+                          <div className="text-[10px] text-slate-400">Office cash receipt</div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setBookingModal({ ...bookingModal, paymentMode: "online" })}
+                        className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer text-left ${
+                          bookingModal.paymentMode === "online"
+                            ? "bg-cyan-500/20 border-cyan-500 text-white shadow-lg shadow-cyan-500/20"
+                            : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white"
+                        }`}
+                      >
+                        <div className={`p-2 rounded-xl ${bookingModal.paymentMode === "online" ? "bg-cyan-500 text-white" : "bg-white/5 text-slate-400"}`}>
+                          <CreditCard className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold">💳 Online Payment</div>
+                          <div className="text-[10px] text-slate-400">UPI / Card / Gateway</div>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Booking Amount */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                      Booking Amount (₹) *
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base font-bold text-slate-400">₹</span>
+                      <input
+                        type="text"
+                        required
+                        value={bookingModal.amount}
+                        onChange={(e) => setBookingModal({ ...bookingModal, amount: e.target.value })}
+                        placeholder="e.g. 25000"
+                        className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white text-sm font-bold placeholder-slate-500 focus:outline-none focus:border-emerald-500 shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Booking Date & Reference */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                        Booking Date
+                      </label>
+                      <input
+                        type="date"
+                        value={bookingModal.bookingDate}
+                        onChange={(e) => setBookingModal({ ...bookingModal, bookingDate: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-emerald-500 shadow-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                        {bookingModal.paymentMode === "cash" ? "Receipt / Note (Optional)" : "UPI / Txn Ref ID (Optional)"}
+                      </label>
+                      <input
+                        type="text"
+                        value={bookingModal.reference}
+                        onChange={(e) => setBookingModal({ ...bookingModal, reference: e.target.value })}
+                        placeholder={bookingModal.paymentMode === "cash" ? "e.g. Receipt #104" : "e.g. UPI-98437298"}
+                        className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-emerald-500 shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setBookingModal({ isOpen: false, lead: null, amount: "", paymentMode: "online", reference: "", bookingDate: "" })
+                      }
+                      className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold border border-white/10 transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition-all cursor-pointer"
+                    >
+                      Confirm Booking & Record Payment
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>,
+            document.body
+          )}
+
+        {/* Custom Booking Cancellation & Refund Modal Dialog */}
+        {mounted && cancellationModal.isOpen && cancellationModal.lead && typeof document !== "undefined" &&
+          createPortal(
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
+              <div
+                className="relative w-full max-w-lg rounded-3xl bg-[#0F172A] border border-rose-500/30 p-6 sm:p-7 shadow-2xl text-left overflow-hidden transform animate-in zoom-in-95 duration-150"
+                role="dialog"
+                aria-modal="true"
+              >
+                {/* Accent top gradient bar */}
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-600 to-red-600" />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCancellationModal({ isOpen: false, lead: null, reason: "", refundAmount: "" })
+                  }
+                  className="absolute top-4 right-4 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-start gap-4 mb-5">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-rose-500/15 border border-rose-500/30 text-rose-400 shadow-lg shadow-rose-500/10">
+                    <Ban className="w-6 h-6" />
+                  </div>
+
+                  <div className="flex-1 min-w-0 pr-3">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                      Cancel Confirmed Booking
+                    </span>
+                    <h3 className="text-lg font-bold text-white font-['Outfit'] mt-1">
+                      {cancellationModal.lead.fullName}
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-0.5">
+                      Original Booking: <strong className="text-white">₹{(cancellationModal.lead.bookingAmount || 0).toLocaleString("en-IN")}</strong> via <strong className="text-emerald-400 capitalize">{cancellationModal.lead.paymentMode || "Online"}</strong>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 mb-4 leading-relaxed">
+                  ⚠️ <strong>Notice:</strong> Cancelling this tour will automatically subtract this amount from active <strong>{cancellationModal.lead.paymentMode === "cash" ? "Cash" : "Online"}</strong> totals and move this booking to the <strong>Cancelled Bookings</strong> tab.
+                </div>
+
+                <form onSubmit={handleConfirmCancellation} className="space-y-4">
+                  {/* Cancellation Reason */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                      Reason for Cancellation *
+                    </label>
+                    <textarea
+                      required
+                      rows={2}
+                      value={cancellationModal.reason}
+                      onChange={(e) => setCancellationModal({ ...cancellationModal, reason: e.target.value })}
+                      placeholder="e.g. Client requested cancellation due to date conflict / emergency"
+                      className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/15 text-white text-xs focus:outline-none focus:border-rose-500 shadow-sm"
+                    />
+                  </div>
+
+                  {/* Refund / Deduction Amount */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                      Amount to Deduct / Refund (₹) *
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base font-bold text-slate-400">₹</span>
+                      <input
+                        type="text"
+                        required
+                        value={cancellationModal.refundAmount}
+                        onChange={(e) => setCancellationModal({ ...cancellationModal, refundAmount: e.target.value })}
+                        placeholder="e.g. 25000"
+                        className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white text-sm font-bold placeholder-slate-500 focus:outline-none focus:border-rose-500 shadow-sm"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Enter the refund amount to subtract from total revenue.
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCancellationModal({ isOpen: false, lead: null, reason: "", refundAmount: "" })
+                      }
+                      className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold border border-white/10 transition-colors cursor-pointer"
+                    >
+                      Keep Booking Active
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition-all cursor-pointer"
+                    >
+                      Confirm Cancellation & Deduct Amount
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>,
+            document.body
+          )}
+
+        {/* Custom Alert/Notice Modal (Replaces native browser window.alert) */}
+        {mounted && alertModal?.isOpen && typeof document !== "undefined" &&
+          createPortal(
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
+              <div
+                className="relative w-full max-w-sm rounded-2xl bg-[#0F172A] border border-white/15 p-6 shadow-2xl text-left overflow-hidden transform animate-in zoom-in-95 duration-150"
+                role="dialog"
+                aria-modal="true"
+              >
+                {/* Accent top gradient bar */}
+                <div
+                  className={`absolute top-0 left-0 right-0 h-1 ${
+                    alertModal.type === "success"
+                      ? "bg-gradient-to-r from-emerald-500 to-teal-500"
+                      : alertModal.type === "warning"
+                      ? "bg-gradient-to-r from-amber-500 to-orange-500"
+                      : alertModal.type === "error"
+                      ? "bg-gradient-to-r from-rose-500 to-red-500"
+                      : "bg-gradient-to-r from-blue-500 to-cyan-500"
+                  }`}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setAlertModal(null)}
+                  className="absolute top-4 right-4 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-start gap-4">
+                  <div
+                    className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+                      alertModal.type === "success"
+                        ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
+                        : alertModal.type === "warning"
+                        ? "bg-amber-500/15 border border-amber-500/30 text-amber-400"
+                        : alertModal.type === "error"
+                        ? "bg-rose-500/15 border border-rose-500/30 text-rose-400"
+                        : "bg-cyan-500/15 border border-cyan-500/30 text-cyan-400"
+                    }`}
+                  >
+                    {alertModal.type === "success" ? (
+                      <CheckCircle className="w-5 h-5" />
+                    ) : alertModal.type === "warning" ? (
+                      <AlertTriangle className="w-5 h-5" />
+                    ) : (
+                      <Sparkles className="w-5 h-5" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0 pr-3">
+                    <h3 className="text-base font-bold text-white font-['Outfit']">
+                      {alertModal.title}
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+                      {alertModal.message}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-3 border-t border-white/10 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setAlertModal(null)}
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] hover:from-[#ff6b50] hover:to-[#ea5235] text-white text-xs font-bold shadow-lg shadow-[#FF5A3C]/30 transition-all cursor-pointer"
+                  >
+                    Got It
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
 
       </div>
     </div>

@@ -30,6 +30,7 @@ import {
   ChevronLeft,
   Download,
   Maximize2,
+  AlertTriangle,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -69,6 +70,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
     customTravelers: "",
     specialRequests: "",
   });
+  const [bookingError, setBookingError] = useState("");
 
   const numTravelers =
     bookingForm.travelersCount === "custom"
@@ -156,10 +158,11 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
 
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!bookingForm.fullName || !bookingForm.phone) {
-      alert("Please provide your name and contact phone number.");
+    if (!bookingForm.fullName.trim() || !bookingForm.phone.trim()) {
+      setBookingError("Please provide your name and contact phone number.");
       return;
     }
+    setBookingError("");
 
     const calculatedTotal = calculateTravelersTotal(pkg?.discountedPrice || "0", numTravelers);
     const perDay = getPerDayPrice(pkg?.discountedPrice || "0", pkg?.duration || "4 Days");
@@ -1584,6 +1587,13 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                 />
               </div>
 
+              {bookingError && (
+                <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-500 dark:text-rose-400 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>{bookingError}</span>
+                </div>
+              )}
+
               {formSubmitted ? (
                 <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold text-center">
                   Thank you! We will get in touch with you right away.
@@ -1591,7 +1601,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
               ) : (
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-sm shadow-lg shadow-[#FF5A3C]/30 transition-all"
+                  className="w-full py-3 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-sm shadow-lg shadow-[#FF5A3C]/30 transition-all cursor-pointer"
                 >
                   Submit Inquiry
                 </button>

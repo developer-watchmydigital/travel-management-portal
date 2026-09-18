@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { initialGoaReviews } from "@/lib/initialData";
 import { Review } from "@/lib/types";
+import { ADMIN_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 
 // In-memory reviews store as fallback
 let inMemoryReviews: Review[] = [...initialGoaReviews];
@@ -136,3 +137,61 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// DELETE: Authenticated admin removal of a review
+export async function DELETE(request: NextRequest) {
+  try {
+    const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
+    const session = token ? await verifySessionToken(token) : null;
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized: Admin session required." },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Review ID parameter 'id' is required." },
+        { status: 400 }
+      );
+    }
+
+    // 1. Delete from Supabase
+    try {
+      const supabase = getSupabaseServerClient();
+      if (supabase) {
+        const { error } = await supabase
+          .from("reviews")
+          .delete()
+          .eq("id", id);
+
+        if (error) {
+          console.error("Supabase review delete error:", error.message);
+        }
+      }
+    } catch (e) {
+      console.warn("Supabase delete review error:", e);
+    }
+
+    // 2. Remove from server memory fallback
+    inMemoryReviews = inMemoryReviews.filter((r) => r.id !== id);
+
+    return NextResponse.json({
+      success: true,
+      id,
+      message: "Review deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Delete review error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete review." },
+      { status: 500 }
+    );
+  }
+}
+

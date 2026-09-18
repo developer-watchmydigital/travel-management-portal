@@ -18,13 +18,21 @@ export async function PATCH(
 
   const { id } = params;
   const body = await request.json();
-  const { status } = body;
+  const updateData: any = {};
+  if (body.status !== undefined) updateData.status = body.status;
+  if (body.bookingAmount !== undefined) updateData.booking_amount = body.bookingAmount;
+  if (body.paymentMode !== undefined) updateData.payment_mode = body.paymentMode;
+  if (body.paymentReference !== undefined) updateData.payment_reference = body.paymentReference;
+  if (body.bookingDate !== undefined) updateData.booking_date = body.bookingDate;
+  if (body.cancellationReason !== undefined) updateData.cancellation_reason = body.cancellationReason;
+  if (body.cancelledAt !== undefined) updateData.cancelled_at = body.cancelledAt;
+  if (body.refundAmount !== undefined) updateData.refund_amount = body.refundAmount;
 
   const supabase = getSupabaseServerClient();
-  if (supabase) {
+  if (supabase && Object.keys(updateData).length > 0) {
     const { error } = await supabase
       .from("leads")
-      .update({ status })
+      .update(updateData)
       .eq("id", id);
 
     if (error) {
@@ -32,7 +40,7 @@ export async function PATCH(
     }
   }
 
-  return NextResponse.json({ success: true, id, status });
+  return NextResponse.json({ success: true, id, ...updateData });
 }
 
 export async function DELETE(

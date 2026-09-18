@@ -10,6 +10,12 @@ export interface Destination {
   highlights: string[];
 }
 
+export interface ServicePhoto {
+  url: string;
+  title?: string;
+  caption?: string;
+}
+
 export interface TravelService {
   id: string;
   title: string;
@@ -18,18 +24,22 @@ export interface TravelService {
   iconName: string;
   badge: string;
   image: string;
+  photos?: ServicePhoto[]; // 3 showcase photos (especially for Hotel Booking and Car Rental)
 }
 
 export interface InquiryLead {
   id: string;
-  type: "package" | "flight" | "train";
+  type: "package" | "flight" | "train" | "hotel" | "car" | "group" | "corporate" | "customized" | "domestic" | "family" | "honeymoon" | "pilgrimage" | string;
   fullName: string;
   phone: string;
   email: string;
   destination?: string;
   packageName?: string;
+  serviceName?: string;
   flightType?: "one-way" | "round-trip" | "multi-city";
+  preferredAirline?: string;
   trainClass?: string;
+  preferredTrain?: string;
   travelDate?: string;
   travellers: Array<{
     name: string;
@@ -37,8 +47,31 @@ export interface InquiryLead {
     gender: string;
   }>;
   specialRequirements?: string;
-  status: "New" | "Contacted" | "Booked" | "Closed";
+  serviceDetails?: Record<string, string>;
+  status: "New" | "Contacted" | "Booked" | "Cancelled" | "Closed";
+  bookingAmount?: number;
+  paymentMode?: "cash" | "online";
+  paymentReference?: string;
+  bookingDate?: string;
+  cancellationReason?: string;
+  cancelledAt?: string;
+  refundAmount?: number;
   createdAt: string;
+}
+
+export interface PaymentRecord {
+  id: string;
+  leadId: string;
+  customerName: string;
+  customerPhone: string;
+  serviceOrPackage: string;
+  amount: number;
+  mode: "cash" | "online";
+  status: "paid" | "cancelled";
+  referenceId?: string;
+  date: string;
+  cancellationReason?: string;
+  cancelledAt?: string;
 }
 
 export interface CompanyInfo {
@@ -69,6 +102,7 @@ export interface PackageInclusionItem {
   image?: string; // Optional primary picture URL
   images?: string[]; // Up to 3 room/service photos
   category?: string; // e.g. "Accommodation", "Cruise", "Watersports", "Sightseeing", "Wellness", "Nightlife"
+  badge?: string;
 }
 
 export interface CuratedPackage {

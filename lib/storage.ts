@@ -1,11 +1,12 @@
-import { companyData, destinationsData, servicesData, initialCuratedPackages } from "./initialData";
-import { CompanyInfo, Destination, InquiryLead, TravelService, CuratedPackage } from "./types";
+import { companyData, destinationsData, servicesData, initialCuratedPackages, initialGoaReviews } from "./initialData";
+import { CompanyInfo, Destination, InquiryLead, TravelService, CuratedPackage, ServicePhoto, Review } from "./types";
 
-const LEADS_KEY = "r_travel_leads_v1";
+const LEADS_KEY = "r_travel_leads_v2";
 const DESTINATIONS_KEY = "r_travel_destinations_v2";
-const SERVICES_KEY = "r_travel_services_v1";
+const SERVICES_KEY = "r_travel_services_v2";
 const COMPANY_KEY = "r_travel_company_v2";
 const PACKAGES_KEY = "r_travel_curated_packages_v3";
+const REVIEWS_KEY = "r_travel_reviews_v2";
 
 export const initialLeads: InquiryLead[] = [
   {
@@ -60,6 +61,57 @@ export const initialLeads: InquiryLead[] = [
     status: "Booked",
     createdAt: "2026-09-11T12:00:00.000Z",
   },
+  {
+    id: "lead-4",
+    type: "hotel",
+    fullName: "Pooja & Vikram Singhania",
+    phone: "+91 97123 45678",
+    email: "vikram.singhania@gmail.com",
+    destination: "Calangute, North Goa",
+    serviceName: "Hotel Booking",
+    packageName: "Hotel Small Daddy Plus (2 Deluxe Rooms)",
+    travelDate: "2026-10-18",
+    travellers: [
+      { name: "Vikram Singhania", age: "34", gender: "Male" },
+      { name: "Pooja Singhania", age: "31", gender: "Female" },
+    ],
+    serviceDetails: {
+      "Hotel Category": "Hotel Small Daddy Plus (Beachside)",
+      "Check-in": "18 Oct 2026",
+      "Check-out": "22 Oct 2026",
+      "Rooms": "2 Deluxe Pool View Rooms",
+      "Meal Plan": "Breakfast Included (CP)",
+      "Special Request": "Ground floor near pool with early check-in assistance",
+    },
+    specialRequirements: "Hotel: Hotel Small Daddy Plus | Rooms: 2 Deluxe Pool View | Check-in: 18-Oct-2026 to 22-Oct-2026 | Meal: CP (Breakfast) | Special: Early check-in requested.",
+    status: "New",
+    createdAt: "2026-09-17T09:40:00.000Z",
+  },
+  {
+    id: "lead-5",
+    type: "car",
+    fullName: "Hardik Joshi",
+    phone: "+91 98980 11223",
+    email: "hardik.joshi@outlook.com",
+    destination: "Goa (North & South)",
+    serviceName: "Car Rental",
+    packageName: "Toyota Innova Crysta (6+1 AC)",
+    travelDate: "2026-10-25",
+    travellers: [
+      { name: "Hardik Joshi", age: "29", gender: "Male" },
+      { name: "Ananya Joshi", age: "27", gender: "Female" },
+    ],
+    serviceDetails: {
+      "Vehicle Type": "Toyota Innova Crysta (6+1 AC)",
+      "Pickup Point": "Mopa International Airport (GOX)",
+      "Drop Point": "Calangute Resort & South Goa Sightseeing",
+      "Rental Duration": "4 Full Days with Chauffeur",
+      "Special Instructions": "English/Hindi speaking polite driver, child car seat requested",
+    },
+    specialRequirements: "Car: Toyota Innova Crysta AC | Pickup: Mopa GOX Airport | Drop: Calangute & Sightseeing | Duration: 4 Days | Driver: Sanitized cab, non-smoker driver.",
+    status: "Contacted",
+    createdAt: "2026-09-17T11:20:00.000Z",
+  },
 ];
 
 export function getStoredLeads(): InquiryLead[] {
@@ -88,6 +140,14 @@ export function saveLead(lead: Omit<InquiryLead, "id" | "createdAt" | "status">)
     const current = getStoredLeads();
     const updated = [newLead, ...current];
     localStorage.setItem(LEADS_KEY, JSON.stringify(updated));
+
+    // Instant local and cross-tab notification
+    window.dispatchEvent(new CustomEvent("wmt-new-lead", { detail: newLead }));
+    try {
+      const bc = new BroadcastChannel("wmt_leads_channel");
+      bc.postMessage({ type: "NEW_LEAD", lead: newLead });
+      bc.close();
+    } catch {}
   }
   return newLead;
 }
@@ -96,6 +156,25 @@ export function updateLeadStatus(id: string, status: InquiryLead["status"]) {
   if (typeof window === "undefined") return;
   const current = getStoredLeads();
   const updated = current.map((l) => (l.id === id ? { ...l, status } : l));
+  localStorage.setItem(LEADS_KEY, JSON.stringify(updated));
+}
+
+export function updateLeadBookingDetails(
+  id: string,
+  details: {
+    status?: InquiryLead["status"];
+    bookingAmount?: number;
+    paymentMode?: "cash" | "online";
+    paymentReference?: string;
+    bookingDate?: string;
+    cancellationReason?: string;
+    cancelledAt?: string;
+    refundAmount?: number;
+  }
+) {
+  if (typeof window === "undefined") return;
+  const current = getStoredLeads();
+  const updated = current.map((l) => (l.id === id ? { ...l, ...details } : l));
   localStorage.setItem(LEADS_KEY, JSON.stringify(updated));
 }
 
@@ -277,4 +356,105 @@ export function deletePackage(id: string) {
   const updated = current.filter((p) => p.id !== id);
   localStorage.setItem(PACKAGES_KEY, JSON.stringify(updated));
 }
+
+export function getStoredServices(): TravelService[] {
+  if (typeof window === "undefined") return servicesData;
+  try {
+    const data = localStorage.getItem(SERVICES_KEY);
+    if (!data) {
+      localStorage.setItem(SERVICES_KEY, JSON.stringify(servicesData));
+      return servicesData;
+    }
+    const parsed: TravelService[] = JSON.parse(data);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      localStorage.setItem(SERVICES_KEY, JSON.stringify(servicesData));
+      return servicesData;
+    }
+    // Merge any missing services or photos from servicesData
+    let updated = false;
+    const merged = servicesData.map((initial) => {
+      const existing = parsed.find((p) => p.id === initial.id);
+      if (!existing) {
+        updated = true;
+        return initial;
+      }
+      if ((!existing.photos || existing.photos.length < 3) && initial.photos) {
+        existing.photos = initial.photos;
+        updated = true;
+      }
+      return existing;
+    });
+    if (updated) {
+      localStorage.setItem(SERVICES_KEY, JSON.stringify(merged));
+    }
+    return merged;
+  } catch {
+    return servicesData;
+  }
+}
+
+export function getStoredServiceById(id: string): TravelService | undefined {
+  const all = getStoredServices();
+  return all.find((s) => s.id === id);
+}
+
+export function saveService(service: TravelService) {
+  if (typeof window === "undefined") return;
+  const current = getStoredServices();
+  const index = current.findIndex((s) => s.id === service.id);
+  let updated: TravelService[];
+  if (index >= 0) {
+    updated = [...current];
+    updated[index] = service;
+  } else {
+    updated = [service, ...current];
+  }
+  localStorage.setItem(SERVICES_KEY, JSON.stringify(updated));
+}
+
+export function updateServicePhotos(id: string, photos: ServicePhoto[]) {
+  if (typeof window === "undefined") return;
+  const current = getStoredServices();
+  const updated = current.map((s) => (s.id === id ? { ...s, photos } : s));
+  localStorage.setItem(SERVICES_KEY, JSON.stringify(updated));
+}
+
+export function getStoredReviews(): Review[] {
+  if (typeof window === "undefined") return initialGoaReviews;
+  try {
+    const data = localStorage.getItem(REVIEWS_KEY);
+    if (!data) {
+      localStorage.setItem(REVIEWS_KEY, JSON.stringify(initialGoaReviews));
+      return initialGoaReviews;
+    }
+    const parsed = JSON.parse(data);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : initialGoaReviews;
+  } catch {
+    return initialGoaReviews;
+  }
+}
+
+export function saveStoredReview(review: Review) {
+  if (typeof window === "undefined") return;
+  const current = getStoredReviews();
+  const index = current.findIndex((r) => r.id === review.id);
+  let updated: Review[];
+  if (index >= 0) {
+    updated = [...current];
+    updated[index] = review;
+  } else {
+    updated = [review, ...current];
+  }
+  localStorage.setItem(REVIEWS_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent("reviews-updated", { detail: updated }));
+}
+
+export function deleteStoredReview(id: string) {
+  if (typeof window === "undefined") return;
+  const current = getStoredReviews();
+  const updated = current.filter((r) => r.id !== id);
+  localStorage.setItem(REVIEWS_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent("reviews-updated", { detail: updated }));
+}
+
 

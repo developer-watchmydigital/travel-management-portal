@@ -17,6 +17,7 @@ import {
   Calendar,
   CheckCircle2,
   Sparkles,
+  AlertTriangle,
 } from "lucide-react";
 import { saveLead } from "@/lib/storage";
 import { destinationsData, servicesData, companyData } from "@/lib/initialData";
@@ -36,6 +37,7 @@ export const InquirySection: React.FC = () => {
   const [trainClass, setTrainClass] = useState("3AC");
   const [travelDate, setTravelDate] = useState("");
   const [specialRequirements, setSpecialRequirements] = useState("");
+  const [formError, setFormError] = useState("");
 
   // Travellers list
   const [travellers, setTravellers] = useState([
@@ -78,10 +80,11 @@ export const InquirySection: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !phone) {
-      alert("Please provide at least your Full Name and Phone Number.");
+    if (!fullName.trim() || !phone.trim()) {
+      setFormError("Please provide at least your Full Name and Phone Number.");
       return;
     }
+    setFormError("");
 
     setIsSubmitting(true);
 
@@ -606,6 +609,14 @@ export const InquirySection: React.FC = () => {
                       className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:border-[#FF5A3C] focus:bg-white dark:focus:bg-white/10 transition-colors"
                     />
                   </div>
+
+                  {/* Error Notification Banner */}
+                  {formError && (
+                    <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-500 dark:text-rose-400 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      <span>{formError}</span>
+                    </div>
+                  )}
 
                   {/* Primary Submit Button */}
                   <button

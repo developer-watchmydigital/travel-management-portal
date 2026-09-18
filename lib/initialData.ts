@@ -368,6 +368,23 @@ export const servicesData: TravelService[] = [
     iconName: "Building2",
     badge: "Verified Stays",
     image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=800&auto=format&fit=crop",
+        title: "Deluxe Suite & Executive Rooms",
+        caption: "Air-conditioned rooms with private balcony, king bed, LED TV & modern attached bathroom",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?q=80&w=800&auto=format&fit=crop",
+        title: "Resort Pool & Palm Courtyard",
+        caption: "Crystal clear swimming pool with sun loungers, poolside cocktails & tropical garden setting",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=800&auto=format&fit=crop",
+        title: "Fine Dining & Multi-Cuisine Restaurant",
+        caption: "Daily buffet breakfasts, fresh coastal seafood, authentic Gujarati/Jain food & 24/7 room service",
+      },
+    ],
   },
   {
     id: "car-rental",
@@ -377,6 +394,23 @@ export const servicesData: TravelService[] = [
     iconName: "Car",
     badge: "Clean Fleet & Verified Drivers",
     image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=800&auto=format&fit=crop",
+    photos: [
+      {
+        url: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=800&auto=format&fit=crop",
+        title: "Toyota Innova Crysta (6+1 / 7+1)",
+        caption: "Premium AC MPV with captain seats, chilled dual air-conditioning & generous luggage capacity",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1550355291-bbee04a92027?q=80&w=800&auto=format&fit=crop",
+        title: "Swift Dzire / AC Sedan (4+1)",
+        caption: "Smooth fuel-efficient sedan for North/South Goa beach hopping, couples & airport transfers",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1563720223185-11003d516935?q=80&w=800&auto=format&fit=crop",
+        title: "AC Luxury Tempo Traveller (12-20 Seater)",
+        caption: "Pushback recliner seats, premium sound system, extra luggage carrier for family & group tours",
+      },
+    ],
   },
 ];
 

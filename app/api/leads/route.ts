@@ -13,9 +13,11 @@ export async function POST(request: NextRequest) {
       email,
       destination,
       packageName,
+      serviceName,
       travelDate,
       travellers = [],
       specialRequirements,
+      serviceDetails,
     } = body;
 
     if (!fullName || !phone) {
@@ -24,6 +26,22 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    let formattedRequirements = specialRequirements || "";
+    if (serviceDetails && typeof serviceDetails === "object" && Object.keys(serviceDetails).length > 0) {
+      const detailsList = Object.entries(serviceDetails)
+        .map(([k, v]) => `• ${k}: ${v}`)
+        .join(" | ");
+      if (formattedRequirements) {
+        if (!formattedRequirements.includes("•")) {
+          formattedRequirements = `${detailsList} | Notes: ${formattedRequirements}`;
+        }
+      } else {
+        formattedRequirements = detailsList;
+      }
+    }
+
+    const resolvedPackageName = packageName || (serviceName ? `${serviceName} Enquiry` : null);
 
     const supabase = getSupabaseServerClient();
     let savedLeadId = "lead-" + Date.now();
@@ -38,10 +56,10 @@ export async function POST(request: NextRequest) {
             phone,
             email: email || null,
             destination: destination || null,
-            package_name: packageName || null,
+            package_name: resolvedPackageName,
             travel_date: travelDate || null,
             travellers: travellers,
-            special_requirements: specialRequirements || null,
+            special_requirements: formattedRequirements || null,
             status: "new",
           },
         ])
@@ -108,6 +126,13 @@ export async function GET(request: NextRequest) {
     travellers: row.travellers || [],
     specialRequirements: row.special_requirements || "",
     status: row.status,
+    bookingAmount: row.booking_amount ? Number(row.booking_amount) : undefined,
+    paymentMode: row.payment_mode || undefined,
+    paymentReference: row.payment_reference || undefined,
+    bookingDate: row.booking_date || undefined,
+    cancellationReason: row.cancellation_reason || undefined,
+    cancelledAt: row.cancelled_at || undefined,
+    refundAmount: row.refund_amount ? Number(row.refund_amount) : undefined,
     createdAt: row.created_at,
   }));
 

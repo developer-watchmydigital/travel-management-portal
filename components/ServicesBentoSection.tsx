@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -21,10 +21,30 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { servicesData } from "@/lib/initialData";
+import { getStoredServices } from "@/lib/storage";
+import { TravelService } from "@/lib/types";
 import { MagicBentoCard } from "./ui/MagicBentoCard";
+import { ServiceEnquiryModal } from "./ServiceEnquiryModal";
 
 export const ServicesBentoSection: React.FC = () => {
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [services, setServices] = useState<TravelService[]>(servicesData);
+  const [activeModalService, setActiveModalService] = useState<TravelService | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Load persisted services (including showcase photos)
+    const stored = getStoredServices();
+    if (stored && stored.length > 0) {
+      setServices(stored);
+    }
+
+    // Listen for live updates from admin panel or storage
+    const handleUpdate = () => {
+      setServices(getStoredServices());
+    };
+    window.addEventListener("services-updated", handleUpdate);
+    return () => window.removeEventListener("services-updated", handleUpdate);
+  }, []);
 
   const getIcon = (name: string) => {
     switch (name) {
@@ -96,14 +116,14 @@ export const ServicesBentoSection: React.FC = () => {
 
         {/* Dynamic Bento Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {servicesData.map((service, idx) => {
+          {services.map((service, idx) => {
             // Give hero service cards a prominent 2-column span on large screens
             const isFeatured = idx === 0 || idx === 1 || idx === 6;
 
             return (
               <MagicBentoCard
                 key={service.id}
-                className={`group relative flex flex-col justify-between overflow-hidden p-6 transition-all duration-500 ${
+                className={`group relative flex flex-col justify-between overflow-hidden p-6 transition-all duration-500 cursor-pointer ${
                   isFeatured ? "sm:col-span-2 lg:col-span-2" : "col-span-1"
                 }`}
                 glowColor={
@@ -127,7 +147,7 @@ export const ServicesBentoSection: React.FC = () => {
                 </div>
 
                 {/* Content Area */}
-                <div className="relative z-10">
+                <div className="relative z-10" onClick={() => { setActiveModalService(service); setIsModalOpen(true); }}>
                   {/* Top Bar: Icon + Badge */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="w-12 h-12 rounded-xl bg-slate-100/90 dark:bg-white/10 backdrop-blur-md border border-slate-200 dark:border-white/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-white/20 transition-all duration-300 shadow-sm">
@@ -161,13 +181,18 @@ export const ServicesBentoSection: React.FC = () => {
                   <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Direct Assistance
                   </span>
-                  <Link
-                    href={`#contact`}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[#FF5A3C] hover:text-[#E04629] dark:hover:text-white transition-colors group-hover:underline"
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveModalService(service);
+                      setIsModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#FF5A3C] hover:text-[#E04629] dark:hover:text-white transition-colors group-hover:underline cursor-pointer"
                   >
                     <span>Enquire Now</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
-                  </Link>
+                  </button>
                 </div>
               </MagicBentoCard>
             );
@@ -199,6 +224,13 @@ export const ServicesBentoSection: React.FC = () => {
         </div>
 
       </div>
+
+      {/* SERVICE ENQUIRY MODAL (WITH SPECIFIC QUESTIONS & 3 SHOWCASE PHOTOS) */}
+      <ServiceEnquiryModal
+        service={activeModalService}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </section>
   );
 };

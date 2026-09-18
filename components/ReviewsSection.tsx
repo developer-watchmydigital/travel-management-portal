@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Review } from "@/lib/types";
 import { initialGoaReviews } from "@/lib/initialData";
+import { getStoredReviews, saveStoredReview } from "@/lib/storage";
 import { MagicBentoCard } from "./ui/MagicBentoCard";
 
 export const ReviewsSection: React.FC = () => {
@@ -40,16 +41,37 @@ export const ReviewsSection: React.FC = () => {
   const [comment, setComment] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Fetch live reviews from API
+  // Initialize and fetch live reviews from API & Supabase
   useEffect(() => {
+    // 1. Initial stored reviews
+    const stored = getStoredReviews();
+    if (stored && stored.length > 0) {
+      setReviews(stored);
+    }
+
+    // 2. Fetch live reviews from Supabase API
     fetch("/api/reviews")
       .then((res) => res.json())
       .then((data) => {
         if (data.reviews && Array.isArray(data.reviews) && data.reviews.length > 0) {
           setReviews(data.reviews);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("r_travel_reviews_v2", JSON.stringify(data.reviews));
+          }
         }
       })
       .catch((err) => console.warn("Could not load reviews API:", err));
+
+    // 3. Listen for live updates/deletions from admin panel
+    const handleReviewsUpdate = (e: any) => {
+      if (e.detail && Array.isArray(e.detail)) {
+        setReviews(e.detail);
+      } else {
+        setReviews(getStoredReviews());
+      }
+    };
+    window.addEventListener("reviews-updated", handleReviewsUpdate);
+    return () => window.removeEventListener("reviews-updated", handleReviewsUpdate);
   }, []);
 
   const packageOptions = [
@@ -103,6 +125,7 @@ export const ReviewsSection: React.FC = () => {
       const data = await res.json();
       if (data.success && data.review) {
         setReviews((prev) => [data.review, ...prev]);
+        saveStoredReview(data.review);
         setCurrentPage(1);
         setSuccessToast("Thank you! Your 5-star review has been recorded.");
         setIsModalOpen(false);

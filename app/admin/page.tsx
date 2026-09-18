@@ -85,6 +85,15 @@ export default function AdminPage() {
   const [adminUsername, setAdminUsername] = useState("admin");
   const [isSupabaseSynced, setIsSupabaseSynced] = useState(false);
 
+  // Auto-logout after 30 min inactivity
+  const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+  const WARNING_BEFORE = 60 * 1000; // warn 1 min before logout
+  const [showInactivityWarning, setShowInactivityWarning] = useState(false);
+  const [inactivitySecondsLeft, setInactivitySecondsLeft] = useState(60);
+  const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const [activeTab, setActiveTab] = useState<"leads" | "packages" | "destinations" | "cash" | "online" | "cancelled" | "services" | "reviews" | "settings">("leads");
   const [leads, setLeads] = useState<InquiryLead[]>([]);
   const [isRefreshingLeads, setIsRefreshingLeads] = useState(false);
@@ -512,6 +521,57 @@ export default function AdminPage() {
       window.location.href = "/admin/login";
     }
   };
+
+  // ── Auto-logout on inactivity ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const clearAllTimers = () => {
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+      if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+
+    const startCountdown = () => {
+      setInactivitySecondsLeft(60);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      countdownRef.current = setInterval(() => {
+        setInactivitySecondsLeft((prev) => {
+          if (prev <= 1) {
+            if (countdownRef.current) clearInterval(countdownRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    };
+
+    const resetTimer = () => {
+      clearAllTimers();
+      setShowInactivityWarning(false);
+
+      // Set warning timer (fires 1 min before logout)
+      warningTimerRef.current = setTimeout(() => {
+        setShowInactivityWarning(true);
+        startCountdown();
+      }, INACTIVITY_TIMEOUT - WARNING_BEFORE);
+
+      // Set logout timer
+      inactivityTimerRef.current = setTimeout(() => {
+        handleLogout();
+      }, INACTIVITY_TIMEOUT);
+    };
+
+    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "click"];
+    events.forEach((e) => window.addEventListener(e, resetTimer, { passive: true }));
+    resetTimer(); // start on mount
+
+    return () => {
+      clearAllTimers();
+      events.forEach((e) => window.removeEventListener(e, resetTimer));
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   const handleStatusChange = (id: string, status: InquiryLead["status"]) => {
     const targetLead = leads.find((l) => l.id === id);
@@ -1183,6 +1243,48 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#070B18] text-slate-200">
+
+      {/* ── Inactivity Warning Banner ─────────────────────────────────────── */}
+      {showInactivityWarning && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-md px-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-3 bg-[#1A0A00] border border-orange-500/60 rounded-2xl shadow-2xl shadow-orange-900/40 px-5 py-4">
+            {/* Icon */}
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center border border-orange-500/30">
+              <Clock className="w-5 h-5 text-orange-400" />
+            </div>
+            {/* Text */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-orange-300">Session expiring soon</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Auto-logout in{" "}
+                <span className="font-bold text-orange-400 tabular-nums">{inactivitySecondsLeft}s</span>
+                {" "}due to inactivity.
+              </p>
+            </div>
+            {/* Actions */}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => {
+                  setShowInactivityWarning(false);
+                  // Moving triggers resetTimer via the event listener,
+                  // but dispatch a synthetic click to force reset immediately
+                  window.dispatchEvent(new MouseEvent("mousemove"));
+                }}
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-400 text-white transition-colors"
+              >
+                Stay Logged In
+              </button>
+              <button
+                onClick={handleLogout}
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Admin Top Navigation */}
       <header className="sticky top-0 z-40 bg-[#090E20]/95 backdrop-blur-xl border-b border-white/10 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

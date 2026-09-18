@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS public.leads (
 );
 
 -- Ensure columns exist if table was already created earlier (Idempotent Migration)
+ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS preferred_airline TEXT;
+ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS preferred_train TEXT;
 ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS booking_amount NUMERIC DEFAULT 0;
 ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS payment_mode TEXT;
 ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS payment_reference TEXT;

@@ -34,7 +34,11 @@ export const InquirySection: React.FC = () => {
   const [destination, setDestination] = useState("");
   const [packageName, setPackageName] = useState("");
   const [flightType, setFlightType] = useState<"one-way" | "round-trip" | "multi-city">("round-trip");
+  const [flightAirline, setFlightAirline] = useState("Any / Best Fare Airline");
+  const [customAirline, setCustomAirline] = useState("");
   const [trainClass, setTrainClass] = useState("3AC");
+  const [trainNameOption, setTrainNameOption] = useState("Any Available Train");
+  const [customTrainName, setCustomTrainName] = useState("");
   const [travelDate, setTravelDate] = useState("");
   const [specialRequirements, setSpecialRequirements] = useState("");
   const [formError, setFormError] = useState("");
@@ -89,18 +93,32 @@ export const InquirySection: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      const resolvedAirline = activeTab === "flight"
+        ? (flightAirline === "Other / Custom Airline" ? (customAirline.trim() || "Custom Airline") : flightAirline)
+        : undefined;
+
+      const resolvedTrain = activeTab === "train"
+        ? (trainNameOption === "Other / Custom Train Name" ? (customTrainName.trim() || "Custom Train") : trainNameOption)
+        : undefined;
+
       const leadPayload = {
         type: activeTab,
         fullName,
         phone,
         email,
         destination: destination || (activeTab === "package" ? "Goa" : "Ahmedabad to Mumbai"),
-        packageName: packageName || (activeTab === "package" ? "Customized Tour Package" : undefined),
+        packageName: packageName || (activeTab === "package" ? "Customized Tour Package" : activeTab === "flight" ? resolvedAirline : resolvedTrain),
         flightType: activeTab === "flight" ? flightType : undefined,
+        preferredAirline: resolvedAirline,
         trainClass: activeTab === "train" ? trainClass : undefined,
+        preferredTrain: resolvedTrain,
         travelDate,
         travellers,
-        specialRequirements,
+        specialRequirements: [
+          specialRequirements ? `Notes: ${specialRequirements}` : "",
+          resolvedAirline ? `Preferred Airline: ${resolvedAirline}` : "",
+          resolvedTrain ? `Preferred Train: ${resolvedTrain}` : "",
+        ].filter(Boolean).join(" | "),
       };
 
       saveLead(leadPayload);
@@ -113,7 +131,7 @@ export const InquirySection: React.FC = () => {
       }).catch((e) => console.error("Supabase lead sync error:", e));
 
       // Automatically launch WhatsApp with pre-filled inquiry details
-      const waUrl = getWhatsAppRedirectUrl();
+      const waUrl = getWhatsAppRedirectUrl(resolvedAirline, resolvedTrain);
       if (typeof window !== "undefined") {
         window.open(waUrl, "_blank");
       }
@@ -127,14 +145,16 @@ export const InquirySection: React.FC = () => {
     }
   };
 
-  const getWhatsAppRedirectUrl = () => {
+  const getWhatsAppRedirectUrl = (airline?: string, train?: string) => {
     const message = `*New Travel Inquiry - Watch My Trip Package*%0A%0A*Name:* ${encodeURIComponent(
       fullName || "Customer"
     )}%0A*Phone:* ${encodeURIComponent(phone)}%0A*Type:* ${encodeURIComponent(
       activeTab.toUpperCase()
     )}%0A*Destination/Route:* ${encodeURIComponent(
       destination || "General Inquiry"
-    )}%0A*Date:* ${encodeURIComponent(
+    )}${airline ? `%0A*Preferred Airline:* ${encodeURIComponent(airline)}` : ""}${
+      train ? `%0A*Preferred Train:* ${encodeURIComponent(train)}` : ""
+    }%0A*Date:* ${encodeURIComponent(
       travelDate || "Flexible"
     )}%0A*Total Travellers:* ${travellers.length}%0A*Special Notes:* ${encodeURIComponent(
       specialRequirements || "None"
@@ -457,40 +477,149 @@ export const InquirySection: React.FC = () => {
                       )}
 
                       {activeTab === "flight" && (
-                        <div>
-                          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            Flight Journey Type
-                          </label>
-                          <select
-                            value={flightType}
-                            onChange={(e) => setFlightType(e.target.value as any)}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#090E20] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:border-[#FF5A3C] transition-colors"
-                          >
-                            <option value="round-trip" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">Round Trip</option>
-                            <option value="one-way" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">One Way</option>
-                            <option value="multi-city" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">Multi City / International</option>
-                          </select>
-                        </div>
+                        <>
+                          <div>
+                            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                              Flight Journey Type
+                            </label>
+                            <select
+                              value={flightType}
+                              onChange={(e) => setFlightType(e.target.value as any)}
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#090E20] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:border-[#FF5A3C] transition-colors"
+                            >
+                              <option value="round-trip" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">Round Trip</option>
+                              <option value="one-way" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">One Way</option>
+                              <option value="multi-city" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">Multi City / International</option>
+                            </select>
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                              Preferred Airline Carrier
+                            </label>
+                            <select
+                              value={flightAirline}
+                              onChange={(e) => setFlightAirline(e.target.value)}
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#090E20] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:border-[#FF5A3C] transition-colors"
+                            >
+                              <option value="Any / Best Fare Airline">✨ Any / Best Available Fare & Timing</option>
+                              <optgroup label="🇮🇳 Domestic Airlines">
+                                <option value="IndiGo (6E)">IndiGo (6E) - Most Punctual</option>
+                                <option value="Air India (AI)">Air India (AI) - Full Service Carrier</option>
+                                <option value="Air India Express (IX)">Air India Express (IX) - Budget Travel</option>
+                                <option value="SpiceJet (SG)">SpiceJet (SG) - Budget Carrier</option>
+                                <option value="Akasa Air (QP)">Akasa Air (QP) - Modern Fleet</option>
+                                <option value="Alliance Air (9I)">Alliance Air (9I) - Regional Network</option>
+                                <option value="Star Air (S5)">Star Air (S5) - Regional Jet</option>
+                                <option value="Fly91 (IC)">Fly91 (IC) - Goa Regional Direct</option>
+                              </optgroup>
+                              <optgroup label="🌍 International Airlines">
+                                <option value="Emirates (EK)">Emirates (EK) - Dubai & Worldwide</option>
+                                <option value="Qatar Airways (QR)">Qatar Airways (QR) - Doha & Global</option>
+                                <option value="Singapore Airlines (SQ)">Singapore Airlines (SQ) - Asia & Pacific</option>
+                                <option value="Etihad Airways (EY)">Etihad Airways (EY) - Abu Dhabi</option>
+                                <option value="Flydubai (FZ)">Flydubai (FZ) - Direct Budget</option>
+                                <option value="Air Arabia (G9)">Air Arabia (G9) - Sharjah Direct</option>
+                                <option value="Gulf Air (GF)">Gulf Air (GF) - Bahrain</option>
+                                <option value="Thai Airways (TG)">Thai Airways (TG) - Thailand / Bangkok</option>
+                                <option value="British Airways (BA)">British Airways (BA) - London & UK</option>
+                                <option value="Lufthansa (LH)">Lufthansa (LH) - Europe & Frankfurt</option>
+                                <option value="Malaysia Airlines (MH)">Malaysia Airlines (MH) - Kuala Lumpur</option>
+                                <option value="SriLankan Airlines (UL)">SriLankan Airlines (UL) - Colombo</option>
+                                <option value="Saudia (SV)">Saudia (SV) - Saudi Arabia / Umrah</option>
+                                <option value="Oman Air (WY)">Oman Air (WY) - Muscat</option>
+                                <option value="Kuwait Airways (KU)">Kuwait Airways (KU) - Kuwait</option>
+                                <option value="Turkish Airlines (TK)">Turkish Airlines (TK) - Istanbul & Europe</option>
+                              </optgroup>
+                              <option value="Other / Custom Airline">✍️ Other / Enter Custom Airline Name...</option>
+                            </select>
+                          </div>
+
+                          {flightAirline === "Other / Custom Airline" && (
+                            <div className="sm:col-span-2 p-3 rounded-xl bg-[#FF5A3C]/5 border border-[#FF5A3C]/30 animate-in fade-in duration-200">
+                              <label className="block text-xs font-bold text-[#FF5A3C] uppercase tracking-wider mb-1">
+                                Enter Custom Airline Name *
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                value={customAirline}
+                                onChange={(e) => setCustomAirline(e.target.value)}
+                                placeholder="e.g. Virgin Atlantic, LOT Polish, Batik Air, Air France"
+                                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-white/5 border border-[#FF5A3C]/40 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
+                              />
+                            </div>
+                          )}
+                        </>
                       )}
 
                       {activeTab === "train" && (
-                        <div>
-                          <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            Preferred Train Class
-                          </label>
-                          <select
-                            value={trainClass}
-                            onChange={(e) => setTrainClass(e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#090E20] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:border-[#FF5A3C] transition-colors"
-                          >
-                            <option value="3AC" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">3rd AC (3AC)</option>
-                            <option value="2AC" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">2nd AC (2AC)</option>
-                            <option value="1AC" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">1st AC (1AC)</option>
-                            <option value="Vande Bharat / CC" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">Vande Bharat (Executive / CC)</option>
-                            <option value="Sleeper" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">Sleeper Class (SL)</option>
-                            <option value="Tatkal Assistance" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">Tatkal Urgent Assistance</option>
-                          </select>
-                        </div>
+                        <>
+                          <div>
+                            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                              Preferred Train Class
+                            </label>
+                            <select
+                              value={trainClass}
+                              onChange={(e) => setTrainClass(e.target.value)}
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#090E20] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:border-[#FF5A3C] transition-colors"
+                            >
+                              <option value="3AC" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">3rd AC (3AC)</option>
+                              <option value="2AC" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">2nd AC (2AC)</option>
+                              <option value="1AC" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">1st AC (1AC)</option>
+                              <option value="Vande Bharat / CC" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">Vande Bharat (Executive / CC)</option>
+                              <option value="Sleeper" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">Sleeper Class (SL)</option>
+                              <option value="Tatkal Assistance" className="bg-white dark:bg-[#090E20] text-slate-900 dark:text-white">Tatkal Urgent Assistance</option>
+                            </select>
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                              Preferred Train Type / Name
+                            </label>
+                            <select
+                              value={trainNameOption}
+                              onChange={(e) => setTrainNameOption(e.target.value)}
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#090E20] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:border-[#FF5A3C] transition-colors"
+                            >
+                              <option value="Any Available Train">✨ Any Available Train on this Route</option>
+                              <optgroup label="⚡ Premium & High Speed Trains">
+                                <option value="Vande Bharat Express">Vande Bharat Express (Fastest Semi-High Speed)</option>
+                                <option value="Rajdhani Express">Rajdhani Express (Premium AC Sleeper)</option>
+                                <option value="Shatabdi Express">Shatabdi Express (Superfast Day Express)</option>
+                                <option value="Tejas Express">Tejas Express (Luxury AC Chair Car / Sleeper)</option>
+                                <option value="Duronto Express">Duronto Express (Non-Stop Point-to-Point)</option>
+                                <option value="Amrit Bharat Express">Amrit Bharat Express (Push-Pull Superfast)</option>
+                                <option value="Humsafar Express">Humsafar Express (All 3AC Premium Train)</option>
+                              </optgroup>
+                              <optgroup label="🚂 Regular & Express Trains">
+                                <option value="Garib Rath Express">Garib Rath Express (Budget AC 3-Tier)</option>
+                                <option value="Superfast Express">Superfast Express (Fast Long-Distance)</option>
+                                <option value="Mail / Express Train">Mail / Express Train (Regular Daily)</option>
+                                <option value="Jan Shatabdi Express">Jan Shatabdi Express (Budget Chair Car)</option>
+                                <option value="Goa Sampark Kranti / Mangala Express">Goa Sampark Kranti / Konkan Express</option>
+                                <option value="Special Festival / Holiday Train">Special Festival / Holiday Express</option>
+                              </optgroup>
+                              <option value="Other / Custom Train Name">✍️ Other / Specific Train Name or Number...</option>
+                            </select>
+                          </div>
+
+                          {trainNameOption === "Other / Custom Train Name" && (
+                            <div className="sm:col-span-2 p-3 rounded-xl bg-[#FF5A3C]/5 border border-[#FF5A3C]/30 animate-in fade-in duration-200">
+                              <label className="block text-xs font-bold text-[#FF5A3C] uppercase tracking-wider mb-1">
+                                Enter Specific Train Name / Number *
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                value={customTrainName}
+                                onChange={(e) => setCustomTrainName(e.target.value)}
+                                placeholder="e.g. 12952 Mumbai Rajdhani, Mandovi Express (10103)"
+                                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-white/5 border border-[#FF5A3C]/40 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
+                              />
+                            </div>
+                          )}
+                        </>
                       )}
 
                       {/* Travel Date */}

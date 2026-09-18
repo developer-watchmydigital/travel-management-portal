@@ -44,6 +44,7 @@ import {
   Wallet,
   CreditCard,
   Ban,
+  Upload,
 } from "lucide-react";
 import {
   getStoredLeads,
@@ -226,6 +227,45 @@ export default function AdminPage() {
       message,
       type,
     });
+  };
+
+  // Image file upload handler (Local Computer / Gallery)
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
+
+  const handleFileUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldKey: string,
+    onSuccess: (uploadedUrl: string) => void
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input value so re-selecting same file triggers change
+    e.target.value = "";
+
+    setUploadingField(fieldKey);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Upload failed");
+      }
+
+      onSuccess(data.url);
+      showAlert("Upload Successful", `Image saved successfully as ${data.filename || "file"}.`, "success");
+    } catch (err: any) {
+      console.error("Image upload error:", err);
+      showAlert("Upload Failed", err?.message || "Could not upload image from computer.", "error");
+    } finally {
+      setUploadingField(null);
+    }
   };
 
   // Verify server session on mount & load data with Supabase sync
@@ -1779,8 +1819,20 @@ export default function AdminPage() {
                           {lead.flightType && (
                             <p className="text-sky-400 text-[11px] mt-0.5 font-medium">Type: {lead.flightType}</p>
                           )}
+                          {lead.preferredAirline && (
+                            <p className="text-sky-300 text-[11px] mt-0.5 font-bold flex items-center gap-1">
+                              <Plane className="w-3 h-3 text-sky-400" />
+                              <span>Airline: {lead.preferredAirline}</span>
+                            </p>
+                          )}
                           {lead.trainClass && (
                             <p className="text-amber-400 text-[11px] mt-0.5 font-medium">Class: {lead.trainClass}</p>
+                          )}
+                          {lead.preferredTrain && (
+                            <p className="text-amber-300 text-[11px] mt-0.5 font-bold flex items-center gap-1">
+                              <Train className="w-3 h-3 text-amber-400" />
+                              <span>Train: {lead.preferredTrain}</span>
+                            </p>
                           )}
                         </div>
 
@@ -2017,16 +2069,33 @@ export default function AdminPage() {
 
                               {/* Image URL Input */}
                               <div>
-                                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                                  Image URL *
-                                </label>
+                                <div className="flex items-center justify-between mb-1">
+                                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                    Image URL *
+                                  </label>
+                                  <label className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-400 hover:text-sky-300 cursor-pointer">
+                                    <Upload className="w-3 h-3" />
+                                    <span>{uploadingField === `service_${currentService.id}_${idx}` ? "Uploading..." : "Upload from Computer"}</span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      disabled={uploadingField === `service_${currentService.id}_${idx}`}
+                                      onChange={(e) =>
+                                        handleFileUpload(e, `service_${currentService.id}_${idx}`, (url) =>
+                                          handlePhotoChange(currentService.id, idx, "url", url)
+                                        )
+                                      }
+                                    />
+                                  </label>
+                                </div>
                                 <input
                                   type="text"
                                   value={currentPhoto.url}
                                   onChange={(e) =>
                                     handlePhotoChange(currentService.id, idx, "url", e.target.value)
                                   }
-                                  placeholder="https://images.unsplash.com/..."
+                                  placeholder="https://images.unsplash.com/... or /uploads/..."
                                   className="w-full px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5A3C]"
                                 />
                               </div>
@@ -2537,20 +2606,54 @@ export default function AdminPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-slate-300 mb-1 font-medium">Cover Image URL</label>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-slate-300 font-medium">Cover Image URL *</label>
+                          <label className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-400 hover:text-sky-300 cursor-pointer">
+                            <Upload className="w-3 h-3" />
+                            <span>{uploadingField === "pkg_cover" ? "Uploading..." : "Upload from Computer"}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={uploadingField === "pkg_cover"}
+                              onChange={(e) =>
+                                handleFileUpload(e, "pkg_cover", (url) =>
+                                  setPkgFormData((prev) => ({ ...prev, image: url }))
+                                )
+                              }
+                            />
+                          </label>
+                        </div>
                         <input
-                          type="url"
-                          placeholder="https://images.unsplash.com/photo-..."
+                          type="text"
+                          placeholder="https://images.unsplash.com/... or /uploads/..."
                           value={pkgFormData.image || ""}
                           onChange={(e) => setPkgFormData({ ...pkgFormData, image: e.target.value })}
                           className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
                         />
                       </div>
                       <div>
-                        <label className="block text-slate-300 mb-1 font-medium">Official Flyer Image URL (Optional)</label>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-slate-300 font-medium">Official Flyer Image URL (Optional)</label>
+                          <label className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-400 hover:text-sky-300 cursor-pointer">
+                            <Upload className="w-3 h-3" />
+                            <span>{uploadingField === "pkg_flyer" ? "Uploading..." : "Upload from Computer"}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={uploadingField === "pkg_flyer"}
+                              onChange={(e) =>
+                                handleFileUpload(e, "pkg_flyer", (url) =>
+                                  setPkgFormData((prev) => ({ ...prev, flyerImage: url }))
+                                )
+                              }
+                            />
+                          </label>
+                        </div>
                         <input
                           type="text"
-                          placeholder="/goa-packages/package_01_luxury_3n4d.jpg"
+                          placeholder="/goa-packages/... or /uploads/..."
                           value={pkgFormData.flyerImage || ""}
                           onChange={(e) => setPkgFormData({ ...pkgFormData, flyerImage: e.target.value })}
                           className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"
@@ -2864,24 +2967,41 @@ export default function AdminPage() {
                               </div>
 
                               <div>
-                                <div className="flex items-center justify-between mb-1">
+                                <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
                                   <label className="block text-[11px] text-slate-400">
                                     Service Image URL (Optional - leave blank for clean centered card)
                                   </label>
-                                  {hasImg && (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleUpdateDetailedInclusion(idx, "image", "")}
-                                      className="text-[10px] text-amber-400 hover:text-amber-300 underline"
-                                    >
-                                      Clear image (Switch to Center Mode)
-                                    </button>
-                                  )}
+                                  <div className="flex items-center gap-2">
+                                    <label className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-400 hover:text-sky-300 cursor-pointer">
+                                      <Upload className="w-3 h-3" />
+                                      <span>{uploadingField === `inclusion_${idx}` ? "Uploading..." : "Upload Photo"}</span>
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        disabled={uploadingField === `inclusion_${idx}`}
+                                        onChange={(e) =>
+                                          handleFileUpload(e, `inclusion_${idx}`, (url) =>
+                                            handleUpdateDetailedInclusion(idx, "image", url)
+                                          )
+                                        }
+                                      />
+                                    </label>
+                                    {hasImg && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleUpdateDetailedInclusion(idx, "image", "")}
+                                        className="text-[10px] text-amber-400 hover:text-amber-300 underline"
+                                      >
+                                        Clear image
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <input
-                                    type="url"
-                                    placeholder="https://images.unsplash.com/... (optional)"
+                                    type="text"
+                                    placeholder="https://images.unsplash.com/... or /uploads/... (optional)"
                                     value={item.image || ""}
                                     onChange={(e) =>
                                       handleUpdateDetailedInclusion(idx, "image", e.target.value)
@@ -2943,14 +3063,29 @@ export default function AdminPage() {
                                       {[0, 1, 2].map((photoIdx) => {
                                         const photoUrl = item.images?.[photoIdx] || "";
                                         const labels = ["Room Photo 1 (Main / Bed)", "Room Photo 2 (Interior / Living)", "Room Photo 3 (Balcony / View)"];
+                                        const uploadKey = `room_${idx}_${photoIdx}`;
                                         return (
                                           <div key={photoIdx} className="space-y-1">
                                             <div className="flex items-center justify-between text-[10px] text-slate-400">
                                               <span className="font-semibold text-slate-300">#{photoIdx + 1}</span>
-                                              <span className="text-[9px] text-slate-500 truncate max-w-[120px]">{labels[photoIdx]}</span>
+                                              <label className="inline-flex items-center gap-0.5 text-[9px] font-bold text-cyan-400 hover:text-cyan-300 cursor-pointer">
+                                                <Upload className="w-2.5 h-2.5" />
+                                                <span>{uploadingField === uploadKey ? "..." : "Upload"}</span>
+                                                <input
+                                                  type="file"
+                                                  accept="image/*"
+                                                  className="hidden"
+                                                  disabled={uploadingField === uploadKey}
+                                                  onChange={(e) =>
+                                                    handleFileUpload(e, uploadKey, (url) =>
+                                                      handleUpdateDetailedInclusionRoomPhoto(idx, photoIdx, url)
+                                                    )
+                                                  }
+                                                />
+                                              </label>
                                             </div>
                                             <input
-                                              type="url"
+                                              type="text"
                                               placeholder={`Room photo #${photoIdx + 1} URL`}
                                               value={photoUrl}
                                               onChange={(e) =>
@@ -3011,42 +3146,68 @@ export default function AdminPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {(pkgFormData.galleryImages || []).map((imgUrl, gIdx) => (
-                        <div
-                          key={gIdx}
-                          className="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-3"
-                        >
-                          <div className="relative w-14 h-12 rounded-lg overflow-hidden border border-white/20 shrink-0 bg-black">
-                            <Image
-                              src={imgUrl}
-                              alt={`Gallery ${gIdx + 1}`}
-                              fill
-                              className="object-cover"
-                              unoptimized
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="block text-[10px] text-slate-400 mb-1 font-semibold">
-                              Photo #{gIdx + 1}
-                            </span>
-                            <input
-                              type="url"
-                              value={imgUrl}
-                              onChange={(e) => handleUpdateGalleryImage(gIdx, e.target.value)}
-                              placeholder="https://images.unsplash.com/..."
-                              className="w-full px-2.5 py-1.5 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveGalleryImage(gIdx)}
-                            className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-colors"
-                            title="Remove Photo"
+                      {(pkgFormData.galleryImages || []).map((imgUrl, gIdx) => {
+                        const uploadKey = `gallery_${gIdx}`;
+                        return (
+                          <div
+                            key={gIdx}
+                            className="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-3"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ))}
+                            <div className="relative w-14 h-12 rounded-lg overflow-hidden border border-white/20 shrink-0 bg-black">
+                              {imgUrl ? (
+                                <Image
+                                  src={imgUrl}
+                                  alt={`Gallery ${gIdx + 1}`}
+                                  fill
+                                  className="object-cover"
+                                  unoptimized
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-[9px] text-slate-600">
+                                  No Img
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="block text-[10px] text-slate-400 font-semibold">
+                                  Photo #{gIdx + 1}
+                                </span>
+                                <label className="inline-flex items-center gap-0.5 text-[9px] font-bold text-sky-400 hover:text-sky-300 cursor-pointer">
+                                  <Upload className="w-2.5 h-2.5" />
+                                  <span>{uploadingField === uploadKey ? "..." : "Upload File"}</span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    disabled={uploadingField === uploadKey}
+                                    onChange={(e) =>
+                                      handleFileUpload(e, uploadKey, (url) =>
+                                        handleUpdateGalleryImage(gIdx, url)
+                                      )
+                                    }
+                                  />
+                                </label>
+                              </div>
+                              <input
+                                type="text"
+                                value={imgUrl}
+                                onChange={(e) => handleUpdateGalleryImage(gIdx, e.target.value)}
+                                placeholder="https://... or /uploads/..."
+                                className="w-full px-2.5 py-1.5 rounded-lg bg-[#090E20] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF5A3C]"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveGalleryImage(gIdx)}
+                              className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-colors"
+                              title="Remove Photo"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -3212,11 +3373,28 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="block text-slate-300 mb-1 font-medium">Image URL (Unsplash or direct image) *</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-slate-300 font-medium">Image URL *</label>
+                        <label className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-400 hover:text-sky-300 cursor-pointer">
+                          <Upload className="w-3 h-3" />
+                          <span>{uploadingField === "new_dest" ? "Uploading..." : "Upload from Computer"}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={uploadingField === "new_dest"}
+                            onChange={(e) =>
+                              handleFileUpload(e, "new_dest", (url) =>
+                                setNewDest((prev) => ({ ...prev, image: url }))
+                              )
+                            }
+                          />
+                        </label>
+                      </div>
                       <input
-                        type="url"
+                        type="text"
                         required
-                        placeholder="https://images.unsplash.com/..."
+                        placeholder="https://images.unsplash.com/... or /uploads/..."
                         value={newDest.image || ""}
                         onChange={(e) => setNewDest({ ...newDest, image: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#FF5A3C]"

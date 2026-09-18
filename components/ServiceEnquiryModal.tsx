@@ -66,6 +66,8 @@ export const ServiceEnquiryModal: React.FC<ServiceEnquiryModalProps> = ({
   const [flightOrigin, setFlightOrigin] = useState("Ahmedabad (AMD)");
   const [flightDestination, setFlightDestination] = useState("Goa Mopa (GOX) / Dabolim (GOI)");
   const [flightType, setFlightType] = useState<"one-way" | "round-trip">("round-trip");
+  const [flightAirline, setFlightAirline] = useState("Any / Best Fare Airline");
+  const [customAirline, setCustomAirline] = useState("");
   const [flightDepartDate, setFlightDepartDate] = useState("");
   const [flightReturnDate, setFlightReturnDate] = useState("");
   const [flightClass, setFlightClass] = useState("Economy");
@@ -74,6 +76,8 @@ export const ServiceEnquiryModal: React.FC<ServiceEnquiryModalProps> = ({
   const [trainOrigin, setTrainOrigin] = useState("Ahmedabad / Surat");
   const [trainDestination, setTrainDestination] = useState("Madgaon (MAO) / Thivim (THVM)");
   const [trainDate, setTrainDate] = useState("");
+  const [trainNameOption, setTrainNameOption] = useState("Any Available Train");
+  const [customTrainName, setCustomTrainName] = useState("");
   const [trainClass, setTrainClass] = useState("3AC");
   const [trainTatkal, setTrainTatkal] = useState("No (Normal Booking)");
   const [trainPassengers, setTrainPassengers] = useState("2 Passengers");
@@ -110,6 +114,8 @@ export const ServiceEnquiryModal: React.FC<ServiceEnquiryModalProps> = ({
       setSpecialNotes("");
       setActivePhotoPreview(null);
       setCustomTravelers("");
+      setCustomAirline("");
+      setCustomTrainName("");
     }
   }, [isOpen, service?.id]);
 
@@ -147,9 +153,11 @@ export const ServiceEnquiryModal: React.FC<ServiceEnquiryModalProps> = ({
       };
     }
     if (isFlight) {
+      const resolvedAirline = flightAirline === "Other / Custom Airline" ? (customAirline || "Custom Airline") : flightAirline;
       return {
         "Route": `${flightOrigin} ➔ ${flightDestination}`,
         "Trip Type": flightType === "round-trip" ? "Round Trip" : "One Way",
+        "Preferred Airline": resolvedAirline,
         "Departure Date": flightDepartDate || "Flexible",
         "Return Date": flightType === "round-trip" ? flightReturnDate || "Flexible" : "N/A",
         "Travel Class": flightClass,
@@ -157,8 +165,10 @@ export const ServiceEnquiryModal: React.FC<ServiceEnquiryModalProps> = ({
       };
     }
     if (isTrain) {
+      const resolvedTrain = trainNameOption === "Other / Custom Train Name" ? (customTrainName || "Custom Train") : trainNameOption;
       return {
         "Station Route": `${trainOrigin} ➔ ${trainDestination}`,
+        "Preferred Train": resolvedTrain,
         "Travel Date": trainDate || "Flexible",
         "Class Preference": trainClass,
         "Tatkal Required": trainTatkal,
@@ -231,6 +241,18 @@ export const ServiceEnquiryModal: React.FC<ServiceEnquiryModalProps> = ({
       ? trainDate
       : groupMonth;
 
+    const resolvedAirline = isFlight
+      ? flightAirline === "Other / Custom Airline"
+        ? customAirline.trim() || "Custom Airline"
+        : flightAirline
+      : undefined;
+
+    const resolvedTrain = isTrain
+      ? trainNameOption === "Other / Custom Train Name"
+        ? customTrainName.trim() || "Custom Train"
+        : trainNameOption
+      : undefined;
+
     const leadPayload = {
       type: leadType,
       fullName: fullName.trim(),
@@ -238,7 +260,21 @@ export const ServiceEnquiryModal: React.FC<ServiceEnquiryModalProps> = ({
       email: email.trim(),
       destination: destinationValue,
       serviceName: service.title,
-      packageName: `${service.title} - ${isHotel ? hotelCategory : isCar ? carVehicleType : "Enquiry"}`,
+      packageName: `${service.title} - ${
+        isHotel
+          ? hotelCategory
+          : isCar
+          ? carVehicleType
+          : isFlight
+          ? resolvedAirline || "Flight Booking"
+          : isTrain
+          ? resolvedTrain || "Train Booking"
+          : "Enquiry"
+      }`,
+      flightType: isFlight ? flightType : undefined,
+      preferredAirline: resolvedAirline,
+      trainClass: isTrain ? trainClass : undefined,
+      preferredTrain: resolvedTrain,
       travelDate: dateValue,
       travellers: [{ name: fullName.trim(), age: "Adult", gender: "Not Specified" }],
       specialRequirements: specialNotes.trim()
@@ -724,6 +760,65 @@ export const ServiceEnquiryModal: React.FC<ServiceEnquiryModalProps> = ({
                       </div>
                     </div>
 
+                    {/* Preferred Airline Selection */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                        ✈️ Preferred Airline Carrier
+                      </label>
+                      <select
+                        value={flightAirline}
+                        onChange={(e) => setFlightAirline(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#070B18] border border-slate-200 dark:border-white/15 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
+                      >
+                        <option value="Any / Best Fare Airline">✨ Any / Best Available Fare & Timing</option>
+                        <optgroup label="🇮🇳 Domestic Airlines">
+                          <option value="IndiGo (6E)">IndiGo (6E) - Most Punctual</option>
+                          <option value="Air India (AI)">Air India (AI) - Full Service Carrier</option>
+                          <option value="Air India Express (IX)">Air India Express (IX) - Budget Travel</option>
+                          <option value="SpiceJet (SG)">SpiceJet (SG) - Budget Carrier</option>
+                          <option value="Akasa Air (QP)">Akasa Air (QP) - Modern Fleet</option>
+                          <option value="Alliance Air (9I)">Alliance Air (9I) - Regional Network</option>
+                          <option value="Star Air (S5)">Star Air (S5) - Regional Jet</option>
+                          <option value="Fly91 (IC)">Fly91 (IC) - Goa Regional Direct</option>
+                        </optgroup>
+                        <optgroup label="🌍 International Airlines">
+                          <option value="Emirates (EK)">Emirates (EK) - Dubai & Worldwide</option>
+                          <option value="Qatar Airways (QR)">Qatar Airways (QR) - Doha & Global</option>
+                          <option value="Singapore Airlines (SQ)">Singapore Airlines (SQ) - Asia & Pacific</option>
+                          <option value="Etihad Airways (EY)">Etihad Airways (EY) - Abu Dhabi</option>
+                          <option value="Flydubai (FZ)">Flydubai (FZ) - Direct Budget</option>
+                          <option value="Air Arabia (G9)">Air Arabia (G9) - Sharjah Direct</option>
+                          <option value="Gulf Air (GF)">Gulf Air (GF) - Bahrain</option>
+                          <option value="Thai Airways (TG)">Thai Airways (TG) - Thailand / Bangkok</option>
+                          <option value="British Airways (BA)">British Airways (BA) - London & UK</option>
+                          <option value="Lufthansa (LH)">Lufthansa (LH) - Europe & Frankfurt</option>
+                          <option value="Malaysia Airlines (MH)">Malaysia Airlines (MH) - Kuala Lumpur</option>
+                          <option value="SriLankan Airlines (UL)">SriLankan Airlines (UL) - Colombo</option>
+                          <option value="Saudia (SV)">Saudia (SV) - Saudi Arabia / Umrah</option>
+                          <option value="Oman Air (WY)">Oman Air (WY) - Muscat</option>
+                          <option value="Kuwait Airways (KU)">Kuwait Airways (KU) - Kuwait</option>
+                          <option value="Turkish Airlines (TK)">Turkish Airlines (TK) - Istanbul & Europe</option>
+                        </optgroup>
+                        <option value="Other / Custom Airline">✍️ Other / Enter Custom Airline Name...</option>
+                      </select>
+                    </div>
+
+                    {flightAirline === "Other / Custom Airline" && (
+                      <div className="p-3 rounded-xl bg-[#FF5A3C]/5 border border-[#FF5A3C]/30 animate-in fade-in duration-200">
+                        <label className="block text-[11px] font-bold text-[#FF5A3C] uppercase tracking-wider mb-1">
+                          Specify Airline Name *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={customAirline}
+                          onChange={(e) => setCustomAirline(e.target.value)}
+                          placeholder="e.g. Virgin Atlantic, LOT Polish, Batik Air, Air France"
+                          className="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#070B18] border border-[#FF5A3C]/40 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
+                        />
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                       <div>
                         <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
@@ -808,6 +903,54 @@ export const ServiceEnquiryModal: React.FC<ServiceEnquiryModalProps> = ({
                         />
                       </div>
                     </div>
+
+                    {/* Preferred Train Selection */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                        🚆 Preferred Train Type / Name
+                      </label>
+                      <select
+                        value={trainNameOption}
+                        onChange={(e) => setTrainNameOption(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#070B18] border border-slate-200 dark:border-white/15 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
+                      >
+                        <option value="Any Available Train">✨ Any Available Train on this Route</option>
+                        <optgroup label="⚡ Premium & High Speed Trains">
+                          <option value="Vande Bharat Express">Vande Bharat Express (Fastest Semi-High Speed)</option>
+                          <option value="Rajdhani Express">Rajdhani Express (Premium AC Sleeper)</option>
+                          <option value="Shatabdi Express">Shatabdi Express (Superfast Day Express)</option>
+                          <option value="Tejas Express">Tejas Express (Luxury AC Chair Car / Sleeper)</option>
+                          <option value="Duronto Express">Duronto Express (Non-Stop Point-to-Point)</option>
+                          <option value="Amrit Bharat Express">Amrit Bharat Express (Push-Pull Superfast)</option>
+                          <option value="Humsafar Express">Humsafar Express (All 3AC Premium Train)</option>
+                        </optgroup>
+                        <optgroup label="🚂 Regular & Express Trains">
+                          <option value="Garib Rath Express">Garib Rath Express (Budget AC 3-Tier)</option>
+                          <option value="Superfast Express">Superfast Express (Fast Long-Distance)</option>
+                          <option value="Mail / Express Train">Mail / Express Train (Regular Daily)</option>
+                          <option value="Jan Shatabdi Express">Jan Shatabdi Express (Budget Chair Car)</option>
+                          <option value="Goa Sampark Kranti / Mangala Express">Goa Sampark Kranti / Konkan Express</option>
+                          <option value="Special Festival / Holiday Train">Special Festival / Holiday Express</option>
+                        </optgroup>
+                        <option value="Other / Custom Train Name">✍️ Other / Specific Train Name or Number...</option>
+                      </select>
+                    </div>
+
+                    {trainNameOption === "Other / Custom Train Name" && (
+                      <div className="p-3 rounded-xl bg-[#FF5A3C]/5 border border-[#FF5A3C]/30 animate-in fade-in duration-200">
+                        <label className="block text-[11px] font-bold text-[#FF5A3C] uppercase tracking-wider mb-1">
+                          Specify Train Name or Number *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={customTrainName}
+                          onChange={(e) => setCustomTrainName(e.target.value)}
+                          placeholder="e.g. 12952 Mumbai Rajdhani, 20901 Vande Bharat, 12137 Punjab Mail"
+                          className="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#070B18] border border-[#FF5A3C]/40 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
+                        />
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                       <div>

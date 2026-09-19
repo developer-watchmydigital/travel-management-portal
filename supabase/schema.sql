@@ -269,3 +269,49 @@ ON public.company_info FOR ALL
 TO anon, authenticated, service_role 
 USING (true) 
 WITH CHECK (true);
+
+
+-- =========================================================================
+-- 7. HERO CAROUSEL BANNERS TABLE
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS public.hero_banners (
+    id TEXT PRIMARY KEY,
+    order_index INTEGER NOT NULL DEFAULT 0,
+    package_id TEXT,
+    title TEXT NOT NULL,
+    subtitle TEXT NOT NULL,
+    image TEXT NOT NULL,
+    badge TEXT NOT NULL,
+    tag TEXT NOT NULL,
+    price TEXT,
+    button_text TEXT,
+    button_link TEXT,
+    location_text TEXT,
+    availability_text TEXT,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.hero_banners ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public select on hero_banners" ON public.hero_banners;
+CREATE POLICY "Allow public select on hero_banners" 
+ON public.hero_banners FOR SELECT 
+TO anon, authenticated, service_role 
+USING (true);
+
+DROP POLICY IF EXISTS "Allow all on hero_banners" ON public.hero_banners;
+CREATE POLICY "Allow all on hero_banners" 
+ON public.hero_banners FOR ALL 
+TO anon, authenticated, service_role 
+USING (true) 
+WITH CHECK (true);
+
+-- Seed Initial 4 Hero Carousel Banners
+INSERT INTO public.hero_banners (id, order_index, package_id, title, subtitle, image, badge, tag, price, button_text, button_link, location_text, availability_text)
+VALUES
+  ('goa-summer-offer', 0, 'pkg-sdp-4n5d-spa', 'Hotel Small Daddy Plus Signature Package', '4N/5D Summer Best Offer: Dinner Cruise, Adventure Boat Party, North/South Tour & Full Body Spa.', 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1600&auto=format&fit=crop', 'Summer Best Offer: ₹2,499 / Day', 'Summer Best Offer', 'From ₹9,996 / person', 'View 4N/5D Summer Offer (₹2,499/Day)', '/packages/pkg-sdp-4n5d-spa', 'Goa Package Special', 'Available 24x7'),
+  ('goa-2', 1, 'pkg-goa-4n5d-luxury', 'Heritage Forts & Portuguese Villas', 'Wander through colorful Latin quarters of Fontainhas, historic Aguada & Chapora Forts.', 'https://images.unsplash.com/photo-1587922546307-776227941871?q=80&w=1600&auto=format&fit=crop', 'Cultural & Heritage Tours', 'Historical Marvels', 'From ₹14,499 / person', 'Explore Heritage Tour (₹14,499)', '/packages/pkg-goa-4n5d-luxury', 'Goa Cultural Special', 'Available 24x7'),
+  ('goa-3', 2, 'pkg-goa-3n4d-watersports', 'Luxury Catamaran & Island Cruises', 'Sail along the pristine Mandovi river, spot dolphins at Grand Island, and enjoy watersports.', 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=1600&auto=format&fit=crop', 'VIP Yacht & Watersport Experience', 'Adventure & Thrill', 'From ₹16,999 / person', 'Book Island & Cruise Tour (₹16,999)', '/packages/pkg-goa-3n4d-watersports', 'Grand Island Special', 'Available 24x7'),
+  ('goa-4', 3, 'pkg-goa-5n6d-honeymoon', 'Tropical Palms & Serene Backwaters', 'Unwind at tranquil South Goa resorts surrounded by emerald palms and serene coastal rivers.', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1600&auto=format&fit=crop', 'Custom Family & Honeymoon Retreat', 'Ultimate Relaxation', 'From ₹18,500 / person', 'View Honeymoon Retreat (₹18,500)', '/packages/pkg-goa-5n6d-honeymoon', 'South Goa Special', 'Available 24x7')
+ON CONFLICT (id) DO NOTHING;
+

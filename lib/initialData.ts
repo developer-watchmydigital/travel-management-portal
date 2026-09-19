@@ -1,4 +1,4 @@
-import { CompanyInfo, Destination, TravelService, CuratedPackage, Review } from "./types";
+import { CompanyInfo, Destination, TravelService, CuratedPackage, Review, HeroBannerSlide } from "./types";
 
 export const companyData: CompanyInfo = {
   name: "WATCH MY TRIP PACKAGE",
@@ -15,44 +15,65 @@ export const companyData: CompanyInfo = {
   instagram: "https://www.instagram.com/watchmytrippackage?stkn=MWxieXNncG5hcDl4OA%3D%3D&utm_source=qr",
 };
 
-export const goaCarouselSlides = [
+export const goaCarouselSlides: HeroBannerSlide[] = [
   {
     id: "goa-summer-offer",
+    packageId: "pkg-sdp-4n5d-spa",
     title: "Hotel Small Daddy Plus Signature Package",
     subtitle: "4N/5D Summer Best Offer: Dinner Cruise, Adventure Boat Party, North/South Tour & Full Body Spa.",
     image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=1600&auto=format&fit=crop",
     badge: "Summer Best Offer: ₹2,499 / Day",
     tag: "Summer Best Offer",
     price: "From ₹9,996 / person",
+    buttonText: "View 4N/5D Summer Offer (₹2,499/Day)",
+    buttonLink: "/packages/pkg-sdp-4n5d-spa",
+    locationText: "Goa Package Special",
+    availabilityText: "Available 24x7",
   },
   {
     id: "goa-2",
+    packageId: "pkg-goa-4n5d-luxury",
     title: "Heritage Forts & Portuguese Villas",
     subtitle: "Wander through colorful Latin quarters of Fontainhas, historic Aguada & Chapora Forts.",
     image: "https://images.unsplash.com/photo-1587922546307-776227941871?q=80&w=1600&auto=format&fit=crop",
     badge: "Cultural & Heritage Tours",
     tag: "Historical Marvels",
     price: "From ₹14,499 / person",
+    buttonText: "Explore Heritage Tour (₹14,499)",
+    buttonLink: "/packages/pkg-goa-4n5d-luxury",
+    locationText: "Goa Cultural Special",
+    availabilityText: "Available 24x7",
   },
   {
     id: "goa-3",
+    packageId: "pkg-goa-3n4d-watersports",
     title: "Luxury Catamaran & Island Cruises",
     subtitle: "Sail along the pristine Mandovi river, spot dolphins at Grand Island, and enjoy watersports.",
     image: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=1600&auto=format&fit=crop",
     badge: "VIP Yacht & Watersport Experience",
     tag: "Adventure & Thrill",
     price: "From ₹16,999 / person",
+    buttonText: "Book Island & Cruise Tour (₹16,999)",
+    buttonLink: "/packages/pkg-goa-3n4d-watersports",
+    locationText: "Grand Island Special",
+    availabilityText: "Available 24x7",
   },
   {
     id: "goa-4",
+    packageId: "pkg-goa-5n6d-honeymoon",
     title: "Tropical Palms & Serene Backwaters",
     subtitle: "Unwind at tranquil South Goa resorts surrounded by emerald palms and serene coastal rivers.",
     image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1600&auto=format&fit=crop",
     badge: "Custom Family & Honeymoon Retreat",
     tag: "Ultimate Relaxation",
     price: "From ₹18,500 / person",
+    buttonText: "View Honeymoon Retreat (₹18,500)",
+    buttonLink: "/packages/pkg-goa-5n6d-honeymoon",
+    locationText: "South Goa Special",
+    availabilityText: "Available 24x7",
   },
 ];
+
 
 export const destinationsData: Destination[] = [
   {

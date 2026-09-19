@@ -140,3 +140,19 @@ export interface Review {
   createdAt: string;
   verified?: boolean;
 }
+
+export interface HeroBannerSlide {
+  id: string; // e.g. "goa-summer-offer", "goa-2", "goa-3", "goa-4"
+  packageId?: string; // linked package ID
+  title: string;
+  subtitle: string;
+  image: string;
+  badge: string; // e.g. "Summer Best Offer: ₹2,499 / Day"
+  tag: string; // e.g. "Summer Best Offer", "Historical Marvels"
+  price?: string; // e.g. "From ₹9,996 / person"
+  buttonText?: string; // e.g. "View 4N/5D Summer Offer (₹2,499/Day)"
+  buttonLink?: string; // e.g. "/packages/pkg-sdp-4n5d-spa"
+  locationText?: string; // e.g. "Goa Package Special"
+  availabilityText?: string; // e.g. "Available 24x7"
+}
+

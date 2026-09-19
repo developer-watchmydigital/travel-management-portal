@@ -1,5 +1,5 @@
-import { companyData, destinationsData, servicesData, initialCuratedPackages, initialGoaReviews } from "./initialData";
-import { CompanyInfo, Destination, InquiryLead, TravelService, CuratedPackage, ServicePhoto, Review } from "./types";
+import { companyData, destinationsData, servicesData, initialCuratedPackages, initialGoaReviews, goaCarouselSlides } from "./initialData";
+import { CompanyInfo, Destination, InquiryLead, TravelService, CuratedPackage, ServicePhoto, Review, HeroBannerSlide } from "./types";
 
 const LEADS_KEY = "r_travel_leads_v2";
 const DESTINATIONS_KEY = "r_travel_destinations_v2";
@@ -7,6 +7,8 @@ const SERVICES_KEY = "r_travel_services_v2";
 const COMPANY_KEY = "r_travel_company_v2";
 const PACKAGES_KEY = "r_travel_curated_packages_v3";
 const REVIEWS_KEY = "r_travel_reviews_v2";
+const BANNERS_KEY = "wmt_hero_banners_v1";
+
 
 export const initialLeads: InquiryLead[] = [
   {
@@ -456,5 +458,58 @@ export function deleteStoredReview(id: string) {
   localStorage.setItem(REVIEWS_KEY, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent("reviews-updated", { detail: updated }));
 }
+
+export function getStoredHeroBanners(): HeroBannerSlide[] {
+  if (typeof window === "undefined") return goaCarouselSlides;
+  try {
+    const data = localStorage.getItem(BANNERS_KEY);
+    if (!data) {
+      localStorage.setItem(BANNERS_KEY, JSON.stringify(goaCarouselSlides));
+      return goaCarouselSlides;
+    }
+    const parsed = JSON.parse(data);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      // Ensure we have 4 banners, merging any missing from initial slides
+      if (parsed.length < goaCarouselSlides.length) {
+        const merged = goaCarouselSlides.map((init, idx) => parsed[idx] || init);
+        localStorage.setItem(BANNERS_KEY, JSON.stringify(merged));
+        return merged;
+      }
+      return parsed;
+    }
+    return goaCarouselSlides;
+  } catch {
+    return goaCarouselSlides;
+  }
+}
+
+export function saveHeroBanner(banner: HeroBannerSlide) {
+  if (typeof window === "undefined") return;
+  const current = getStoredHeroBanners();
+  const index = current.findIndex((b) => b.id === banner.id);
+  let updated: HeroBannerSlide[];
+  if (index >= 0) {
+    updated = [...current];
+    updated[index] = banner;
+  } else {
+    updated = [...current, banner];
+  }
+  localStorage.setItem(BANNERS_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent("banners-updated", { detail: updated }));
+}
+
+export function saveAllHeroBanners(banners: HeroBannerSlide[]) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(BANNERS_KEY, JSON.stringify(banners));
+  window.dispatchEvent(new CustomEvent("banners-updated", { detail: banners }));
+}
+
+export function resetHeroBanners(): HeroBannerSlide[] {
+  if (typeof window === "undefined") return goaCarouselSlides;
+  localStorage.setItem(BANNERS_KEY, JSON.stringify(goaCarouselSlides));
+  window.dispatchEvent(new CustomEvent("banners-updated", { detail: goaCarouselSlides }));
+  return goaCarouselSlides;
+}
+
 
 

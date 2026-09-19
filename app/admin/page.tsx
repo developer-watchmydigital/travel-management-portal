@@ -19,6 +19,7 @@ import {
   CheckCircle,
   Plus,
   ArrowLeft,
+  ArrowRight,
   MessageCircle,
   Eye,
   Edit,
@@ -64,6 +65,10 @@ import {
   updateServicePhotos,
   getStoredReviews,
   deleteStoredReview,
+  getStoredHeroBanners,
+  saveHeroBanner,
+  saveAllHeroBanners,
+  resetHeroBanners,
 } from "@/lib/storage";
 import {
   InquiryLead,
@@ -75,8 +80,9 @@ import {
   TravelService,
   ServicePhoto,
   Review,
+  HeroBannerSlide,
 } from "@/lib/types";
-import { curatedRegionsList, initialGoaReviews } from "@/lib/initialData";
+import { curatedRegionsList, initialGoaReviews, goaCarouselSlides } from "@/lib/initialData";
 import { getPerDayPrice } from "@/lib/pricing";
 
 export default function AdminPage() {
@@ -94,7 +100,8 @@ export default function AdminPage() {
   const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const [activeTab, setActiveTab] = useState<"leads" | "packages" | "destinations" | "cash" | "online" | "cancelled" | "services" | "reviews" | "settings">("leads");
+  const [activeTab, setActiveTab] = useState<"leads" | "banners" | "packages" | "destinations" | "cash" | "online" | "cancelled" | "services" | "reviews" | "settings">("leads");
+
   const [leads, setLeads] = useState<InquiryLead[]>([]);
   const [isRefreshingLeads, setIsRefreshingLeads] = useState(false);
   const [lastLeadsSync, setLastLeadsSync] = useState<string>("Just now");
@@ -206,6 +213,28 @@ export default function AdminPage() {
     category: "india",
     highlights: ["Sightseeing", "Hotel Stay", "Transfers"],
   });
+
+  // Hero Carousel Banners Management State
+  const [heroBanners, setHeroBanners] = useState<HeroBannerSlide[]>(goaCarouselSlides);
+  const [editingBanner, setEditingBanner] = useState<HeroBannerSlide | null>(null);
+  const [editingBannerIndex, setEditingBannerIndex] = useState<number>(0);
+  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
+  const [bannerToast, setBannerToast] = useState("");
+  const [isSavingBanner, setIsSavingBanner] = useState(false);
+  const [bannerFormData, setBannerFormData] = useState<Partial<HeroBannerSlide>>({
+    title: "",
+    subtitle: "",
+    image: "",
+    badge: "",
+    tag: "",
+    price: "",
+    buttonText: "",
+    buttonLink: "",
+    locationText: "",
+    availabilityText: "Available 24x7",
+    packageId: "",
+  });
+
 
   // Custom In-App Modal Dialog States (Replaces native browser window.confirm and window.alert)
   const [confirmModal, setConfirmModal] = useState<{
@@ -383,16 +412,39 @@ export default function AdminPage() {
     // 7. Load reviews from Supabase API with local fallback
     refreshReviews();
 
+    // 8. Load hero banners with local fallback
+    const localBanners = getStoredHeroBanners();
+    setHeroBanners(localBanners);
+    fetch("/api/banners")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.banners && Array.isArray(data.banners) && data.banners.length > 0) {
+          setHeroBanners(data.banners);
+          if (data.isSupabaseActive) setIsSupabaseSynced(true);
+        }
+      })
+      .catch(() => {});
+
     // Listen for instant local / cross-tab lead submissions & reviews updates
     const handleNewLead = () => refreshLeads(true);
     const handleReviewsSync = () => refreshReviews();
+    const handleBannersSync = (e: any) => {
+      if (e.detail && Array.isArray(e.detail) && e.detail.length > 0) {
+        setHeroBanners(e.detail);
+      } else {
+        setHeroBanners(getStoredHeroBanners());
+      }
+    };
 
     window.addEventListener("wmt-new-lead", handleNewLead);
     window.addEventListener("reviews-updated", handleReviewsSync);
+    window.addEventListener("banners-updated", handleBannersSync as EventListener);
     window.addEventListener("storage", (e) => {
       if (e.key === "r_travel_leads_v2") refreshLeads(true);
       if (e.key === "r_travel_reviews_v2") refreshReviews();
+      if (e.key === "wmt_hero_banners_v1") setHeroBanners(getStoredHeroBanners());
     });
+
 
     let leadsChannel: BroadcastChannel | null = null;
     try {
@@ -1088,6 +1140,155 @@ export default function AdminPage() {
     setPkgFormData({ ...pkgFormData, itinerary: updated });
   };
 
+  // ── Hero Banner Management Handlers ─────────────────────────────────────
+  const handleEditBanner = (banner: HeroBannerSlide, index: number) => {
+    setEditingBanner(banner);
+    setEditingBannerIndex(index);
+    setBannerFormData({
+      id: banner.id,
+      packageId: banner.packageId || "",
+      title: banner.title || "",
+      subtitle: banner.subtitle || "",
+      image: banner.image || "",
+      badge: banner.badge || "",
+      tag: banner.tag || "",
+      price: banner.price || "",
+      buttonText: banner.buttonText || "",
+      buttonLink: banner.buttonLink || "",
+      locationText: banner.locationText || "",
+      availabilityText: banner.availabilityText || "Available 24x7",
+    });
+    setIsBannerModalOpen(true);
+  };
+
+  const handleSelectPackageForBanner = (pkgId: string) => {
+    if (!pkgId) {
+      setBannerFormData((prev) => ({ ...prev, packageId: "" }));
+      return;
+    }
+    const selectedPkg = packages.find((p) => p.id === pkgId);
+    if (selectedPkg) {
+      setBannerFormData((prev) => ({
+        ...prev,
+        packageId: selectedPkg.id,
+        title: selectedPkg.title,
+        subtitle: selectedPkg.subtitle || selectedPkg.route || `${selectedPkg.duration} comprehensive holiday experience.`,
+        image: selectedPkg.image,
+        tag: selectedPkg.categoryBadge || "Featured Offer",
+        badge: `${selectedPkg.categoryBadge}: ₹${selectedPkg.discountedPrice || selectedPkg.originalPrice}`,
+        price: `From ₹${selectedPkg.discountedPrice || selectedPkg.originalPrice} / person`,
+        buttonText: `View ${selectedPkg.duration} Offer (₹${selectedPkg.discountedPrice || selectedPkg.originalPrice})`,
+        buttonLink: `/packages/${selectedPkg.id}`,
+        locationText: `${selectedPkg.state} Package Special`,
+        availabilityText: "Available 24x7",
+      }));
+    }
+  };
+
+  const handleQuickAssignPackageToBanner = (index: number, pkgId: string) => {
+    if (!pkgId) return;
+    const selectedPkg = packages.find((p) => p.id === pkgId);
+    if (!selectedPkg) return;
+
+    const currentBanner = heroBanners[index] || goaCarouselSlides[index];
+    const updatedBanner: HeroBannerSlide = {
+      ...currentBanner,
+      packageId: selectedPkg.id,
+      title: selectedPkg.title,
+      subtitle: selectedPkg.subtitle || selectedPkg.route || `${selectedPkg.duration} comprehensive holiday experience.`,
+      image: selectedPkg.image,
+      tag: selectedPkg.categoryBadge || "Featured Offer",
+      badge: `${selectedPkg.categoryBadge}: ₹${selectedPkg.discountedPrice || selectedPkg.originalPrice}`,
+      price: `From ₹${selectedPkg.discountedPrice || selectedPkg.originalPrice} / person`,
+      buttonText: `View ${selectedPkg.duration} Offer (₹${selectedPkg.discountedPrice || selectedPkg.originalPrice})`,
+      buttonLink: `/packages/${selectedPkg.id}`,
+      locationText: `${selectedPkg.state} Package Special`,
+      availabilityText: "Available 24x7",
+    };
+
+    const updatedList = [...heroBanners];
+    updatedList[index] = updatedBanner;
+    setHeroBanners(updatedList);
+    saveAllHeroBanners(updatedList);
+
+    fetch("/api/banners", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ banners: updatedList }),
+    }).catch((err) => console.error("Banner sync error:", err));
+
+    setBannerToast(`Banner #${index + 1} updated to "${selectedPkg.title}"!`);
+    setTimeout(() => setBannerToast(""), 4000);
+  };
+
+  const handleSaveBanner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bannerFormData.title?.trim() || !bannerFormData.image?.trim()) {
+      showAlert("Missing Fields", "Please provide a title and image URL for the banner.", "warning");
+      return;
+    }
+    setIsSavingBanner(true);
+    const updatedBanner: HeroBannerSlide = {
+      id: editingBanner?.id || `goa-${editingBannerIndex + 1}`,
+      packageId: bannerFormData.packageId || undefined,
+      title: bannerFormData.title.trim(),
+      subtitle: bannerFormData.subtitle?.trim() || "",
+      image: bannerFormData.image.trim(),
+      badge: bannerFormData.badge?.trim() || "Special Tour Offer",
+      tag: bannerFormData.tag?.trim() || "Featured",
+      price: bannerFormData.price?.trim() || undefined,
+      buttonText: bannerFormData.buttonText?.trim() || "Explore Package",
+      buttonLink: bannerFormData.buttonLink?.trim() || "/#contact",
+      locationText: bannerFormData.locationText?.trim() || "Goa Package Special",
+      availabilityText: bannerFormData.availabilityText?.trim() || "Available 24x7",
+    };
+
+    const updatedList = [...heroBanners];
+    if (editingBannerIndex >= 0 && editingBannerIndex < updatedList.length) {
+      updatedList[editingBannerIndex] = updatedBanner;
+    } else {
+      updatedList.push(updatedBanner);
+    }
+
+    setHeroBanners(updatedList);
+    saveAllHeroBanners(updatedList);
+
+    fetch("/api/banners", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ banners: updatedList }),
+    }).catch((err) => console.error("Banner sync error:", err));
+
+    setIsSavingBanner(false);
+    setIsBannerModalOpen(false);
+    setBannerToast(`Banner #${editingBannerIndex + 1} saved successfully!`);
+    setTimeout(() => setBannerToast(""), 4000);
+  };
+
+  const handleResetAllBanners = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Reset All 4 Hero Banners",
+      message: "Are you sure you want to restore the 4 default Goa and vacation showcase banners? All customized banner text and package links will be reset to defaults.",
+      confirmText: "Yes, Reset Banners",
+      cancelText: "Cancel",
+      variant: "warning",
+      onConfirm: () => {
+        const defaults = resetHeroBanners();
+        setHeroBanners(defaults);
+        fetch("/api/banners", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ banners: defaults }),
+        }).catch((err) => console.error("Banner reset sync error:", err));
+        setConfirmModal(null);
+        setBannerToast("All 4 hero banners have been reset to initial defaults.");
+        setTimeout(() => setBannerToast(""), 4000);
+      },
+    });
+  };
+
+
   // Filtered Curated Packages
   const filteredPackages = packages.filter((pkg) => {
     const matchesState = packageFilterState === "all" || pkg.state === packageFilterState;
@@ -1585,6 +1786,19 @@ export default function AdminPage() {
           </button>
 
           <button
+            onClick={() => setActiveTab("banners")}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "banners"
+                ? "bg-[#FF5A3C] text-white shadow-lg shadow-[#FF5A3C]/30"
+                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span>Change Banners (4)</span>
+          </button>
+
+
+          <button
             onClick={() => setActiveTab("packages")}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeTab === "packages"
@@ -1996,8 +2210,185 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* TAB 2: HERO CAROUSEL BANNERS MANAGEMENT */}
+        {activeTab === "banners" && (
+          <div className="space-y-6">
+            {/* Top Bar with Info & Reset Action */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#090E20]/90 border border-white/10 backdrop-blur-xl shadow-xl">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-[10px] font-extrabold text-amber-300 uppercase tracking-wider mb-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Homepage Hero Carousel • 4 Interactive Slides</span>
+                </div>
+                <h3 className="text-xl font-black text-white font-['Outfit']">
+                  Change Hero Banners & Packages
+                </h3>
+                <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+                  Select any tour package from the dropdown to instantly update a banner slide with that package&apos;s images, title, subtitle, duration, and link. You can also customize all banner fields manually.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleResetAllBanners}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 hover:text-white border border-white/10 transition-all cursor-pointer"
+                  title="Reset all 4 banners to original defaults"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Reset Default Banners</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Notification Toast */}
+            {bannerToast && (
+              <div className="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{bannerToast}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBannerToast("")}
+                  className="p-1 text-emerald-400 hover:text-white"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {/* 4 Hero Banners Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {heroBanners.slice(0, 4).map((banner, index) => {
+                const linkedPkg = packages.find((p) => p.id === banner.packageId);
+
+                return (
+                  <div
+                    key={banner.id || `banner-${index}`}
+                    className="relative rounded-2xl bg-[#090E20]/90 border border-white/10 hover:border-[#FF5A3C]/40 transition-all overflow-hidden p-5 flex flex-col justify-between shadow-xl"
+                  >
+                    {/* Card Header Tag & Package Link Pill */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white text-xs font-black tracking-wide shadow-md shadow-[#FF5A3C]/30">
+                          Slide #{index + 1}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-md bg-[#FF5A3C]/15 border border-[#FF5A3C]/30 text-[11px] font-bold text-[#FF5A3C]">
+                          {banner.tag || "Featured Banner"}
+                        </span>
+                      </div>
+
+                      {linkedPkg ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-semibold text-emerald-300 max-w-[200px] truncate">
+                          <Package className="w-3 h-3 shrink-0 text-emerald-400" />
+                          <span className="truncate">{linkedPkg.title}</span>
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-slate-500 font-medium">Custom Banner</span>
+                      )}
+                    </div>
+
+                    {/* Banner Image Preview Container */}
+                    <div className="relative h-44 sm:h-48 w-full rounded-xl overflow-hidden bg-slate-900 border border-white/10 mb-4 group">
+                      <Image
+                        src={banner.image || "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800&auto=format&fit=crop"}
+                        alt={banner.title || `Banner ${index + 1}`}
+                        fill
+                        className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                        sizes="(max-width: 768px) 100vw, 500px"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/20" />
+
+                      {/* Tag Pill */}
+                      <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-[#FF5A3C] text-white text-[11px] font-bold shadow">
+                        {banner.tag || "Featured Offer"}
+                      </div>
+
+                      {/* Overlay Title */}
+                      <div className="absolute bottom-2.5 left-2.5 right-2.5 text-left">
+                        <p className="text-[10px] text-slate-300 font-medium">Spotlight Tour</p>
+                        <h4 className="text-sm font-bold text-white drop-shadow line-clamp-1">
+                          {banner.title}
+                        </h4>
+                      </div>
+                    </div>
+
+                    {/* Banner Text Details */}
+                    <div className="space-y-2 mb-4 text-left">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold text-amber-400">
+                          ⭐ {banner.badge || "Summer Best Offer"}
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-bold text-white line-clamp-1">
+                        {banner.title}
+                      </h4>
+                      <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                        {banner.subtitle || "Comprehensive itinerary with luxury stays, sightseeing and transfers."}
+                      </p>
+                    </div>
+
+                    {/* Bottom CTA & Trip Planner Preview */}
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/10 mb-4 text-left">
+                      <div className="flex items-center justify-between text-[11px] font-medium mb-1.5">
+                        <span className="flex items-center gap-1 text-slate-300">
+                          <MapPin className="w-3 h-3 text-[#FF5A3C]" />
+                          <span>{banner.locationText || "Goa Package Special"}</span>
+                        </span>
+                        <span className="text-emerald-400 font-semibold">
+                          {banner.availabilityText || "Available 24x7"}
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#FF5A3C]/20 border border-[#FF5A3C]/40 text-[#FF8E79] text-xs font-semibold">
+                        <span className="truncate">{banner.buttonText || "View Package Offer"}</span>
+                        <ArrowRight className="w-3.5 h-3.5 shrink-0 ml-1" />
+                      </div>
+                    </div>
+
+                    {/* Interactive Dropdown & Change Button */}
+                    <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                      {/* Quick Package Selector Dropdown */}
+                      <div className="flex-1 min-w-0">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 text-left">
+                          Select Package:
+                        </label>
+                        <select
+                          value={banner.packageId || ""}
+                          onChange={(e) => handleQuickAssignPackageToBanner(index, e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-[#0F172A] border border-white/15 text-xs text-white focus:outline-none focus:border-[#FF5A3C] cursor-pointer"
+                        >
+                          <option value="">-- Choose from All Packages --</option>
+                          {packages.map((pkg) => (
+                            <option key={pkg.id} value={pkg.id}>
+                              [{pkg.state}] {pkg.title} ({pkg.duration} - ₹{pkg.discountedPrice || pkg.originalPrice})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Customize / Edit Button */}
+                      <div className="sm:self-end">
+                        <button
+                          type="button"
+                          onClick={() => handleEditBanner(banner, index)}
+                          className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] hover:from-[#ff6b50] hover:to-[#ea5235] text-white text-xs font-bold shadow-md shadow-[#FF5A3C]/30 transition-all cursor-pointer"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                          <span>Change Banner</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* TAB: SERVICES & 3 SHOWCASE PHOTOS MANAGEMENT */}
         {activeTab === "services" && (
+
           <div className="space-y-6">
             {/* Top Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -4586,6 +4977,239 @@ export default function AdminPage() {
                       className="px-6 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition-all cursor-pointer"
                     >
                       Confirm Cancellation & Deduct Amount
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>,
+            document.body
+          )}
+
+        {/* Modal for Editing / Changing Hero Banner */}
+        {mounted && isBannerModalOpen && typeof document !== "undefined" &&
+          createPortal(
+            <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+              <div
+                className="relative w-full max-w-3xl rounded-3xl bg-[#0B1124] border border-white/15 p-6 sm:p-7 shadow-2xl text-left my-8 max-h-[90vh] overflow-y-auto"
+                role="dialog"
+                aria-modal="true"
+              >
+                {/* Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black text-white font-['Outfit']">
+                        Customize Banner #{editingBannerIndex + 1}
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        Update slide image, text, tags, and link to package catalog
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsBannerModalOpen(false)}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleSaveBanner} className="space-y-5">
+                  {/* Highlighted Package Dropdown Auto-Fill Box */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-[#FF5A3C]/10 via-[#FF6C4B]/5 to-transparent border border-[#FF5A3C]/30 space-y-2">
+                    <label className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-wider">
+                      <Package className="w-4 h-4 text-[#FF5A3C]" />
+                      <span>Auto-Populate From Package:</span>
+                    </label>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      Select any tour package below to automatically fill the Title, Subtitle, Image URL, Tag, Badge, and Link:
+                    </p>
+                    <select
+                      value={bannerFormData.packageId || ""}
+                      onChange={(e) => handleSelectPackageForBanner(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#070B18] border border-[#FF5A3C]/50 text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#FF5A3C] shadow-inner cursor-pointer"
+                    >
+                      <option value="">-- Select a Tour Package to Auto-Fill --</option>
+                      {packages.map((pkg) => (
+                        <option key={pkg.id} value={pkg.id}>
+                          [{pkg.state}] {pkg.title} ({pkg.duration} • ₹{pkg.discountedPrice || pkg.originalPrice})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* 2 Column Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Banner Title */}
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-300 mb-1">
+                        Banner Headline / Title *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={bannerFormData.title || ""}
+                        onChange={(e) => setBannerFormData({ ...bannerFormData, title: e.target.value })}
+                        placeholder="e.g. Hotel Small Daddy Plus Signature Package"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#FF5A3C]"
+                      />
+                    </div>
+
+                    {/* Banner Subtitle / Description */}
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-300 mb-1">
+                        Subtitle / Short Description
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={bannerFormData.subtitle || ""}
+                        onChange={(e) => setBannerFormData({ ...bannerFormData, subtitle: e.target.value })}
+                        placeholder="e.g. 4N/5D Summer Best Offer: Dinner Cruise, Adventure Boat Party & Spa."
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#FF5A3C]"
+                      />
+                    </div>
+
+                    {/* Tag Pill (on image) */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">
+                        Card Tag Pill (Overlay on Image)
+                      </label>
+                      <input
+                        type="text"
+                        value={bannerFormData.tag || ""}
+                        onChange={(e) => setBannerFormData({ ...bannerFormData, tag: e.target.value })}
+                        placeholder="e.g. Summer Best Offer / Adventure & Thrill"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#FF5A3C]"
+                      />
+                    </div>
+
+                    {/* Top Text Badge */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">
+                        Top Badge Pill (Above Headline)
+                      </label>
+                      <input
+                        type="text"
+                        value={bannerFormData.badge || ""}
+                        onChange={(e) => setBannerFormData({ ...bannerFormData, badge: e.target.value })}
+                        placeholder="e.g. Summer Best Offer: ₹2,499 / Day"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#FF5A3C]"
+                      />
+                    </div>
+
+                    {/* Image URL */}
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-bold text-slate-300 mb-1">
+                        Banner Cover Image URL *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={bannerFormData.image || ""}
+                        onChange={(e) => setBannerFormData({ ...bannerFormData, image: e.target.value })}
+                        placeholder="https://images.unsplash.com/..."
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#FF5A3C]"
+                      />
+                      {bannerFormData.image && (
+                        <div className="mt-2 relative h-32 w-full rounded-xl overflow-hidden bg-slate-900 border border-white/10">
+                          <Image
+                            src={bannerFormData.image}
+                            alt="Banner Preview"
+                            fill
+                            className="object-cover object-center"
+                            sizes="600px"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Button Text */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">
+                        CTA Button Text
+                      </label>
+                      <input
+                        type="text"
+                        value={bannerFormData.buttonText || ""}
+                        onChange={(e) => setBannerFormData({ ...bannerFormData, buttonText: e.target.value })}
+                        placeholder="e.g. View 4N/5D Summer Offer (₹2,499/Day)"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#FF5A3C]"
+                      />
+                    </div>
+
+                    {/* Button Link */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">
+                        CTA Target URL / Link
+                      </label>
+                      <input
+                        type="text"
+                        value={bannerFormData.buttonLink || ""}
+                        onChange={(e) => setBannerFormData({ ...bannerFormData, buttonLink: e.target.value })}
+                        placeholder="e.g. /packages/pkg-sdp-4n5d-spa or /#contact"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#FF5A3C]"
+                      />
+                    </div>
+
+                    {/* Location Special Tag */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">
+                        Bottom Location Label
+                      </label>
+                      <input
+                        type="text"
+                        value={bannerFormData.locationText || ""}
+                        onChange={(e) => setBannerFormData({ ...bannerFormData, locationText: e.target.value })}
+                        placeholder="e.g. Goa Package Special"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#FF5A3C]"
+                      />
+                    </div>
+
+                    {/* Availability Text */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">
+                        Availability Status
+                      </label>
+                      <input
+                        type="text"
+                        value={bannerFormData.availabilityText || ""}
+                        onChange={(e) => setBannerFormData({ ...bannerFormData, availabilityText: e.target.value })}
+                        placeholder="e.g. Available 24x7"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-[#FF5A3C]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsBannerModalOpen(false)}
+                      className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-xs font-semibold border border-white/10 transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSavingBanner}
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] hover:from-[#ff6b50] hover:to-[#ea5235] text-white text-xs font-bold shadow-lg shadow-[#FF5A3C]/30 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {isSavingBanner ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Saving Banner...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-3.5 h-3.5" />
+                          <span>Save Banner Changes</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>

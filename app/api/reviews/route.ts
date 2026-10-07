@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { db, schema } from "@/lib/db";
 import { initialGoaReviews } from "@/lib/initialData";
 import { Review } from "@/lib/types";
 import { ADMIN_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
+import { eq } from "drizzle-orm";
 
-// In-memory reviews store as fallback
 let inMemoryReviews: Review[] = [...initialGoaReviews];
 
 function rowToReview(row: any): Review {
@@ -15,56 +15,28 @@ function rowToReview(row: any): Review {
     rating: Number(row.rating) || 5,
     experience: row.experience || "Excellent",
     category: row.category === "hotel" ? "hotel" : "package",
-    targetName: row.target_name || "Goa Tour Package",
+    targetName: row.targetName || row.target_name || "Goa Tour Package",
     comment: row.comment,
-    createdAt: row.created_at ? new Date(row.created_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+    createdAt: row.createdAt || new Date().toISOString().slice(0, 10),
     verified: row.verified ?? true,
   };
 }
 
-function reviewToRow(rev: Review): any {
-  return {
-    id: rev.id,
-    name: rev.name,
-    location: rev.location,
-    rating: rev.rating,
-    experience: rev.experience,
-    category: rev.category,
-    target_name: rev.targetName,
-    comment: rev.comment,
-    verified: rev.verified ?? true,
-    created_at: new Date().toISOString(),
-  };
-}
-
-// GET: Retrieve all reviews
 export async function GET() {
-  try {
-    const supabase = getSupabaseServerClient();
-    if (supabase) {
-      const { data, error } = await supabase
-        .from("reviews")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && data && data.length > 0) {
-        return NextResponse.json({
-          reviews: data.map(rowToReview),
-          source: "database",
-        });
+  if (db) {
+    try {
+      const dbReviews = await db.select().from(schema.reviews);
+      if (dbReviews && dbReviews.length > 0) {
+        return NextResponse.json({ reviews: dbReviews.map(rowToReview), source: "database" });
       }
+    } catch (err) {
+      console.warn("Drizzle reviews fetch error:", err);
     }
-  } catch (err) {
-    console.warn("Could not query Supabase reviews table, using fallback:", err);
   }
 
-  return NextResponse.json({
-    reviews: inMemoryReviews,
-    source: "fallback",
-  });
+  return NextResponse.json({ reviews: inMemoryReviews, source: "fallback" });
 }
 
-// POST: Submit a new review
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -79,21 +51,14 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!name || typeof name !== "string" || !name.trim()) {
-      return NextResponse.json(
-        { error: "Your name is required." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Your name is required." }, { status: 400 });
     }
 
     if (!comment || typeof comment !== "string" || !comment.trim()) {
-      return NextResponse.json(
-        { error: "Review comment is required." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Review comment is required." }, { status: 400 });
     }
 
     const numericRating = Math.max(1, Math.min(5, Number(rating) || 5));
-
     const newReview: Review = {
       id: `rev-${Date.now()}`,
       name: name.trim(),
@@ -107,91 +72,60 @@ export async function POST(request: NextRequest) {
       verified: true,
     };
 
-    // Try inserting into Supabase
-    try {
-      const supabase = getSupabaseServerClient();
-      if (supabase) {
-        const { error } = await supabase
-          .from("reviews")
-          .insert([reviewToRow(newReview)]);
-
-        if (error) {
-          console.warn("Supabase review insert failed, using memory:", error.message);
-        }
+    if (db) {
+      try {
+        await db.insert(schema.reviews).values({
+          id: newReview.id,
+          name: newReview.name,
+          location: newReview.location,
+          rating: newReview.rating,
+          experience: newReview.experience,
+          category: newReview.category,
+          targetName: newReview.targetName,
+          comment: newReview.comment,
+          createdAt: newReview.createdAt,
+          verified: newReview.verified,
+        });
+      } catch (err) {
+        console.warn("Drizzle insert review error:", err);
       }
-    } catch (e) {
-      console.warn("Supabase review insert error:", e);
     }
 
-    // Always keep in-memory up to date
     inMemoryReviews = [newReview, ...inMemoryReviews];
-
-    return NextResponse.json({
-      success: true,
-      review: newReview,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to process review submission." },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, review: newReview });
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message || "Failed to process review submission." }, { status: 500 });
   }
 }
 
-// DELETE: Authenticated admin removal of a review
 export async function DELETE(request: NextRequest) {
   try {
     const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
     const session = token ? await verifySessionToken(token) : null;
 
     if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized: Admin session required." },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized: Admin session required." }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json(
-        { error: "Review ID parameter 'id' is required." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Review ID parameter 'id' is required." }, { status: 400 });
     }
 
-    // 1. Delete from Supabase
-    try {
-      const supabase = getSupabaseServerClient();
-      if (supabase) {
-        const { error } = await supabase
-          .from("reviews")
-          .delete()
-          .eq("id", id);
-
-        if (error) {
-          console.error("Supabase review delete error:", error.message);
-        }
+    if (db) {
+      try {
+        await db.delete(schema.reviews).where(eq(schema.reviews.id, id));
+      } catch (err) {
+        console.error("Drizzle delete review error:", err);
       }
-    } catch (e) {
-      console.warn("Supabase delete review error:", e);
     }
 
-    // 2. Remove from server memory fallback
     inMemoryReviews = inMemoryReviews.filter((r) => r.id !== id);
-
-    return NextResponse.json({
-      success: true,
-      id,
-      message: "Review deleted successfully.",
-    });
-  } catch (error) {
+    return NextResponse.json({ success: true, id, message: "Review deleted successfully." });
+  } catch (error: any) {
     console.error("Delete review error:", error);
-    return NextResponse.json(
-      { error: "Failed to delete review." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error?.message || "Failed to delete review." }, { status: 500 });
   }
 }
-

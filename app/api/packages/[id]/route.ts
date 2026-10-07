@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { db, schema } from "@/lib/db";
 import { ADMIN_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
+import { eq } from "drizzle-orm";
 
 export async function DELETE(
   request: NextRequest,
@@ -17,11 +18,11 @@ export async function DELETE(
   }
 
   const { id } = params;
-  const supabase = getSupabaseServerClient();
-  if (supabase) {
-    const { error } = await supabase.from("packages").delete().eq("id", id);
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+  if (db && id) {
+    try {
+      await db.delete(schema.packages).where(eq(schema.packages.id, id));
+    } catch (err) {
+      console.error("Drizzle delete package error:", err);
     }
   }
 

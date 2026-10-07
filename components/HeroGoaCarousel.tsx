@@ -12,25 +12,38 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { goaCarouselSlides } from "@/lib/initialData";
-import { getStoredHeroBanners } from "@/lib/storage";
-import { HeroBannerSlide } from "@/lib/types";
+import { getStoredHeroBanners, getStoredPackages } from "@/lib/storage";
+import { HeroBannerSlide, CuratedPackage } from "@/lib/types";
 
 export const HeroGoaCarousel: React.FC = () => {
   const [slides, setSlides] = useState<HeroBannerSlide[]>(goaCarouselSlides);
+  const [allPackages, setAllPackages] = useState<CuratedPackage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  // Load banners on mount and listen to real-time updates from admin
+  // Load banners and packages on mount and listen to real-time updates from admin
   useEffect(() => {
-    // 1. Initial local load
+    const storedPkgs = getStoredPackages();
+    if (storedPkgs && storedPkgs.length > 0) {
+      setAllPackages(storedPkgs);
+    }
+
     const stored = getStoredHeroBanners();
     if (stored && stored.length > 0) {
       setSlides(stored);
     }
 
-    // 2. Fetch from API with local fallback
+    fetch("/api/packages")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.packages && Array.isArray(data.packages) && data.packages.length > 0) {
+          setAllPackages(data.packages);
+        }
+      })
+      .catch(() => {});
+
     fetch("/api/banners")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -40,7 +53,6 @@ export const HeroGoaCarousel: React.FC = () => {
       })
       .catch(() => {});
 
-    // 3. Listen to live updates from admin across tabs and in-page
     const handleBannersUpdate = (e: CustomEvent<HeroBannerSlide[]>) => {
       if (e.detail && Array.isArray(e.detail) && e.detail.length > 0) {
         setSlides(e.detail);
@@ -52,6 +64,9 @@ export const HeroGoaCarousel: React.FC = () => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "wmt_hero_banners_v1") {
         setSlides(getStoredHeroBanners());
+      }
+      if (e.key === "r_travel_curated_packages_v3") {
+        setAllPackages(getStoredPackages());
       }
     };
 
@@ -103,6 +118,18 @@ export const HeroGoaCarousel: React.FC = () => {
 
   const activeSlide: HeroBannerSlide = slides[currentIndex] || slides[0] || goaCarouselSlides[0];
 
+  // Resolve target package link dynamically so clicking never leads to Itinerary Not Found
+  const matchedPackage =
+    allPackages.find((p) => p.id === activeSlide.packageId) ||
+    allPackages[currentIndex % (allPackages.length || 1)] ||
+    allPackages[0];
+
+  const resolvedPackageLink = matchedPackage
+    ? `/packages/${matchedPackage.id}`
+    : activeSlide.buttonLink && activeSlide.buttonLink.startsWith("/packages/")
+    ? activeSlide.buttonLink
+    : "/#curated";
+
   return (
     <section
       id="home"
@@ -148,7 +175,7 @@ export const HeroGoaCarousel: React.FC = () => {
             <div>
               {/* Main Catchy Heading */}
               <h1 className="text-2xl sm:text-3xl md:text-3xl lg:text-[40px] xl:text-[46px] font-extrabold tracking-tight text-slate-900 dark:text-white font-['Outfit'] leading-[1.18] lg:leading-[1.16]">
-                Discover Goa & Beyond with <br />
+                Discover Goa &amp; Beyond with <br />
                 <span className="text-gradient-coral">Watch My Trip Package</span>
               </h1>
 
@@ -167,10 +194,10 @@ export const HeroGoaCarousel: React.FC = () => {
                 </div>
 
                 <h2 className="text-base sm:text-lg md:text-lg lg:text-xl font-bold text-slate-900 dark:text-white mb-1.5 sm:mb-2">
-                  {activeSlide.title}
+                  {matchedPackage ? matchedPackage.title : activeSlide.title}
                 </h2>
                 <p className="text-xs sm:text-sm md:text-xs lg:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {activeSlide.subtitle} We arrange complete domestic & international airfares, luxury stays, railway tickets, and personalized itineraries from Mehsana, Gujarat to worldwide destinations.
+                  {matchedPackage ? matchedPackage.subtitle : activeSlide.subtitle} We arrange complete domestic &amp; international airfares, luxury stays, railway tickets, and personalized itineraries from Mehsana, Gujarat to worldwide destinations.
                 </p>
               </div>
 
@@ -237,8 +264,8 @@ export const HeroGoaCarousel: React.FC = () => {
 
               {/* 3D Glass Container */}
               <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-white/20 bg-white/95 dark:bg-[#0C142E]/80 backdrop-blur-2xl shadow-xl dark:shadow-2xl p-3.5 sm:p-4">
-                {/* Active Image Container with Robust Crossfade */}
-                <div className="relative h-56 sm:h-64 md:h-52 lg:h-72 w-full rounded-xl overflow-hidden bg-slate-900">
+                {/* Active Image Container with Robust Crossfade - Clickable Link */}
+                <Link href={resolvedPackageLink} className="block relative h-56 sm:h-64 md:h-52 lg:h-72 w-full rounded-xl overflow-hidden bg-slate-900 group cursor-pointer">
                   {slides.map((slide, idx) => (
                     <div
                       key={slide.id || idx}
@@ -251,7 +278,7 @@ export const HeroGoaCarousel: React.FC = () => {
                         alt={slide.title}
                         fill
                         priority={idx === 0}
-                        className="object-cover object-center"
+                        className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 500px"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/20" />
@@ -264,13 +291,13 @@ export const HeroGoaCarousel: React.FC = () => {
                       {/* Title on image */}
                       <div className="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-3 sm:left-3 sm:right-3 text-left">
                         <p className="text-[10px] sm:text-xs font-medium text-slate-300">Spotlight Tour</p>
-                        <h3 className="text-sm sm:text-base font-bold text-white drop-shadow line-clamp-1">
-                          {slide.title}
+                        <h3 className="text-sm sm:text-base font-bold text-white drop-shadow line-clamp-1 group-hover:text-[#FF5A3C] transition-colors">
+                          {matchedPackage ? matchedPackage.title : slide.title}
                         </h3>
                       </div>
                     </div>
                   ))}
-                </div>
+                </Link>
 
                 {/* Carousel Navigation Controls & Thumbnails */}
                 <div className="mt-3 sm:mt-4 flex items-center justify-between">
@@ -320,11 +347,13 @@ export const HeroGoaCarousel: React.FC = () => {
                     </span>
                   </div>
                   <Link
-                    href={activeSlide.buttonLink || (activeSlide.packageId ? `/packages/${activeSlide.packageId}` : "/packages/pkg-sdp-4n5d-spa")}
-                    className="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 rounded-lg bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-semibold text-[11px] sm:text-xs tracking-wide shadow hover:brightness-110 active:scale-[0.99] transition-all"
+                    href={resolvedPackageLink}
+                    className="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 rounded-lg bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-semibold text-[11px] sm:text-xs tracking-wide shadow hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer"
                   >
                     <span className="truncate">
-                      {activeSlide.buttonText || (activeSlide.price ? `View Offer (${activeSlide.price})` : "View Summer Offer (₹2,499/Day)")}
+                      {matchedPackage
+                        ? `View Tour Package (${matchedPackage.duration})`
+                        : activeSlide.buttonText || "View Package Offer"}
                     </span>
                     <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                   </Link>

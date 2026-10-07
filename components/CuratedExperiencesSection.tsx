@@ -51,7 +51,7 @@ export const CuratedExperiencesSection: React.FC = () => {
     fetch("/api/packages")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.isSupabaseActive && data?.packages && data.packages.length > 0) {
+        if (data?.packages && Array.isArray(data.packages) && data.packages.length > 0) {
           setPackages(data.packages);
         }
       })

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { db, schema } from "@/lib/db";
 import { ADMIN_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
+import { eq } from "drizzle-orm";
 
 export async function PATCH(
   request: NextRequest,
@@ -10,33 +11,26 @@ export async function PATCH(
   const session = token ? await verifySessionToken(token) : null;
 
   if (!session) {
-    return NextResponse.json(
-      { error: "Unauthorized: Admin session required." },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized: Admin session required." }, { status: 401 });
   }
 
   const { id } = params;
   const body = await request.json();
   const updateData: any = {};
   if (body.status !== undefined) updateData.status = body.status;
-  if (body.bookingAmount !== undefined) updateData.booking_amount = body.bookingAmount;
-  if (body.paymentMode !== undefined) updateData.payment_mode = body.paymentMode;
-  if (body.paymentReference !== undefined) updateData.payment_reference = body.paymentReference;
-  if (body.bookingDate !== undefined) updateData.booking_date = body.bookingDate;
-  if (body.cancellationReason !== undefined) updateData.cancellation_reason = body.cancellationReason;
-  if (body.cancelledAt !== undefined) updateData.cancelled_at = body.cancelledAt;
-  if (body.refundAmount !== undefined) updateData.refund_amount = body.refundAmount;
+  if (body.bookingAmount !== undefined) updateData.bookingAmount = body.bookingAmount;
+  if (body.paymentMode !== undefined) updateData.paymentMode = body.paymentMode;
+  if (body.paymentReference !== undefined) updateData.paymentReference = body.paymentReference;
+  if (body.bookingDate !== undefined) updateData.bookingDate = body.bookingDate;
+  if (body.cancellationReason !== undefined) updateData.cancellationReason = body.cancellationReason;
+  if (body.cancelledAt !== undefined) updateData.cancelledAt = body.cancelledAt;
+  if (body.refundAmount !== undefined) updateData.refundAmount = body.refundAmount;
 
-  const supabase = getSupabaseServerClient();
-  if (supabase && Object.keys(updateData).length > 0) {
-    const { error } = await supabase
-      .from("leads")
-      .update(updateData)
-      .eq("id", id);
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+  if (db && id && Object.keys(updateData).length > 0) {
+    try {
+      await db.update(schema.leads).set(updateData).where(eq(schema.leads.id, id));
+    } catch (err) {
+      console.error("Drizzle update lead error:", err);
     }
   }
 
@@ -51,18 +45,15 @@ export async function DELETE(
   const session = token ? await verifySessionToken(token) : null;
 
   if (!session) {
-    return NextResponse.json(
-      { error: "Unauthorized: Admin session required." },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized: Admin session required." }, { status: 401 });
   }
 
   const { id } = params;
-  const supabase = getSupabaseServerClient();
-  if (supabase) {
-    const { error } = await supabase.from("leads").delete().eq("id", id);
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+  if (db && id) {
+    try {
+      await db.delete(schema.leads).where(eq(schema.leads.id, id));
+    } catch (err) {
+      console.error("Drizzle delete lead error:", err);
     }
   }
 

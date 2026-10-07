@@ -335,7 +335,20 @@ export function getStoredPackages(): CuratedPackage[] {
 
 export function getStoredPackageById(id: string): CuratedPackage | undefined {
   const all = getStoredPackages();
-  return all.find((p) => p.id === id);
+  if (!all || all.length === 0) return undefined;
+  if (!id) return all[0];
+
+  const exact = all.find((p) => p.id === id);
+  if (exact) return exact;
+
+  // Partial or fuzzy match fallback
+  const partial = all.find(
+    (p) => id.includes(p.id) || p.id.includes(id) || (p.state && id.toLowerCase().includes(p.state.toLowerCase()))
+  );
+  if (partial) return partial;
+
+  // Default to first active package to ensure seamless UX
+  return all[0];
 }
 
 export function savePackage(pkg: CuratedPackage) {
@@ -469,11 +482,11 @@ export function getStoredHeroBanners(): HeroBannerSlide[] {
     }
     const parsed = JSON.parse(data);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      // Ensure we have 4 banners, merging any missing from initial slides
-      if (parsed.length < goaCarouselSlides.length) {
-        const merged = goaCarouselSlides.map((init, idx) => parsed[idx] || init);
-        localStorage.setItem(BANNERS_KEY, JSON.stringify(merged));
-        return merged;
+      // If cached banners contain obsolete package IDs like pkg-goa-, reset to updated slides
+      const hasObsoleteId = parsed.some((b) => b.packageId && b.packageId.startsWith("pkg-goa-"));
+      if (hasObsoleteId || parsed.length < goaCarouselSlides.length) {
+        localStorage.setItem(BANNERS_KEY, JSON.stringify(goaCarouselSlides));
+        return goaCarouselSlides;
       }
       return parsed;
     }

@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { db, schema } from "@/lib/db";
 import { ADMIN_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { initialCuratedPackages } from "@/lib/initialData";
 import { CuratedPackage } from "@/lib/types";
 
-// Helper to convert database row to CuratedPackage
 function rowToPackage(row: any): CuratedPackage {
   return {
     id: row.id,
@@ -13,132 +12,110 @@ function rowToPackage(row: any): CuratedPackage {
     subtitle: row.subtitle || "",
     route: row.route || "",
     duration: row.duration,
-    categoryBadge: row.category_badge || "Holiday Tour",
-    badgeGradient: row.badge_gradient || "from-pink-500 to-rose-500",
+    categoryBadge: row.categoryBadge || "Holiday Tour",
+    badgeGradient: row.badgeGradient || "from-pink-500 to-rose-500",
     image: row.image,
-    flyerImage: row.flyer_image || undefined,
-    galleryImages: row.gallery_images || undefined,
-    originalPrice: row.original_price,
-    discountedPrice: row.discounted_price,
-    savings: row.savings,
+    flyerImage: row.flyerImage || undefined,
+    galleryImages: row.galleryImages || undefined,
+    originalPrice: row.originalPrice,
+    discountedPrice: row.discountedPrice,
+    savings: row.savings || undefined,
     highlights: row.highlights || [],
     itinerary: row.itinerary || [],
     inclusions: row.inclusions || [],
-    detailedInclusions: row.detailed_inclusions || undefined,
+    detailedInclusions: row.detailedInclusions || undefined,
     exclusions: row.exclusions || [],
   };
 }
 
-// Helper to convert CuratedPackage to database row
-function packageToRow(pkg: CuratedPackage): any {
-  return {
-    id: pkg.id,
-    state: pkg.state || "Goa",
-    title: pkg.title,
-    subtitle: pkg.subtitle || null,
-    route: pkg.route || null,
-    duration: pkg.duration,
-    category_badge: pkg.categoryBadge,
-    badge_gradient: pkg.badgeGradient,
-    image: pkg.image,
-    flyer_image: pkg.flyerImage || null,
-    gallery_images: pkg.galleryImages || null,
-    original_price: pkg.originalPrice,
-    discounted_price: pkg.discountedPrice,
-    savings: pkg.savings,
-    highlights: pkg.highlights,
-    itinerary: pkg.itinerary,
-    inclusions: pkg.inclusions,
-    detailed_inclusions: pkg.detailedInclusions || null,
-    exclusions: pkg.exclusions,
-    updated_at: new Date().toISOString(),
-  };
-}
-
-// GET: Public package retrieval (Supabase with fallback & auto-seed)
 export async function GET() {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) {
-    return NextResponse.json({
-      packages: initialCuratedPackages,
-      isSupabaseActive: false,
-    });
+  if (db) {
+    try {
+      const dbPackages = await db.select().from(schema.packages);
+      if (dbPackages && dbPackages.length > 0) {
+        return NextResponse.json({ packages: dbPackages.map(rowToPackage), isDbActive: true });
+      }
+
+      // Auto-seed initial packages into PostgreSQL
+      const rows = initialCuratedPackages.map((p) => ({
+        id: p.id,
+        state: p.state || "Goa",
+        title: p.title,
+        subtitle: p.subtitle || null,
+        route: p.route || null,
+        duration: p.duration,
+        categoryBadge: p.categoryBadge,
+        badgeGradient: p.badgeGradient,
+        image: p.image,
+        flyerImage: p.flyerImage || null,
+        galleryImages: p.galleryImages || null,
+        originalPrice: p.originalPrice,
+        discountedPrice: p.discountedPrice,
+        savings: p.savings || null,
+        highlights: p.highlights,
+        itinerary: p.itinerary,
+        inclusions: p.inclusions,
+        detailedInclusions: p.detailedInclusions || null,
+        exclusions: p.exclusions,
+      }));
+
+      await db.insert(schema.packages).values(rows).onConflictDoNothing();
+      return NextResponse.json({ packages: initialCuratedPackages, isDbActive: true, seeded: true });
+    } catch (err) {
+      console.error("Drizzle fetch packages error:", err);
+    }
   }
 
-  try {
-    const { data, error } = await supabase
-      .from("packages")
-      .select("*")
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      console.error("Supabase fetch packages error:", error);
-      return NextResponse.json({
-        packages: initialCuratedPackages,
-        isSupabaseActive: false,
-      });
-    }
-
-    // Auto-seed if database packages table is empty
-    if (!data || data.length === 0) {
-      const rows = initialCuratedPackages.map(packageToRow);
-      // Batch insert initial packages
-      await supabase.from("packages").insert(rows);
-      return NextResponse.json({
-        packages: initialCuratedPackages,
-        isSupabaseActive: true,
-        seeded: true,
-      });
-    }
-
-    const packages = data.map(rowToPackage);
-    return NextResponse.json({ packages, isSupabaseActive: true });
-  } catch (err) {
-    console.error("Packages GET error:", err);
-    return NextResponse.json({
-      packages: initialCuratedPackages,
-      isSupabaseActive: false,
-    });
-  }
+  return NextResponse.json({ packages: initialCuratedPackages, isDbActive: false });
 }
 
-// POST: Protected admin upsert package
 export async function POST(request: NextRequest) {
   const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
   const session = token ? await verifySessionToken(token) : null;
 
   if (!session) {
-    return NextResponse.json(
-      { error: "Unauthorized: Admin session required." },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized: Admin session required." }, { status: 401 });
   }
 
   try {
     const pkg: CuratedPackage = await request.json();
     if (!pkg.id || !pkg.title || !pkg.discountedPrice) {
-      return NextResponse.json(
-        { error: "Package ID, title, and price are required." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Package ID, title, and price are required." }, { status: 400 });
     }
 
-    const supabase = getSupabaseServerClient();
-    if (supabase) {
-      const row = packageToRow(pkg);
-      const { error } = await supabase.from("packages").upsert(row);
-      if (error) {
-        console.error("Supabase upsert package error:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      }
+    if (db) {
+      const row = {
+        id: pkg.id,
+        state: pkg.state || "Goa",
+        title: pkg.title,
+        subtitle: pkg.subtitle || null,
+        route: pkg.route || null,
+        duration: pkg.duration,
+        categoryBadge: pkg.categoryBadge,
+        badgeGradient: pkg.badgeGradient,
+        image: pkg.image,
+        flyerImage: pkg.flyerImage || null,
+        galleryImages: pkg.galleryImages || null,
+        originalPrice: pkg.originalPrice,
+        discountedPrice: pkg.discountedPrice,
+        savings: pkg.savings || null,
+        highlights: pkg.highlights,
+        itinerary: pkg.itinerary,
+        inclusions: pkg.inclusions,
+        detailedInclusions: pkg.detailedInclusions || null,
+        exclusions: pkg.exclusions,
+        updatedAt: new Date(),
+      };
+
+      await db.insert(schema.packages).values(row).onConflictDoUpdate({
+        target: schema.packages.id,
+        set: row,
+      });
     }
 
     return NextResponse.json({ success: true, package: pkg });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Package save error:", error);
-    return NextResponse.json(
-      { error: "Failed to save package." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error?.message || "Failed to save package." }, { status: 500 });
   }
 }

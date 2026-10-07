@@ -90,6 +90,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminUsername, setAdminUsername] = useState("admin");
   const [isSupabaseSynced, setIsSupabaseSynced] = useState(false);
+  const [isDbActive, setIsDbActive] = useState(false);
 
   // Auto-logout after 30 min inactivity
   const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
@@ -331,29 +332,30 @@ export default function AdminPage() {
         window.location.href = "/admin/login";
       });
 
-    // 2. Load leads from API (Supabase) with local fallback
+    // 2. Load leads from API (Drizzle ORM / Supabase) with local fallback
     const localLeads = getStoredLeads();
     setLeads(localLeads);
     fetch("/api/leads")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.isSupabaseActive && data?.leads && data.leads.length > 0) {
+        if (data?.isDbActive) setIsDbActive(true);
+        if (data?.isSupabaseActive) setIsSupabaseSynced(true);
+        if (data?.leads && data.leads.length > 0) {
           setLeads(data.leads);
-          setIsSupabaseSynced(true);
         }
       })
       .catch(() => {});
 
-    // 3. Load packages: ALWAYS prioritize stored packages to prevent resetting custom edits
+    // 3. Load packages
     const localPackages = getStoredPackages();
     setPackages(localPackages);
     fetch("/api/packages")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.isSupabaseActive && data?.packages && data.packages.length > 0) {
-          // If Supabase has packages, use them
+        if (data?.isDbActive) setIsDbActive(true);
+        if (data?.isSupabaseActive) setIsSupabaseSynced(true);
+        if (data?.packages && data.packages.length > 0) {
           setPackages(data.packages);
-          setIsSupabaseSynced(true);
         }
       })
       .catch(() => {});
@@ -364,9 +366,9 @@ export default function AdminPage() {
     fetch("/api/destinations")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.isSupabaseActive && data?.destinations && data.destinations.length > 0) {
+        if (data?.isDbActive) setIsDbActive(true);
+        if (data?.destinations && data.destinations.length > 0) {
           setDestinations(data.destinations);
-          setIsSupabaseSynced(true);
         }
       })
       .catch(() => {});
@@ -377,9 +379,9 @@ export default function AdminPage() {
     fetch("/api/company-info")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.isSupabaseActive && data?.companyInfo) {
+        if (data?.isDbActive) setIsDbActive(true);
+        if (data?.companyInfo) {
           setCompanyInfo(data.companyInfo);
-          setIsSupabaseSynced(true);
         }
       })
       .catch(() => {});
@@ -409,7 +411,7 @@ export default function AdminPage() {
       })
       .catch(() => {});
 
-    // 7. Load reviews from Supabase API with local fallback
+    // 7. Load reviews with local fallback
     refreshReviews();
 
     // 8. Load hero banners with local fallback
@@ -420,7 +422,7 @@ export default function AdminPage() {
       .then((data) => {
         if (data?.banners && Array.isArray(data.banners) && data.banners.length > 0) {
           setHeroBanners(data.banners);
-          if (data.isSupabaseActive) setIsSupabaseSynced(true);
+          if (data.isDbActive) setIsDbActive(true);
         }
       })
       .catch(() => {});
@@ -1221,6 +1223,21 @@ export default function AdminPage() {
     setTimeout(() => setBannerToast(""), 4000);
   };
 
+  const handleSaveAllBannersClick = async () => {
+    saveAllHeroBanners(heroBanners);
+    try {
+      await fetch("/api/banners", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ banners: heroBanners }),
+      });
+    } catch (err) {
+      console.error("Banner save error:", err);
+    }
+    setBannerToast("Hero Carousel Banners & Packages saved & updated live on website!");
+    setTimeout(() => setBannerToast(""), 4000);
+  };
+
   const handleSaveBanner = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bannerFormData.title?.trim() || !bannerFormData.image?.trim()) {
@@ -1433,10 +1450,27 @@ export default function AdminPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#070B18] flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="w-12 h-12 border-4 border-[#FF5A3C] border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-semibold text-slate-300">Verifying secure admin session...</p>
-          <p className="text-xs text-slate-500">Redirecting to login if unauthenticated.</p>
+        <div className="bg-[#0C142E] border border-white/15 rounded-3xl p-8 max-w-md w-full text-center space-y-4 shadow-2xl">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#FF5A3C] to-[#F59E0B] p-0.5 mx-auto flex items-center justify-center shadow-lg shadow-[#FF5A3C]/30">
+            <div className="w-full h-full bg-[#090E20] rounded-[14px] flex items-center justify-center">
+              <ShieldCheck className="w-7 h-7 text-[#FF5A3C]" />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-xl font-extrabold text-white font-['Outfit']">Admin Portal Authentication</h2>
+            <p className="text-xs text-slate-400 mt-1">
+              Please sign in with your admin credentials to access the management dashboard.
+            </p>
+          </div>
+          <div className="pt-2">
+            <Link
+              href="/admin/login"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-extrabold text-sm shadow-lg shadow-[#FF5A3C]/30 hover:scale-[1.02] transition-all"
+            >
+              <span>Login to Admin Portal</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -1531,13 +1565,22 @@ export default function AdminPage() {
             {/* Database Sync Status */}
             <span
               className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border ${
-                isSupabaseSynced
+                isDbActive
+                  ? "bg-purple-500/15 border-purple-500/30 text-purple-300"
+                  : isSupabaseSynced
                   ? "bg-cyan-500/15 border-cyan-500/30 text-cyan-300"
                   : "bg-white/5 border-white/10 text-slate-400"
               }`}
+              title="AWS RDS PostgreSQL / Drizzle ORM Status"
             >
               <Database className="w-3.5 h-3.5" />
-              <span>{isSupabaseSynced ? "Supabase Live" : "Local Sync"}</span>
+              <span>
+                {isDbActive
+                  ? "Drizzle PostgreSQL Live"
+                  : isSupabaseSynced
+                  ? "Supabase Live"
+                  : "Local / RDS Ready"}
+              </span>
             </span>
 
             <Link
@@ -2228,7 +2271,16 @@ export default function AdminPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleSaveAllBannersClick}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-xs font-extrabold text-white shadow-lg shadow-[#FF5A3C]/30 hover:scale-[1.02] transition-all cursor-pointer"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save Hero Banners</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={handleResetAllBanners}

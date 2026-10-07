@@ -31,12 +31,15 @@ import {
   Download,
   Maximize2,
   AlertTriangle,
+  Users,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getStoredPackageById, getStoredCompanyInfo, saveLead } from "@/lib/storage";
 import { CuratedPackage, CompanyInfo } from "@/lib/types";
-import { getPerDayPrice, getPerDayPriceNumber, calculateTravelersTotal } from "@/lib/pricing";
+import { getPerDayPrice, getPerDayPriceNumber, calculateTravelersTotal, calculateDetailedTourPrice, ChildDetails } from "@/lib/pricing";
+import { useAuth } from "@/context/AuthContext";
+import { BookingSuccessModal, BookingSuccessDetails } from "@/components/BookingSuccessModal";
 
 export default function PackageDetailPage({ params: propParams }: { params?: { id?: string } }) {
   const clientParams = useParams();
@@ -58,24 +61,128 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
     activeIndex: number;
   } | null>(null);
 
-  // Booking / Inquiry Modal State
+  // Booking / Inquiry Modal State & T&C Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTcModalOpen, setIsTcModalOpen] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [paymentOption, setPaymentOption] = useState<"full_online" | "advance_30" | "cod_hotel">("advance_30");
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  const { user, setIsAuthModalOpen } = useAuth();
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [successBookingDetails, setSuccessBookingDetails] = useState<BookingSuccessDetails | null>(null);
+
   const [bookingForm, setBookingForm] = useState({
     fullName: "",
     phone: "",
     email: "",
     travelDate: "",
-    travelersCount: "2",
-    customTravelers: "",
+    adultsCount: "2", // Allowed strictly 2 to 42
     specialRequests: "",
+    agreedToTc: false,
   });
+
+  useEffect(() => {
+    if (user) {
+      setBookingForm((prev) => ({
+        ...prev,
+        fullName: prev.fullName || user.displayName || "",
+        email: prev.email || user.email || "",
+        phone: prev.phone || user.phoneNumber || "",
+      }));
+    }
+  }, [user]);
+
+  const [childrenList, setChildrenList] = useState<ChildDetails[]>([]);
+  const [childAlertMessage, setChildAlertMessage] = useState("");
   const [bookingError, setBookingError] = useState("");
 
-  const numTravelers =
-    bookingForm.travelersCount === "custom"
-      ? Math.max(1, parseInt(bookingForm.customTravelers || "1", 10) || 1)
-      : parseInt(bookingForm.travelersCount || "1", 10);
+  const calculateAgeFromDOB = (dobString: string): number => {
+    if (!dobString) return 0;
+    const birthDate = new Date(dobString);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return Math.max(0, age);
+  };
+
+  const adultCountNum = parseInt(bookingForm.adultsCount || "2", 10);
+  const detailedPricing = calculateDetailedTourPrice(
+    pkg?.discountedPrice || "0",
+    pkg?.duration || "4 Days",
+    adultCountNum,
+    childrenList,
+    2000
+  );
+
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (typeof window === "undefined") return resolve(false);
+      if ((window as any).Razorpay) return resolve(true);
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleAddChild = () => {
+    const totalCurrent = adultCountNum + childrenList.length;
+    if (totalCurrent >= 42) {
+      setBookingError("Maximum group size of 42 total travelers (Adults + Children) reached.");
+      return;
+    }
+    setBookingError("");
+    setChildAlertMessage("");
+    const newChild: ChildDetails = {
+      id: "child-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6),
+      name: `Child ${childrenList.length + 1}`,
+      dob: "",
+      age: 5, // Default child age 5 (under 6)
+      gender: "Not Specified",
+    };
+    setChildrenList([...childrenList, newChild]);
+  };
+
+  const handleUpdateChild = (id: string, field: "name" | "dob" | "age" | "gender", value: any) => {
+    setChildAlertMessage("");
+    if (field === "dob") {
+      const calculatedAge = calculateAgeFromDOB(value);
+      if (calculatedAge > 17) {
+        setChildAlertMessage(
+          `⚠️ Traveler (DOB: ${value}) is calculated as ${calculatedAge} years old. Travelers over 17 years old are considered Adults. Please update your Adult traveler count.`
+        );
+        return;
+      }
+      setChildrenList((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, dob: value, age: calculatedAge } : c))
+      );
+    } else if (field === "age") {
+      const numAge = parseInt(value || "0", 10);
+      if (numAge > 17) {
+        setChildAlertMessage(
+          `⚠️ Age ${numAge} is over 17. Travelers over 17 years old are considered Adults. Please update your Adult traveler count.`
+        );
+        return;
+      }
+      setChildrenList((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, age: numAge } : c))
+      );
+    } else {
+      setChildrenList((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
+      );
+    }
+  };
+
+  const handleRemoveChild = (id: string) => {
+    setChildrenList((prev) => prev.filter((c) => c.id !== id));
+    setChildAlertMessage("");
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -90,8 +197,11 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
         fetch("/api/packages")
           .then((res) => (res.ok ? res.json() : null))
           .then((data) => {
-            if (data?.packages) {
-              const livePkg = data.packages.find((p: CuratedPackage) => p.id === packageId);
+            if (data?.packages && Array.isArray(data.packages) && data.packages.length > 0) {
+              const livePkg =
+                data.packages.find((p: CuratedPackage) => p.id === packageId) ||
+                data.packages.find((p: CuratedPackage) => packageId.includes(p.id) || p.id.includes(packageId)) ||
+                data.packages[0];
               if (livePkg) {
                 setPkg(livePkg);
               }
@@ -156,76 +266,347 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
     }
   };
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
+
+
+  const handleOpenBookingModal = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      setBookingError("You must log in to your account before completing a tour reservation.");
+      setIsAuthModalOpen(true);
+      return;
+    }
     if (!bookingForm.fullName.trim() || !bookingForm.phone.trim()) {
       setBookingError("Please provide your name and contact phone number.");
       return;
     }
-    setBookingError("");
 
-    const calculatedTotal = calculateTravelersTotal(pkg?.discountedPrice || "0", numTravelers);
-    const perDay = getPerDayPrice(pkg?.discountedPrice || "0", pkg?.duration || "4 Days");
-    const perDayNum = getPerDayPriceNumber(pkg?.discountedPrice || "0", pkg?.duration || "4 Days");
-    const groupDaily = (perDayNum * numTravelers).toLocaleString("en-IN");
-
-    const leadPayload = {
-      type: "package" as const,
-      fullName: bookingForm.fullName,
-      phone: bookingForm.phone,
-      email: bookingForm.email,
-      destination: pkg?.state || "Goa",
-      packageName: `${pkg?.title} (${pkg?.duration})`,
-      travelDate: bookingForm.travelDate,
-      travellers: [
-        {
-          name: bookingForm.fullName,
-          age: "30",
-          gender: "Not Specified",
-        },
-      ],
-      specialRequirements: `Travelers: ${numTravelers} ${numTravelers === 1 ? "Person" : "Persons"}. Daily Rate: ₹${groupDaily}/Day (₹${perDay} per person). Total Tour Cost: ₹${calculatedTotal}. Notes: ${bookingForm.specialRequests || "None"}`,
-    };
-
-    saveLead(leadPayload);
-
-    // Asynchronously send to server API for central Supabase storage
-    fetch("/api/leads", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(leadPayload),
-    }).catch((e) => console.error("Supabase lead sync error:", e));
-
-    // Automatically launch WhatsApp with pre-filled booking details
-    const waPhone = companyInfo?.whatsapp || "919588667027";
-    const inquiryWhatsAppText = `*New Booking Request - Watch My Trip Package*%0A%0A*Package:* ${encodeURIComponent(
-      pkg?.title || ""
-    )} (${encodeURIComponent(pkg?.duration || "")})%0A*Total Tour Cost:* ₹${encodeURIComponent(
-      calculatedTotal
-    )} (${numTravelers} ${numTravelers === 1 ? "Person" : "Persons"} @ ₹${encodeURIComponent(
-      pkg?.discountedPrice || ""
-    )}/person)%0A*Daily Rate:* ₹${encodeURIComponent(
-      groupDaily
-    )}/day (${numTravelers} ${numTravelers === 1 ? "Person" : "Persons"} @ ₹${encodeURIComponent(
-      perDay
-    )}/person/day)%0A*Name:* ${encodeURIComponent(bookingForm.fullName)}%0A*Phone:* ${encodeURIComponent(
-      bookingForm.phone
-    )}%0A*Email:* ${encodeURIComponent(
-      bookingForm.email || "N/A"
-    )}%0A*Travel Date:* ${encodeURIComponent(
-      bookingForm.travelDate || "Flexible"
-    )}%0A*Total Travelers:* ${numTravelers}%0A*Special Notes:* ${encodeURIComponent(bookingForm.specialRequests || "None")}`;
-
-    const directWhatsAppUrl = `https://wa.me/${waPhone}?text=${inquiryWhatsAppText}`;
-    if (typeof window !== "undefined") {
-      window.open(directWhatsAppUrl, "_blank");
+    if (detailedPricing.totalOccupants < 2 || detailedPricing.totalOccupants > 42) {
+      setBookingError("Bookings are allowed for 2 to 42 travelers only.");
+      return;
     }
 
-    setFormSubmitted(true);
-    setTimeout(() => {
-      setFormSubmitted(false);
+    const hasInvalidChild = childrenList.some((c) => c.age > 17);
+    if (hasInvalidChild) {
+      setBookingError("One or more children have age > 17. Travelers over 17 years old must be included in Adult count.");
+      return;
+    }
+
+    if (!bookingForm.agreedToTc) {
+      setBookingError("Please accept the Booking Terms & Conditions and Aadhaar verification agreement.");
+      return;
+    }
+
+    setBookingError("");
+
+    const travellersList = [
+      ...Array.from({ length: adultCountNum }, (_, i) => ({
+        name: i === 0 ? bookingForm.fullName : `Adult Traveler ${i + 1}`,
+        age: "Adult (18+)",
+        gender: "Not Specified",
+      })),
+      ...childrenList.map((c, i) => ({
+        name: c.name || `Child ${i + 1}`,
+        age: c.dob ? `${c.age} Yrs (DOB: ${c.dob})` : `${c.age} Yrs`,
+        gender: c.gender || "Child",
+      })),
+    ];
+
+    const childBreakdownText = childrenList.length > 0
+      ? childrenList
+        .map((c) =>
+          c.age <= 6
+            ? `${c.name || "Child"} (Age ${c.age} - FREE)`
+            : `${c.name || "Child"} (Age ${c.age} - ₹${detailedPricing.childUnitPrice.toLocaleString("en-IN")}, Room Rent Waived: -₹${detailedPricing.childDeductionPerChild.toLocaleString("en-IN")})`
+        )
+        .join("; ")
+      : "None";
+
+    let payableNow = detailedPricing.totalPackageCost;
+    let paymentLabel = "100% Full Online Payment";
+    if (paymentOption === "advance_30") {
+      payableNow = Math.round(detailedPricing.totalPackageCost * 0.3);
+      paymentLabel = "30% Advance Deposit Online";
+    } else if (paymentOption === "cod_hotel") {
+      payableNow = 0;
+      paymentLabel = "Full Pay at Hotel (COD)";
+    }
+
+    const balancePayable = detailedPricing.totalPackageCost - payableNow;
+
+    // IF COD / Pay at Hotel:
+    if (paymentOption === "cod_hotel") {
+      const leadPayload = {
+        type: "package" as const,
+        fullName: bookingForm.fullName,
+        phone: bookingForm.phone,
+        email: bookingForm.email,
+        destination: pkg?.state || "Goa",
+        packageName: `${pkg?.title} (${pkg?.duration})`,
+        travelDate: bookingForm.travelDate,
+        travellers: travellersList,
+        status: "New" as const,
+        bookingAmount: 0,
+        paymentMode: "cash" as const,
+        serviceDetails: {
+          "Selected Payment Option": "Full Pay at Hotel / COD (100% Cash at Check-in)",
+          "Amount Paid Online Now": "₹0",
+          "Balance Payable at Hotel Desk": `₹${detailedPricing.totalPackageCost.toLocaleString("en-IN")}`,
+          "Adult Travelers": `${adultCountNum} Adults (@ ₹${pkg?.discountedPrice}/person)`,
+          "Child Travelers": `${childrenList.length} Children (${detailedPricing.childrenUnder6Count} under 6 yrs, ${detailedPricing.children7To17Count} aged 7-17 yrs)`,
+          "Total Party Size": `${detailedPricing.totalOccupants} Persons`,
+          "Child Breakdown & Pricing": childBreakdownText,
+          "Total Tour Package Cost": `₹${detailedPricing.totalPackageCost.toLocaleString("en-IN")}`,
+          "Aadhaar Verification T&C Agreed": "YES (Agreed to carry original Aadhaar ID at check-in)",
+        },
+        specialRequirements: `Payment: Full Pay at Hotel (COD). Party Size: ${detailedPricing.totalOccupants} Travelers (${adultCountNum} Adults, ${childrenList.length} Children). FINAL TOTAL COST: ₹${detailedPricing.totalPackageCost.toLocaleString("en-IN")}. Notes: ${bookingForm.specialRequests || "None"}. Aadhaar T&C Agreed: YES.`,
+      };
+
+      saveLead(leadPayload);
+      fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(leadPayload),
+      }).catch((e) => console.error("Supabase lead sync error:", e));
+
+      // WhatsApp URL
+      const waPhone = companyInfo?.whatsapp || "919588667027";
+      const inquiryWhatsAppText = `*New Booking Request (Pay at Hotel COD) - Watch My Trip Package*%0A%0A` +
+        `*Package:* ${encodeURIComponent(pkg?.title || "")} (${encodeURIComponent(pkg?.duration || "")})%0A` +
+        `*Name:* ${encodeURIComponent(bookingForm.fullName)}%0A` +
+        `*Phone:* ${encodeURIComponent(bookingForm.phone)}%0A` +
+        `*Travel Date:* ${encodeURIComponent(bookingForm.travelDate || "Flexible")}%0A%0A` +
+        `*PAYMENT CHOICE:* Full Pay at Hotel / COD (100% Cash at Check-in)%0A` +
+        `*Paid Now Online:* ₹0%0A` +
+        `*Payable at Hotel Desk:* ₹${encodeURIComponent(detailedPricing.totalPackageCost.toLocaleString("en-IN"))}%0A%0A` +
+        `*TRAVELERS & BREAKDOWN:*%0A` +
+        `• *Adults:* ${adultCountNum} @ ₹${pkg?.discountedPrice} = ₹${detailedPricing.adultTotal.toLocaleString("en-IN")}%0A` +
+        `• *Children (<=6 yrs):* ${detailedPricing.childrenUnder6Count} (FREE)%0A` +
+        `• *Children (7-17 yrs):* ${detailedPricing.children7To17Count} @ ₹${detailedPricing.childUnitPrice.toLocaleString("en-IN")} (Room Rent Waived)%0A` +
+        `• *Total Party Size:* ${detailedPricing.totalOccupants} Persons%0A%0A` +
+        `*TOTAL TOUR PACKAGE COST:* ₹${encodeURIComponent(detailedPricing.totalPackageCost.toLocaleString("en-IN"))}%0A%0A` +
+        `*Aadhaar Verification T&C:* Agreed to present original Aadhaar cards at check-in.%0A` +
+        `*Notes:* ${encodeURIComponent(bookingForm.specialRequests || "None")}`;
+
+      if (typeof window !== "undefined") {
+        window.open(`https://wa.me/${waPhone}?text=${inquiryWhatsAppText}`, "_blank");
+      }
+
+      const newBookingRecord = {
+        id: `BK-${Math.floor(100000 + Math.random() * 900000)}`,
+        userId: user?.uid || "guest",
+        packageId: pkg?.id || packageId,
+        packageTitle: pkg?.title || "Curated Tour Package",
+        destinationName: pkg?.state || "Goa, India",
+        travelerCount: adultCountNum,
+        childCount: childrenList.length,
+        travelDate: bookingForm.travelDate || "Flexible",
+        paymentMode: "cod" as const,
+        totalCost: detailedPricing.totalPackageCost,
+        amountPaidNow: 0,
+        remainingAmount: detailedPricing.totalPackageCost,
+        status: "confirmed" as const,
+        createdAt: new Date().toISOString(),
+        customerName: bookingForm.fullName,
+        customerPhone: bookingForm.phone,
+      };
+
+      if (typeof window !== "undefined") {
+        const prev = JSON.parse(localStorage.getItem("my_travel_bookings") || "[]");
+        localStorage.setItem("my_travel_bookings", JSON.stringify([newBookingRecord, ...prev]));
+      }
+
+      setSuccessBookingDetails({
+        bookingId: newBookingRecord.id,
+        packageTitle: newBookingRecord.packageTitle,
+        destinationName: newBookingRecord.destinationName,
+        travelerCount: newBookingRecord.travelerCount,
+        childCount: newBookingRecord.childCount,
+        travelDate: newBookingRecord.travelDate,
+        paymentMode: newBookingRecord.paymentMode,
+        totalCost: newBookingRecord.totalCost,
+        amountPaidNow: newBookingRecord.amountPaidNow,
+        remainingAmount: newBookingRecord.remainingAmount,
+        customerName: newBookingRecord.customerName,
+        customerPhone: newBookingRecord.customerPhone,
+      });
+      setSuccessModalOpen(true);
       setIsModalOpen(false);
-    }, 3000);
+      return;
+    }
+
+    // IF ONLINE PAYMENT (100% or 30%):
+    setIsProcessingPayment(true);
+    try {
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        setBookingError("Razorpay SDK failed to load. Please check your internet connection and try again.");
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      const res = await fetch("/api/create-razorpay-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: payableNow,
+          currency: "INR",
+          receipt: `rcpt_${Date.now()}`,
+        }),
+      });
+
+      const orderData = await res.json();
+      if (!res.ok || !orderData.orderId) {
+        throw new Error(orderData.error || "Could not generate Razorpay payment order.");
+      }
+
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "WATCH MY TRIP PACKAGE",
+        description: `${pkg?.title} (${paymentLabel})`,
+        order_id: orderData.orderId,
+        prefill: {
+          name: bookingForm.fullName,
+          contact: bookingForm.phone,
+          email: bookingForm.email,
+        },
+        theme: {
+          color: "#FF5A3C",
+        },
+        handler: async function (response: any) {
+          // Verify payment signature
+          try {
+            await fetch("/api/verify-razorpay-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response),
+            });
+          } catch (e) {
+            console.error("Signature verification error:", e);
+          }
+
+          const leadPayload = {
+            type: "package" as const,
+            fullName: bookingForm.fullName,
+            phone: bookingForm.phone,
+            email: bookingForm.email,
+            destination: pkg?.state || "Goa",
+            packageName: `${pkg?.title} (${pkg?.duration})`,
+            travelDate: bookingForm.travelDate,
+            travellers: travellersList,
+            status: "Booked" as const,
+            bookingAmount: payableNow,
+            paymentMode: "online" as const,
+            paymentReference: response.razorpay_payment_id,
+            bookingDate: new Date().toISOString().slice(0, 10),
+            serviceDetails: {
+              "Selected Payment Option": paymentLabel,
+              "Razorpay Payment ID": response.razorpay_payment_id,
+              "Razorpay Order ID": response.razorpay_order_id,
+              "Amount Paid Online Now": `₹${payableNow.toLocaleString("en-IN")}`,
+              "Balance Payable at Hotel": `₹${balancePayable.toLocaleString("en-IN")}`,
+              "Adult Travelers": `${adultCountNum} Adults (@ ₹${pkg?.discountedPrice}/person)`,
+              "Child Travelers": `${childrenList.length} Children (${detailedPricing.childrenUnder6Count} under 6 yrs, ${detailedPricing.children7To17Count} aged 7-17 yrs)`,
+              "Total Party Size": `${detailedPricing.totalOccupants} Persons`,
+              "Child Breakdown & Pricing": childBreakdownText,
+              "Total Tour Package Cost": `₹${detailedPricing.totalPackageCost.toLocaleString("en-IN")}`,
+              "Aadhaar Verification T&C Agreed": "YES (Agreed to carry original Aadhaar ID at check-in)",
+            },
+            specialRequirements: `Payment: ${paymentLabel} SUCCESS (Razorpay ID: ${response.razorpay_payment_id}). Paid Now: ₹${payableNow.toLocaleString("en-IN")}. Balance at Hotel: ₹${balancePayable.toLocaleString("en-IN")}. Party Size: ${detailedPricing.totalOccupants} Travelers (${adultCountNum} Adults, ${childrenList.length} Children). TOTAL COST: ₹${detailedPricing.totalPackageCost.toLocaleString("en-IN")}. Notes: ${bookingForm.specialRequests || "None"}.`,
+          };
+
+          saveLead(leadPayload);
+          fetch("/api/leads", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(leadPayload),
+          }).catch((e) => console.error("Supabase lead sync error:", e));
+
+          const waPhone = companyInfo?.whatsapp || "919588667027";
+          const inquiryWhatsAppText = `*CONFIRMED BOOKING - Watch My Trip Package*%0A%0A` +
+            `*Package:* ${encodeURIComponent(pkg?.title || "")} (${encodeURIComponent(pkg?.duration || "")})%0A` +
+            `*Name:* ${encodeURIComponent(bookingForm.fullName)}%0A` +
+            `*Phone:* ${encodeURIComponent(bookingForm.phone)}%0A` +
+            `*Travel Date:* ${encodeURIComponent(bookingForm.travelDate || "Flexible")}%0A%0A` +
+            `*PAYMENT CONFIRMED (Razorpay):*%0A` +
+            `• *Payment Option:* ${encodeURIComponent(paymentLabel)}%0A` +
+            `• *Razorpay Payment ID:* ${response.razorpay_payment_id}%0A` +
+            `• *Amount Paid Online:* ₹${encodeURIComponent(payableNow.toLocaleString("en-IN"))}%0A` +
+            `• *Balance at Hotel Desk:* ₹${encodeURIComponent(balancePayable.toLocaleString("en-IN"))}%0A%0A` +
+            `*TRAVELERS:* ${detailedPricing.totalOccupants} Persons (${adultCountNum} Adults, ${childrenList.length} Children)%0A` +
+            `*TOTAL TOUR PACKAGE COST:* ₹${encodeURIComponent(detailedPricing.totalPackageCost.toLocaleString("en-IN"))}%0A%0A` +
+            `*Aadhaar Verification T&C:* Agreed to present original Aadhaar cards at check-in.%0A` +
+            `*Notes:* ${encodeURIComponent(bookingForm.specialRequests || "None")}`;
+
+          if (typeof window !== "undefined") {
+            window.open(`https://wa.me/${waPhone}?text=${inquiryWhatsAppText}`, "_blank");
+          }
+
+          const newBookingRecord = {
+            id: `BK-${Math.floor(100000 + Math.random() * 900000)}`,
+            userId: user?.uid || "guest",
+            packageId: pkg?.id || packageId,
+            packageTitle: pkg?.title || "Curated Tour Package",
+            destinationName: pkg?.state || "Goa, India",
+            travelerCount: adultCountNum,
+            childCount: childrenList.length,
+            travelDate: bookingForm.travelDate || "Flexible",
+            paymentMode: paymentOption === "full_online" ? ("full_online" as const) : ("advance_30" as const),
+            totalCost: detailedPricing.totalPackageCost,
+            amountPaidNow: payableNow,
+            remainingAmount: balancePayable,
+            status: "confirmed" as const,
+            createdAt: new Date().toISOString(),
+            customerName: bookingForm.fullName,
+            customerPhone: bookingForm.phone,
+          };
+
+          if (typeof window !== "undefined") {
+            const prev = JSON.parse(localStorage.getItem("my_travel_bookings") || "[]");
+            localStorage.setItem("my_travel_bookings", JSON.stringify([newBookingRecord, ...prev]));
+          }
+
+          setSuccessBookingDetails({
+            bookingId: newBookingRecord.id,
+            packageTitle: newBookingRecord.packageTitle,
+            destinationName: newBookingRecord.destinationName,
+            travelerCount: newBookingRecord.travelerCount,
+            childCount: newBookingRecord.childCount,
+            travelDate: newBookingRecord.travelDate,
+            paymentMode: newBookingRecord.paymentMode,
+            totalCost: newBookingRecord.totalCost,
+            amountPaidNow: newBookingRecord.amountPaidNow,
+            remainingAmount: newBookingRecord.remainingAmount,
+            customerName: newBookingRecord.customerName,
+            customerPhone: newBookingRecord.customerPhone,
+          });
+          setSuccessModalOpen(true);
+          setIsModalOpen(false);
+          setIsProcessingPayment(false);
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessingPayment(false);
+          },
+        },
+      };
+
+      const rzp1 = new (window as any).Razorpay(options);
+      rzp1.open();
+    } catch (err: any) {
+      console.error("Payment error:", err);
+      setBookingError(err?.message || "Failed to initialize payment gateway.");
+      setIsProcessingPayment(false);
+    }
   };
 
   const phoneCall = companyInfo?.phones?.[0] || "+91 95886 67027";
@@ -441,7 +822,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
 
                 <div className="w-full flex flex-col sm:flex-row lg:flex-col gap-2.5 pt-2 sm:pt-0">
                   <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={handleOpenBookingModal}
                     className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-bold text-sm shadow-xl shadow-[#FF5A3C]/40 hover:shadow-[#FF5A3C]/60 hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >
                     <span>Instant Inquiry / Book</span>
@@ -1024,69 +1405,151 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      Travelers
+                      Adult Travelers (2 - 42) *
                     </label>
                     <select
-                      value={bookingForm.travelersCount}
-                      onChange={(e) => setBookingForm({ ...bookingForm, travelersCount: e.target.value })}
+                      value={bookingForm.adultsCount}
+                      onChange={(e) => setBookingForm({ ...bookingForm, adultsCount: e.target.value })}
                       className="w-full px-2.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#070B18] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
                     >
-                      <option value="1">1 Person</option>
-                      <option value="2">2 Persons</option>
-                      <option value="3">3 Persons</option>
-                      <option value="4">4 Persons</option>
-                      <option value="5">5 Persons</option>
-                      <option value="custom">Custom Travelers...</option>
+                      {Array.from({ length: 41 }, (_, i) => i + 2).map((num) => (
+                        <option key={num} value={num.toString()}>
+                          {num} Adults
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
-                {bookingForm.travelersCount === "custom" && (
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#080D21] border border-slate-200 dark:border-white/10">
-                    <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      Enter Number of Travelers *
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="200"
-                      placeholder="e.g. 8"
-                      value={bookingForm.customTravelers}
-                      onChange={(e) => setBookingForm({ ...bookingForm, customTravelers: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#0C1226] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
-                    />
+                {/* CHILD DETAILS SECTION */}
+                <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#080D21] border border-slate-200 dark:border-white/10 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 dark:text-white block">
+                        Child Travelers (0–17 Yrs)
+                      </span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                        Under 6 yrs free • 7–17 yrs room rent waived
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddChild}
+                      className="px-2.5 py-1 rounded-lg bg-[#FF5A3C]/15 hover:bg-[#FF5A3C]/25 text-[#FF5A3C] text-xs font-bold transition-all cursor-pointer"
+                    >
+                      + Add Child
+                    </button>
                   </div>
-                )}
+
+                  {childrenList.length > 0 && (
+                    <div className="space-y-2">
+                      {childrenList.map((child, index) => (
+                        <div
+                          key={child.id}
+                          className="p-2.5 rounded-xl bg-white dark:bg-[#0C1226] border border-slate-200 dark:border-white/10 space-y-1.5"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-[#FF5A3C]">Child #{index + 1}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveChild(child.id)}
+                              className="text-rose-500 hover:text-rose-400 text-[10px] font-semibold cursor-pointer"
+                            >
+                              Remove
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <input
+                                type="text"
+                                placeholder="Child Name"
+                                value={child.name}
+                                onChange={(e) => handleUpdateChild(child.id, "name", e.target.value)}
+                                className="w-full px-2 py-1 rounded bg-slate-50 dark:bg-[#070B18] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white"
+                              />
+                            </div>
+                            <div>
+                              <input
+                                type="date"
+                                value={child.dob}
+                                onChange={(e) => handleUpdateChild(child.id, "dob", e.target.value)}
+                                className="w-full px-2 py-1 rounded bg-slate-50 dark:bg-[#070B18] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between text-[10px]">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-slate-400">Age:</span>
+                              <input
+                                type="number"
+                                min="0"
+                                max="17"
+                                value={child.age}
+                                onChange={(e) => handleUpdateChild(child.id, "age", e.target.value)}
+                                className="w-12 px-1 py-0.5 rounded bg-slate-50 dark:bg-[#070B18] border border-slate-200 dark:border-white/10 text-xs text-center text-slate-900 dark:text-white font-bold"
+                              />
+                              <span className="text-slate-400">Yrs</span>
+                            </div>
+
+                            {child.age <= 6 ? (
+                              <span className="text-emerald-500 font-bold">🎉 FREE</span>
+                            ) : child.age <= 17 ? (
+                              <span className="text-sky-400 font-bold">🏨 Room Rent Waived</span>
+                            ) : (
+                              <span className="text-rose-500 font-bold">Must be Adult</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {childAlertMessage && (
+                    <div className="p-2 rounded-lg bg-amber-500/15 text-amber-500 text-[11px] font-medium flex items-center gap-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{childAlertMessage}</span>
+                    </div>
+                  )}
+                </div>
 
                 {/* Dynamic Price Calculation Box */}
-                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-rose-500/10 border border-orange-500/20 dark:border-orange-500/30">
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="text-slate-600 dark:text-slate-300 font-medium">Selected Travelers:</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">
-                      {numTravelers} {numTravelers === 1 ? "Person" : "Persons"}
-                    </span>
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-rose-500/10 border border-orange-500/20 dark:border-orange-500/30 space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-600 dark:text-slate-300 font-medium">Adults ({detailedPricing.adultCount}):</span>
+                    <span className="font-semibold text-slate-900 dark:text-white">₹{detailedPricing.adultTotal.toLocaleString("en-IN")}</span>
                   </div>
-                  <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="text-slate-600 dark:text-slate-300 font-medium">Daily Breakdown:</span>
-                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                      ₹{(getPerDayPriceNumber(pkg.discountedPrice, pkg.duration) * numTravelers).toLocaleString("en-IN")} / Day
-                      {numTravelers > 1 && (
-                        <span className="text-[10px] text-slate-400 font-normal ml-1">
-                          (₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} × {numTravelers})
-                        </span>
+
+                  {childrenList.length > 0 && (
+                    <>
+                      {detailedPricing.childrenUnder6Count > 0 && (
+                        <div className="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400">
+                          <span>Children Under 6 Yrs ({detailedPricing.childrenUnder6Count}):</span>
+                          <span className="font-bold">₹0 (FREE)</span>
+                        </div>
                       )}
-                    </span>
-                  </div>
+                      {detailedPricing.children7To17Count > 0 && (
+                        <div className="flex items-center justify-between text-xs text-sky-600 dark:text-sky-400">
+                          <span>Children 7–17 Yrs ({detailedPricing.children7To17Count}):</span>
+                          <span className="font-bold">₹{detailedPricing.children7To17Total.toLocaleString("en-IN")}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
                   <div className="pt-2 border-t border-orange-500/20 flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
-                      Total Package Cost:
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 block">
+                        TOTAL COST:
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        {detailedPricing.totalOccupants} Persons ({detailedPricing.adultCount} Adults + {childrenList.length} Children)
+                      </span>
+                    </div>
+                    <span className="text-xl font-extrabold text-[#FF5A3C] font-['Outfit']">
+                      ₹{detailedPricing.totalPackageCost.toLocaleString("en-IN")}
                     </span>
-                    <span className="text-base font-extrabold text-[#FF5A3C] font-['Outfit']">
-                      ₹{calculateTravelersTotal(pkg.discountedPrice, numTravelers)}
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-slate-400 mt-0.5 text-right">
-                    (₹{pkg.discountedPrice} × {numTravelers} {numTravelers === 1 ? "Person" : "Persons"})
                   </div>
                 </div>
 
@@ -1103,6 +1566,28 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                   />
                 </div>
 
+                {/* TERMS & CONDITIONS CHECKBOX & MODAL TRIGGER */}
+                <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={bookingForm.agreedToTc}
+                      onChange={(e) => setBookingForm({ ...bookingForm, agreedToTc: e.target.checked })}
+                      className="mt-0.5 w-3.5 h-3.5 rounded text-[#FF5A3C] focus:ring-[#FF5A3C] accent-[#FF5A3C]"
+                    />
+                    <span className="text-[10px] text-slate-700 dark:text-slate-300 leading-snug">
+                      I agree to carry <strong>Original Aadhaar Cards</strong> for check-in & accept{" "}
+                      <button
+                        type="button"
+                        onClick={() => setIsTcModalOpen(true)}
+                        className="text-[#FF5A3C] font-bold hover:underline cursor-pointer inline"
+                      >
+                        T&C Rules
+                      </button>.
+                    </span>
+                  </label>
+                </div>
+
                 {formSubmitted ? (
                   <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold text-center flex items-center justify-center gap-2">
                     <CheckCircle2 className="w-4 h-4" />
@@ -1114,7 +1599,7 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                     className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-[#FF5A3C] to-[#E04629] text-white font-bold text-sm shadow-lg shadow-[#FF5A3C]/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >
                     <Send className="w-4 h-4" />
-                    <span>Request Callback & Quote</span>
+                    <span>Book Now / Reserve</span>
                   </button>
                 )}
               </form>
@@ -1439,8 +1924,8 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
 
       {/* POPUP MODAL FOR MOBILE / QUICK INQUIRY */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-[#0C132B] border border-slate-200 dark:border-white/15 p-6 sm:p-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="relative w-full max-w-lg my-8 rounded-3xl bg-white dark:bg-[#0C132B] border border-slate-200 dark:border-white/15 p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400"
@@ -1508,72 +1993,266 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Travelers
+                    Adult Travelers (2 - 42) *
                   </label>
                   <select
-                    value={bookingForm.travelersCount}
-                    onChange={(e) => setBookingForm({ ...bookingForm, travelersCount: e.target.value })}
+                    value={bookingForm.adultsCount}
+                    onChange={(e) => setBookingForm({ ...bookingForm, adultsCount: e.target.value })}
                     className="w-full px-2.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#070B18] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
                   >
-                    <option value="1">1 Person</option>
-                    <option value="2">2 Persons</option>
-                    <option value="3">3 Persons</option>
-                    <option value="4">4 Persons</option>
-                    <option value="5">5 Persons</option>
-                    <option value="custom">Custom Travelers...</option>
+                    {Array.from({ length: 41 }, (_, i) => i + 2).map((num) => (
+                      <option key={num} value={num.toString()}>
+                        {num} Adults
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
 
-              {bookingForm.travelersCount === "custom" && (
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#080D21] border border-slate-200 dark:border-white/10">
-                  <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Enter Number of Travelers *
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="200"
-                    placeholder="e.g. 8"
-                    value={bookingForm.customTravelers}
-                    onChange={(e) => setBookingForm({ ...bookingForm, customTravelers: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#0C1226] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-[#FF5A3C]"
-                  />
+              {/* CHILD DETAILS SECTION */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#080D21] border border-slate-200 dark:border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">
+                      Child Travelers (0–17 Yrs)
+                    </span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                      Under 6 yrs free • 7–17 yrs room rent waived (activities apply)
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddChild}
+                    className="px-3 py-1.5 rounded-xl bg-[#FF5A3C]/15 hover:bg-[#FF5A3C]/25 text-[#FF5A3C] text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>+ Add Child</span>
+                  </button>
                 </div>
-              )}
 
-              {/* Dynamic Price Calculation Box */}
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-rose-500/10 border border-orange-500/20 dark:border-orange-500/30">
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-slate-600 dark:text-slate-300 font-medium">Selected Travelers:</span>
+                {childrenList.length === 0 ? (
+                  <p className="text-[11px] text-slate-400 italic">No children added yet. Click &quot;+ Add Child&quot; if traveling with children.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {childrenList.map((child, index) => (
+                      <div
+                        key={child.id}
+                        className="p-3 rounded-xl bg-white dark:bg-[#0C1226] border border-slate-200 dark:border-white/10 space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-[#FF5A3C]">Child #{index + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveChild(child.id)}
+                            className="text-rose-500 hover:text-rose-400 text-xs font-semibold cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[10px] font-medium text-slate-600 dark:text-slate-400 mb-0.5">
+                              Child Name / Tag
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Aarav"
+                              value={child.name}
+                              onChange={(e) => handleUpdateChild(child.id, "name", e.target.value)}
+                              className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-[#070B18] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-medium text-slate-600 dark:text-slate-400 mb-0.5">
+                              Date of Birth (DOB)
+                            </label>
+                            <input
+                              type="date"
+                              value={child.dob}
+                              onChange={(e) => handleUpdateChild(child.id, "dob", e.target.value)}
+                              className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-[#070B18] border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white"
+                            />
+                          </div>
+                        </div>
+
+                        {/* AGE BADGE & POLICY STATUS */}
+                        <div className="flex items-center justify-between pt-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-slate-500">Calculated Age:</span>
+                            <input
+                              type="number"
+                              min="0"
+                              max="17"
+                              value={child.age}
+                              onChange={(e) => handleUpdateChild(child.id, "age", e.target.value)}
+                              className="w-14 px-2 py-0.5 rounded bg-slate-50 dark:bg-[#070B18] border border-slate-200 dark:border-white/10 text-xs text-center text-slate-900 dark:text-white font-bold"
+                            />
+                            <span className="text-[10px] text-slate-400">Yrs</span>
+                          </div>
+
+                          {child.age <= 6 ? (
+                            <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold border border-emerald-500/30">
+                              🎉 100% FREE OF COST
+                            </span>
+                          ) : child.age <= 17 ? (
+                            <span className="px-2 py-0.5 rounded bg-sky-500/20 text-sky-600 dark:text-sky-400 text-[10px] font-extrabold border border-sky-500/30">
+                              🏨 Room Rent Waived (-₹{detailedPricing.childDeductionPerChild.toLocaleString("en-IN")})
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-500 text-[10px] font-bold">
+                              Must be Adult
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {childAlertMessage && (
+                  <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span>{childAlertMessage}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Dynamic Detailed Pricing Breakdown Box */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-rose-500/10 border border-orange-500/20 dark:border-orange-500/30 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-600 dark:text-slate-300 font-medium">
+                    Adult Travelers ({detailedPricing.adultCount} Persons):
+                  </span>
                   <span className="font-semibold text-slate-900 dark:text-white">
-                    {numTravelers} {numTravelers === 1 ? "Person" : "Persons"}
+                    ₹{detailedPricing.adultTotal.toLocaleString("en-IN")}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="text-slate-600 dark:text-slate-300 font-medium">Daily Breakdown:</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                    ₹{(getPerDayPriceNumber(pkg.discountedPrice, pkg.duration) * numTravelers).toLocaleString("en-IN")} / Day
-                    {numTravelers > 1 && (
-                      <span className="text-[10px] text-slate-400 font-normal ml-1">
-                        (₹{getPerDayPrice(pkg.discountedPrice, pkg.duration)} × {numTravelers})
-                      </span>
+
+                {childrenList.length > 0 && (
+                  <>
+                    {detailedPricing.childrenUnder6Count > 0 && (
+                      <div className="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400">
+                        <span className="font-medium">
+                          Children Under 6 Yrs ({detailedPricing.childrenUnder6Count} Children):
+                        </span>
+                        <span className="font-extrabold">₹0 (FREE)</span>
+                      </div>
                     )}
-                  </span>
-                </div>
+                    {detailedPricing.children7To17Count > 0 && (
+                      <div className="flex items-center justify-between text-xs text-sky-600 dark:text-sky-400">
+                        <span className="font-medium">
+                          Children 7–17 Yrs ({detailedPricing.children7To17Count} Children):
+                        </span>
+                        <span className="font-extrabold">
+                          ₹{detailedPricing.children7To17Total.toLocaleString("en-IN")}
+                          <span className="text-[10px] font-normal text-slate-400 ml-1">
+                            (Saved ₹{detailedPricing.childDeductionPerChild.toLocaleString("en-IN")} room rent/child)
+                          </span>
+                        </span>
+                      </div>
+                    )}
+                  </>
+                )}
+
                 <div className="pt-2 border-t border-orange-500/20 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
-                    Total Package Cost:
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 block">
+                      TOTAL PACKAGE COST:
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      Total Party: {detailedPricing.totalOccupants} Persons ({detailedPricing.adultCount} Adults + {childrenList.length} Children)
+                    </span>
+                  </div>
+                  <span className="text-xl font-extrabold text-[#FF5A3C] font-['Outfit']">
+                    ₹{detailedPricing.totalPackageCost.toLocaleString("en-IN")}
                   </span>
-                  <span className="text-base font-extrabold text-[#FF5A3C] font-['Outfit']">
-                    ₹{calculateTravelersTotal(pkg.discountedPrice, numTravelers)}
-                  </span>
-                </div>
-                <div className="text-[10px] text-slate-400 mt-0.5 text-right">
-                  (₹{pkg.discountedPrice} × {numTravelers} {numTravelers === 1 ? "Person" : "Persons"})
                 </div>
               </div>
 
+              {/* PAYMENT OPTION CARDS SECTION */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#080D21] border border-slate-200 dark:border-white/10 space-y-2.5">
+                <div>
+                  <span className="text-xs font-bold text-slate-900 dark:text-white block">
+                    Select Payment Method *
+                  </span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                    Choose how you would like to pay for your booking
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {/* 100% Full Online */}
+                  <div
+                    onClick={() => setPaymentOption("full_online")}
+                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      paymentOption === "full_online"
+                        ? "border-[#FF5A3C] bg-[#FF5A3C]/10 ring-1 ring-[#FF5A3C]"
+                        : "border-slate-200 dark:border-white/10 bg-white dark:bg-[#0C1226]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-extrabold uppercase text-[#FF5A3C]">Full Online</span>
+                      <span className="w-3 h-3 rounded-full border border-[#FF5A3C] flex items-center justify-center">
+                        {paymentOption === "full_online" && <span className="w-1.5 h-1.5 rounded-full bg-[#FF5A3C]" />}
+                      </span>
+                    </div>
+                    <div className="text-xs font-bold mt-1 text-slate-900 dark:text-white">100% Online</div>
+                    <div className="text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                      ₹{detailedPricing.totalPackageCost.toLocaleString("en-IN")}
+                    </div>
+                    <div className="text-[9px] text-slate-400 mt-0.5">Pay 100% via Razorpay</div>
+                  </div>
+
+                  {/* 30% Advance Deposit */}
+                  <div
+                    onClick={() => setPaymentOption("advance_30")}
+                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      paymentOption === "advance_30"
+                        ? "border-[#FF5A3C] bg-[#FF5A3C]/10 ring-1 ring-[#FF5A3C]"
+                        : "border-slate-200 dark:border-white/10 bg-white dark:bg-[#0C1226]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-extrabold uppercase text-amber-500">30% Advance</span>
+                      <span className="w-3 h-3 rounded-full border border-[#FF5A3C] flex items-center justify-center">
+                        {paymentOption === "advance_30" && <span className="w-1.5 h-1.5 rounded-full bg-[#FF5A3C]" />}
+                      </span>
+                    </div>
+                    <div className="text-xs font-bold mt-1 text-slate-900 dark:text-white">30% Deposit</div>
+                    <div className="text-[11px] font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">
+                      ₹{Math.round(detailedPricing.totalPackageCost * 0.3).toLocaleString("en-IN")} now
+                    </div>
+                    <div className="text-[9px] text-slate-400 mt-0.5">
+                      Bal ₹{(detailedPricing.totalPackageCost - Math.round(detailedPricing.totalPackageCost * 0.3)).toLocaleString("en-IN")} at hotel
+                    </div>
+                  </div>
+
+                  {/* Full Pay at Hotel / COD */}
+                  <div
+                    onClick={() => setPaymentOption("cod_hotel")}
+                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      paymentOption === "cod_hotel"
+                        ? "border-[#FF5A3C] bg-[#FF5A3C]/10 ring-1 ring-[#FF5A3C]"
+                        : "border-slate-200 dark:border-white/10 bg-white dark:bg-[#0C1226]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-extrabold uppercase text-sky-500">Pay at Hotel</span>
+                      <span className="w-3 h-3 rounded-full border border-[#FF5A3C] flex items-center justify-center">
+                        {paymentOption === "cod_hotel" && <span className="w-1.5 h-1.5 rounded-full bg-[#FF5A3C]" />}
+                      </span>
+                    </div>
+                    <div className="text-xs font-bold mt-1 text-slate-900 dark:text-white">100% COD</div>
+                    <div className="text-[11px] font-extrabold text-sky-600 dark:text-sky-400 mt-0.5">
+                      ₹0 now
+                    </div>
+                    <div className="text-[9px] text-slate-400 mt-0.5">Pay 100% at check-in</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* SPECIAL REQUESTS */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Special Notes
@@ -1587,6 +2266,28 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
                 />
               </div>
 
+              {/* TERMS & CONDITIONS CHECKBOX & MODAL TRIGGER */}
+              <div className="p-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 space-y-1.5">
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={bookingForm.agreedToTc}
+                    onChange={(e) => setBookingForm({ ...bookingForm, agreedToTc: e.target.checked })}
+                    className="mt-0.5 w-4 h-4 rounded text-[#FF5A3C] focus:ring-[#FF5A3C] accent-[#FF5A3C]"
+                  />
+                  <span className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug">
+                    I confirm carrying <strong>Original Aadhaar Cards</strong> for all travelers (Adults & Children) at check-in & agree to{" "}
+                    <button
+                      type="button"
+                      onClick={() => setIsTcModalOpen(true)}
+                      className="text-[#FF5A3C] font-bold hover:underline cursor-pointer inline"
+                    >
+                      Booking Terms & Conditions
+                    </button>.
+                  </span>
+                </label>
+              </div>
+
               {bookingError && (
                 <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-500 dark:text-rose-400 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
                   <AlertTriangle className="w-4 h-4 shrink-0" />
@@ -1595,18 +2296,124 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
               )}
 
               {formSubmitted ? (
-                <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold text-center">
-                  Thank you! We will get in touch with you right away.
+                <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold text-center flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Booking Confirmed! Synced with Admin.</span>
                 </div>
+              ) : isProcessingPayment ? (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full py-3 rounded-xl bg-slate-700 text-white font-bold text-sm shadow-lg flex items-center justify-center gap-2 cursor-not-allowed opacity-80"
+                >
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Opening Razorpay Gateway...</span>
+                </button>
               ) : (
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-sm shadow-lg shadow-[#FF5A3C]/30 transition-all cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-sm shadow-lg shadow-[#FF5A3C]/30 transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
-                  Submit Inquiry
+                  <span>
+                    {paymentOption === "full_online"
+                      ? `Pay ₹${detailedPricing.totalPackageCost.toLocaleString("en-IN")} & Confirm Booking`
+                      : paymentOption === "advance_30"
+                      ? `Pay 30% Advance (₹${Math.round(detailedPricing.totalPackageCost * 0.3).toLocaleString("en-IN")}) & Reserve`
+                      : "Submit Booking (Pay 100% at Hotel Desk)"}
+                  </span>
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               )}
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DEDICATED TERMS & CONDITIONS (T&C) MODAL */}
+      {isTcModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="relative w-full max-w-xl rounded-3xl bg-white dark:bg-[#0C132B] border border-slate-200 dark:border-white/15 p-6 sm:p-8 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <button
+              onClick={() => setIsTcModalOpen(false)}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 cursor-pointer"
+            >
+              <XCircle className="w-6 h-6" />
+            </button>
+
+            <div className="flex items-center gap-2 text-[#FF5A3C] font-bold text-xs uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4" />
+              <span>Official Policy & Guidelines</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white font-['Outfit'] mt-1">
+              Booking Terms & Conditions (T&C)
+            </h3>
+
+            <div className="mt-5 space-y-4 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-1">
+                <h4 className="font-bold text-amber-600 dark:text-amber-400 text-xs flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>1. Mandatory Aadhaar Card Verification</span>
+                </h4>
+                <p>
+                  All guests (Adults and Children) must carry and present their original <strong>Government Photo Identity Proof (Aadhaar Card)</strong> at the time of hotel check-in and activity boarding.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-1">
+                <h4 className="font-bold text-rose-600 dark:text-rose-400 text-xs flex items-center gap-1.5">
+                  <XCircle className="w-4 h-4 shrink-0" />
+                  <span>2. Details Mismatch & Penalty Clause</span>
+                </h4>
+                <p>
+                  If the age, Date of Birth (DOB), or identity details entered during online booking do not match the physical Aadhaar card presented during hotel check-in:
+                </p>
+                <ul className="list-disc list-inside mt-1 space-y-0.5 pl-2 text-[11px] text-slate-700 dark:text-slate-300">
+                  <li>Any child free rate or room rent waiver discount will be immediately revoked.</li>
+                  <li>Full standard adult hotel tariffs and package price differences must be paid directly at the hotel front desk prior to check-in.</li>
+                </ul>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-1">
+                <h4 className="font-bold text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>3. Child Policy & Pricing Structure</span>
+                </h4>
+                <ul className="list-disc list-inside space-y-1 text-[11px]">
+                  <li>
+                    <strong>Children Under 6 Years:</strong> 100% Free of Cost (Package & room charges waived).
+                  </li>
+                  <li>
+                    <strong>Children 7 to 17 Years:</strong> Room rent is waived; activity and experience charges apply. Calculated by subtracting shared daily room tariff (₹2,000 / Total Occupants × Nights) from adult package fare.
+                  </li>
+                  <li>
+                    <strong>Age 18+ Years:</strong> Calculated as full Adult fare.
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-sky-500/10 border border-sky-500/20 space-y-1">
+                <h4 className="font-bold text-sky-600 dark:text-sky-400 text-xs flex items-center gap-1.5">
+                  <Users className="w-4 h-4 shrink-0" />
+                  <span>4. Group Capacity Limits</span>
+                </h4>
+                <p>
+                  Online booking inquiries are accepted for group sizes ranging strictly from <strong>2 to 42 travelers</strong>. Solo (1 traveler) or groups above 42 require direct concierge approval.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setBookingForm((prev) => ({ ...prev, agreedToTc: true }));
+                  setIsTcModalOpen(false);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-[#FF5A3C] hover:bg-[#E04629] text-white font-bold text-xs shadow-lg shadow-[#FF5A3C]/30 transition-all cursor-pointer"
+              >
+                I Agree & Accept Terms
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1647,13 +2454,20 @@ export default function PackageDetailPage({ params: propParams }: { params?: { i
           </a>
 
           <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-[#FF5A3C] text-white font-bold text-xs shadow-lg shadow-[#FF5A3C]/30 hover:bg-[#E04629] transition-all"
+            onClick={handleOpenBookingModal}
+            className="px-4 py-2.5 rounded-xl bg-[#FF5A3C] text-[#FFFFFF] font-bold text-xs shadow-lg shadow-[#FF5A3C]/30 hover:bg-[#E04629] transition-all"
           >
             Inquire Now
           </button>
         </div>
       </div>
+
+      {/* Booking Success Celebration Modal */}
+      <BookingSuccessModal
+        isOpen={successModalOpen}
+        onClose={() => setSuccessModalOpen(false)}
+        bookingDetails={successBookingDetails}
+      />
 
       <Footer />
     </div>

@@ -38,7 +38,7 @@ export const DestinationsSection: React.FC = () => {
     fetch("/api/destinations")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data?.isSupabaseActive && data?.destinations && data.destinations.length > 0) {
+        if (data?.destinations && Array.isArray(data.destinations) && data.destinations.length > 0) {
           setDestinations(data.destinations);
         }
       })

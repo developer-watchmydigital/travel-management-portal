@@ -1,111 +1,71 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { db, schema } from "@/lib/db";
 import { ADMIN_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { goaCarouselSlides } from "@/lib/initialData";
 import { HeroBannerSlide } from "@/lib/types";
 
-// Helper to convert database row to HeroBannerSlide
 function rowToHeroBanner(row: any): HeroBannerSlide {
   return {
     id: row.id,
-    packageId: row.package_id || undefined,
+    packageId: row.packageId || undefined,
     title: row.title,
     subtitle: row.subtitle,
     image: row.image,
     badge: row.badge,
     tag: row.tag,
     price: row.price || undefined,
-    buttonText: row.button_text || undefined,
-    buttonLink: row.button_link || undefined,
-    locationText: row.location_text || undefined,
-    availabilityText: row.availability_text || undefined,
+    buttonText: row.buttonText || undefined,
+    buttonLink: row.buttonLink || undefined,
+    locationText: row.locationText || undefined,
+    availabilityText: row.availabilityText || undefined,
   };
 }
 
-// Helper to convert HeroBannerSlide to database row
-function heroBannerToRow(slide: HeroBannerSlide, orderIndex: number): any {
-  return {
-    id: slide.id,
-    order_index: orderIndex,
-    package_id: slide.packageId || null,
-    title: slide.title,
-    subtitle: slide.subtitle,
-    image: slide.image,
-    badge: slide.badge,
-    tag: slide.tag,
-    price: slide.price || null,
-    button_text: slide.buttonText || null,
-    button_link: slide.buttonLink || null,
-    location_text: slide.locationText || null,
-    availability_text: slide.availabilityText || null,
-    updated_at: new Date().toISOString(),
-  };
-}
-
-// GET: Public retrieval of hero banners
 export async function GET() {
-  const supabase = getSupabaseServerClient();
-  if (!supabase) {
-    return NextResponse.json({
-      banners: goaCarouselSlides,
-      isSupabaseActive: false,
-    });
-  }
+  if (db) {
+    try {
+      const dbBanners = await db.select().from(schema.heroBanners).orderBy(schema.heroBanners.orderIndex);
+      if (dbBanners && dbBanners.length > 0) {
+        return NextResponse.json({ banners: dbBanners.map(rowToHeroBanner), isDbActive: true });
+      }
 
-  try {
-    const { data, error } = await supabase
-      .from("hero_banners")
-      .select("*")
-      .order("order_index", { ascending: true });
-
-    if (error) {
-      console.error("Supabase fetch hero_banners error:", error);
-      return NextResponse.json({
-        banners: goaCarouselSlides,
-        isSupabaseActive: false,
-      });
-    }
-
-    if (!data || data.length === 0) {
       // Auto-seed default banners
-      const defaultRows = goaCarouselSlides.map((slide, idx) => heroBannerToRow(slide, idx));
-      await supabase.from("hero_banners").insert(defaultRows);
-      return NextResponse.json({
-        banners: goaCarouselSlides,
-        isSupabaseActive: true,
-        seeded: true,
-      });
-    }
+      const rows = goaCarouselSlides.map((slide, idx) => ({
+        id: slide.id,
+        orderIndex: idx,
+        packageId: slide.packageId || null,
+        title: slide.title,
+        subtitle: slide.subtitle,
+        image: slide.image,
+        badge: slide.badge,
+        tag: slide.tag,
+        price: slide.price || null,
+        buttonText: slide.buttonText || null,
+        buttonLink: slide.buttonLink || null,
+        locationText: slide.locationText || null,
+        availabilityText: slide.availabilityText || null,
+      }));
 
-    return NextResponse.json({
-      banners: data.map(rowToHeroBanner),
-      isSupabaseActive: true,
-    });
-  } catch (err) {
-    console.error("Hero banners GET error:", err);
-    return NextResponse.json({
-      banners: goaCarouselSlides,
-      isSupabaseActive: false,
-    });
+      await db.insert(schema.heroBanners).values(rows).onConflictDoNothing();
+      return NextResponse.json({ banners: goaCarouselSlides, isDbActive: true, seeded: true });
+    } catch (err) {
+      console.error("Drizzle fetch hero_banners error:", err);
+    }
   }
+
+  return NextResponse.json({ banners: goaCarouselSlides, isDbActive: false });
 }
 
-// POST: Admin update of hero banners (single banner or array of all 4 banners)
 export async function POST(request: NextRequest) {
   const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
   const session = token ? await verifySessionToken(token) : null;
 
   if (!session) {
-    return NextResponse.json(
-      { error: "Unauthorized: Admin session required." },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized: Admin session required." }, { status: 401 });
   }
 
   try {
     const body = await request.json();
-    const supabase = getSupabaseServerClient();
-
     let incomingBanners: HeroBannerSlide[] = [];
     if (Array.isArray(body)) {
       incomingBanners = body;
@@ -119,36 +79,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No valid banner data provided." }, { status: 400 });
     }
 
-    if (!supabase) {
-      return NextResponse.json({
-        success: true,
-        banners: incomingBanners,
-        isSupabaseActive: false,
-        message: "Saved locally (Supabase unconfigured).",
-      });
+    if (db) {
+      const rows = incomingBanners.map((slide, idx) => ({
+        id: slide.id,
+        orderIndex: idx,
+        packageId: slide.packageId || null,
+        title: slide.title,
+        subtitle: slide.subtitle,
+        image: slide.image,
+        badge: slide.badge,
+        tag: slide.tag,
+        price: slide.price || null,
+        buttonText: slide.buttonText || null,
+        buttonLink: slide.buttonLink || null,
+        locationText: slide.locationText || null,
+        availabilityText: slide.availabilityText || null,
+        updatedAt: new Date(),
+      }));
+
+      for (const row of rows) {
+        await db.insert(schema.heroBanners).values(row).onConflictDoUpdate({
+          target: schema.heroBanners.id,
+          set: row,
+        });
+      }
     }
 
-    const rows = incomingBanners.map((slide, idx) => heroBannerToRow(slide, idx));
-    const { data, error } = await supabase
-      .from("hero_banners")
-      .upsert(rows, { onConflict: "id" })
-      .select();
-
-    if (error) {
-      console.error("Supabase upsert hero_banners error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({
-      success: true,
-      banners: data ? data.map(rowToHeroBanner) : incomingBanners,
-      isSupabaseActive: true,
-    });
-  } catch (err) {
+    return NextResponse.json({ success: true, banners: incomingBanners });
+  } catch (err: any) {
     console.error("Hero banners save error:", err);
-    return NextResponse.json(
-      { error: "Failed to save hero banner." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err?.message || "Failed to save hero banner." }, { status: 500 });
   }
 }

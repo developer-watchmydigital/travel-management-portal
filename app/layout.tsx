@@ -36,6 +36,7 @@ export const viewport = {
 };
 
 import { ThemeProvider } from "@/context/ThemeContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 export default function RootLayout({
   children,
@@ -55,7 +56,9 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased selection:bg-[#FF5A3C] selection:text-white">
-        <ThemeProvider>{children}</ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
